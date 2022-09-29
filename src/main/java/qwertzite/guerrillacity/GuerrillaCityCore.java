@@ -7,6 +7,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegisterEvent.RegisterHelper;
@@ -37,6 +38,8 @@ public class GuerrillaCityCore {
 				() -> BootstrapServerSide::new);
 		
 		this.init();
+		
+		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
 	
 	private void init() {
@@ -59,7 +62,6 @@ public class GuerrillaCityCore {
 		event.register(ForgeRegistries.Keys.BIOMES, this::onBiomeRegistry);
 		
 		// ...
-		
 	}
 	
 	private void onBiomeRegistry(RegisterHelper<Biome> helper) {

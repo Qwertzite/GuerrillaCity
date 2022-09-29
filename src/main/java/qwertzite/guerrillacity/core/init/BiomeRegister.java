@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.registries.RegisterEvent.RegisterHelper;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.ModLog;
 
 public class BiomeRegister {
 	
@@ -24,5 +25,6 @@ public class BiomeRegister {
 	
 	public void register(RegisterHelper<Biome> helper) {
 		helper.register(this.key, this.biome);
+		ModLog.info("biome register event {}", this.key);
 	}
 }
