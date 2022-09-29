@@ -7,26 +7,22 @@ import qwertzite.guerrillacity.GuerrillaCityCore;
 
 public class BiomeRegister {
 	
-	private Biome biome;
 	private String biomeName;
+	private Biome biome;
 	
 	private ResourceLocation key;
 	
 	public BiomeRegister(String name, Biome biome) {
-		this.biome = biome;
 		this.biomeName = name;
+		this.biome = biome;
 	}
 	
-	public Biome freeze() {
+	public Biome confirmed() {
 		this.key = new ResourceLocation(GuerrillaCityCore.MODID, this.biomeName);
 		return this.biome;
 	}
 	
-	public Biome getBiome() {
-		return this.biome;
-	}
-	
 	public void register(RegisterHelper<Biome> helper) {
-		helper.register(this.key, biome);
+		helper.register(this.key, this.biome);
 	}
 }

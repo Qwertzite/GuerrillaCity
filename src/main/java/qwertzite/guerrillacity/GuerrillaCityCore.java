@@ -14,6 +14,7 @@ import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
+import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 
 @Mod(GuerrillaCityCore.MODID)
 public class GuerrillaCityCore {
@@ -35,13 +36,16 @@ public class GuerrillaCityCore {
 				() -> BootstrapClientSide::new,
 				() -> BootstrapServerSide::new);
 		
+		this.init();
+	}
+	
+	private void init() {
+		this.registerModModule(new GcWorldGenModule());
 		
-		// registerModModule here
-		
+		// ...
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private void registerModModule(GcModuleBase module) {
 		this.modules.add(module);
 	}
@@ -53,6 +57,9 @@ public class GuerrillaCityCore {
 	@SubscribeEvent
 	public void register(RegisterEvent event) {
 		event.register(ForgeRegistries.Keys.BIOMES, this::onBiomeRegistry);
+		
+		// ...
+		
 	}
 	
 	private void onBiomeRegistry(RegisterHelper<Biome> helper) {
@@ -60,5 +67,8 @@ public class GuerrillaCityCore {
 			this.bootstrap.initBiomes(helper, module);
 		}
 	}
+	
+	// ...
+	
 	
 }

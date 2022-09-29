@@ -15,10 +15,9 @@ public abstract class GcModuleBase {
 		this.biomes = new LinkedList<>();
 	}
 	
-	
 	public Biome biome(BiomeRegister biome) {
 		this.biomes.add(biome);
-		return biome.getBiome();
+		return biome.confirmed();
 	}
 	
 	public void registerBiomes(RegisterHelper<Biome> helper) {
