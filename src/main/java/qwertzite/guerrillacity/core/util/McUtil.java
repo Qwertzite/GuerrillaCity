@@ -19,5 +19,4 @@ public class McUtil {
 	public static boolean isServer() {
 		return Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER;
 	}
-	
 }

@@ -3,17 +3,17 @@ package qwertzite.guerrillacity;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
-import net.minecraftforge.registries.RegisterEvent.RegisterHelper;
 import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
+import qwertzite.guerrillacity.core.init.BiomeRegister;
+import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 
@@ -25,6 +25,7 @@ public class GuerrillaCityCore {
 	
 	public static GuerrillaCityCore INSTANCE;
 	
+	@SuppressWarnings("unused")
 	private final BootstrapCommon bootstrap;
 	
 	private final List<GcModuleBase> modules = new LinkedList<>();
@@ -39,10 +40,13 @@ public class GuerrillaCityCore {
 		
 		this.init();
 		
-		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
 	
 	private void init() {
+		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		bus.register(this);
+		BiomeRegister.initialise(bus);
+		
 		this.registerModModule(new GcWorldGenModule());
 		
 		// ...
@@ -53,24 +57,12 @@ public class GuerrillaCityCore {
 		this.modules.add(module);
 	}
 	
-	/**
-	 * Calling registry methods of the bootstrap.
-	 * @param event
-	 */
-	@SubscribeEvent
-	public void register(RegisterEvent event) {
-		event.register(ForgeRegistries.Keys.BIOMES, this::onBiomeRegistry);
-		
-		// ...
-	}
-	
-	private void onBiomeRegistry(RegisterHelper<Biome> helper) {
-		for (GcModuleBase module : this.modules) {
-			this.bootstrap.initBiomes(helper, module);
-		}
-	}
-	
 	// ...
 	
-	
+	@SubscribeEvent
+	public void onFmlCommonRegistruyEvent(FMLCommonSetupEvent event) {
+		event.enqueueWork(() -> {
+			RegionRegister.enqueueToFmlCommonSetupEvent();
+		});
+	}
 }

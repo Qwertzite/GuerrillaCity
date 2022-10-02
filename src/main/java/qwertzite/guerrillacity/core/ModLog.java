@@ -38,6 +38,10 @@ public class ModLog {
 		logger.log(level, message, params);
 	}
 	
+	public static void info(String message) {
+		ModLog.log(Level.INFO, message);
+	}
+	
 	public static void info(String message, Object...params) {
 		ModLog.log(Level.INFO, message, params);
 	}
