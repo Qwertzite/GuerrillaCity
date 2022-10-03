@@ -14,6 +14,7 @@ import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
+import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 
@@ -63,6 +64,7 @@ public class GuerrillaCityCore {
 	public void onFmlCommonRegistruyEvent(FMLCommonSetupEvent event) {
 		event.enqueueWork(() -> {
 			RegionRegister.enqueueToFmlCommonSetupEvent();
+			SurfaceRuleRegister.enqueueToFmlCommonSetupEvent();
 		});
 	}
 }

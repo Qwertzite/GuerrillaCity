@@ -5,9 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
+import qwertzite.guerrillacity.core.init.RegionRegister;
+import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
-import terrablender.api.Regions;
-import terrablender.api.SurfaceRuleManager;
 import terrablender.api.SurfaceRuleManager.RuleCategory;
 
 /**
@@ -33,7 +33,7 @@ public class GcWorldGenModule extends GcModuleBase {
 		CITY_BIOME = BiomeRegister.register(KEY_CITY_BIOME, CityBiomes.plains(false));
 		SNOWY_CITY_BIOME = BiomeRegister.register(KEY_SNOWY_CITY_BIOME, CityBiomes.plains(true));
 		
-		Regions.register(new CityRegion(REGION_CITY, 5));
-		SurfaceRuleManager.addSurfaceRules(RuleCategory.OVERWORLD, GuerrillaCityCore.MODID, CitySurfaceRules.makeRules()); // TODO: Registryに移す
+		RegionRegister.register(new CityRegion(REGION_CITY, 5));
+		SurfaceRuleRegister.register(RuleCategory.OVERWORLD, CitySurfaceRules.makeRules());
 	}
 }
