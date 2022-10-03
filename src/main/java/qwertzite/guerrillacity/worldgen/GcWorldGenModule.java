@@ -7,6 +7,8 @@ import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 import terrablender.api.Regions;
+import terrablender.api.SurfaceRuleManager;
+import terrablender.api.SurfaceRuleManager.RuleCategory;
 
 /**
  * 
@@ -31,6 +33,7 @@ public class GcWorldGenModule extends GcModuleBase {
 		CITY_BIOME = BiomeRegister.register(KEY_CITY_BIOME, CityBiomes.plains(false));
 		SNOWY_CITY_BIOME = BiomeRegister.register(KEY_SNOWY_CITY_BIOME, CityBiomes.plains(true));
 		
-		Regions.register(new CityRegion(REGION_CITY, 10));
+		Regions.register(new CityRegion(REGION_CITY, 5));
+		SurfaceRuleManager.addSurfaceRules(RuleCategory.OVERWORLD, GuerrillaCityCore.MODID, CitySurfaceRules.makeRules()); // TODO: Registryに移す
 	}
 }
