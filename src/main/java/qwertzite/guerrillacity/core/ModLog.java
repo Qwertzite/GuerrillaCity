@@ -38,11 +38,24 @@ public class ModLog {
 		logger.log(level, message, params);
 	}
 	
-	public static void info(String message) {
-		ModLog.log(Level.INFO, message);
+	public static void log(Level level, String message) {
+		Logger logger = getLogger();
+		logger.log(level, message);
 	}
 	
 	public static void info(String message, Object...params) {
 		ModLog.log(Level.INFO, message, params);
+	}
+	
+	public static void info(String message) {
+		ModLog.log(Level.INFO, message);
+	}
+	
+	public static void debug(String message, Object...objects) {
+		ModLog.log(Level.DEBUG, message, objects);
+	}
+	
+	public static void debug(String message) {
+		ModLog.log(Level.DEBUG, message);
 	}
 }
