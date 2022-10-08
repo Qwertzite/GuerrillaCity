@@ -48,10 +48,9 @@ public class GuerrillaCityCore {
 		bus.register(this);
 		BiomeRegister.initialise(bus);
 		
-		this.registerModModule(new GcWorldGenModule());
+		this.registerModModule(new GcWorldGenModule(bus));
 		
 		// ...
-		
 	}
 	
 	private void registerModModule(GcModuleBase module) {
@@ -67,4 +66,6 @@ public class GuerrillaCityCore {
 			SurfaceRuleRegister.enqueueToFmlCommonSetupEvent();
 		});
 	}
+	
+
 }
