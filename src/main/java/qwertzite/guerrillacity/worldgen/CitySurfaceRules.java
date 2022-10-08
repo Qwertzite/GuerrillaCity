@@ -13,8 +13,6 @@ public class CitySurfaceRules {
 	public static SurfaceRules.RuleSource makeRules() {
 		
 		return SurfaceRules.sequence(
-//				SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(),
-//						SurfaceRules.ifTrue(SurfaceRules.not(GROUND_HEIGHT), STONE)), // below ground height
 				SurfaceRules.ifTrue(GROUND_HEIGHT, AIR), // above ground height
 				STONE
 		);

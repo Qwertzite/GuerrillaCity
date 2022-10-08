@@ -22,7 +22,7 @@ public class EveryChunkStructurePlacement extends StructurePlacement {
 	
 	@Override
 	public boolean isStructureChunk(ChunkGenerator chunkGenerator, RandomState rand, long p_227057_, int p_227058_, int p_227059_) {
-		return true; // XXX: called
+		return true;
 	}
 
 	@Override

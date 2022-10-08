@@ -39,10 +39,10 @@ public class CityStructure extends Structure {
 	public static RegistryObject<Structure> INSTANCE;
 	public static RegistryObject<StructureType<?>> TYPE;
 	
+	@SuppressWarnings("deprecation")
 	public CityStructure() {
 		super(new Structure.StructureSettings(
 				BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY),
-//				HolderSet.direct(GcWorldGenModule.CITY_BIOME.getHolder().get()), // FIXME: use tags to enable other mod biomes to have city buildings.
 				Map.of(),
 				Decoration.SURFACE_STRUCTURES,
 				TerrainAdjustment.NONE));
@@ -53,8 +53,6 @@ public class CityStructure extends Structure {
 		BlockPos pos = context.chunkPos().getBlockAt(0, 64, 0);
 		
 		return Optional.of(new Structure.GenerationStub(pos, piecesBuilder -> {
-//			StructurePiece startingPiece = new ExampleStructurePiece(0, x+1, y+8, z+1); // FIXME
-//			startingPiece.addChildren(startingPiece, structurePiecesBuilder, context.random());
 			ChunkPos chunkPos = context.chunkPos();
 			piecesBuilder.addPiece(new CityStructurePiece(chunkPos));
 		}));
