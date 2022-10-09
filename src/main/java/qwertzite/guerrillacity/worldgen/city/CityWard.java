@@ -72,6 +72,7 @@ public class CityWard {
 			return new BuildingEntry(circumBB);
 		}).filter(e -> e != null).collect(Collectors.toSet());
 		
+		
 		this.initialised = true;
 		this.initialising = false;
 		ModLog.info("Initialied city ward at " + this.offset);
@@ -124,6 +125,8 @@ public class CityWard {
 			}
 		});
 		System.out.println("CityWard#compute map=" + map.size());
+		
+		// TODO: building context
 		
 		return map;
 	}

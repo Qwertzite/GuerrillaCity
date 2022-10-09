@@ -2,12 +2,9 @@ package qwertzite.guerrillacity.worldgen;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
-import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -15,7 +12,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -90,43 +86,14 @@ public class CityStructure extends Structure {
 			
 			@SuppressWarnings("deprecation")
 			Map<BlockPos, BlockState> statemap = CityStructureProvider.getBlockStatesForChunk(
-					chunkPos, genLevel.getSeed(), genLevel, BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains); // 本当はstructure側から情報を取りたいところ...
-			
-			BlockState buildinbgState = ITEM_BY_DYE.get(DyeColor.byId(new Random(genLevel.getSeed() + chunkPos.hashCode()).nextInt(0, DyeColor.values().length))).defaultBlockState();
+					chunkPos, genLevel.getSeed(), genLevel, BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains); // 本当はstructure側からbiomeの情報を取りたいところ...
 			
 			for (var e : statemap.entrySet()) {
-				genLevel.setBlock(e.getKey(), buildinbgState, Block.UPDATE_CLIENTS);
+				genLevel.setBlock(e.getKey(), e.getValue(), Block.UPDATE_CLIENTS);
 			}
-			
-			var state = (chunkPos.x % 16 == 0 || chunkPos.z % 16 == 0) ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.DIAMOND_BLOCK.defaultBlockState();
-			for (int y = 60; y <= 70; y++) {
-				var pos = chunkPos.getBlockAt(0, y, 0);
-				if (!genLevel.getBlockState(pos).isAir() && y != 70) continue;
-				genLevel.setBlock(pos, state, Block.UPDATE_CLIENTS);
-			}
-			genLevel.setBlock(chunkPos.getBlockAt(0, 70, 0), state, Block.UPDATE_CLIENTS);
 			
 			ModLog.trace("Generated City piece at chunk pos " + chunkPos);
 		}
-		
-		   private static final Map<DyeColor, Block> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), (p_29841_) -> {
-			      p_29841_.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
-			      p_29841_.put(DyeColor.ORANGE, Blocks.ORANGE_WOOL);
-			      p_29841_.put(DyeColor.MAGENTA, Blocks.MAGENTA_WOOL);
-			      p_29841_.put(DyeColor.LIGHT_BLUE, Blocks.LIGHT_BLUE_WOOL);
-			      p_29841_.put(DyeColor.YELLOW, Blocks.YELLOW_WOOL);
-			      p_29841_.put(DyeColor.LIME, Blocks.LIME_WOOL);
-			      p_29841_.put(DyeColor.PINK, Blocks.PINK_WOOL);
-			      p_29841_.put(DyeColor.GRAY, Blocks.GRAY_WOOL);
-			      p_29841_.put(DyeColor.LIGHT_GRAY, Blocks.LIGHT_GRAY_WOOL);
-			      p_29841_.put(DyeColor.CYAN, Blocks.CYAN_WOOL);
-			      p_29841_.put(DyeColor.PURPLE, Blocks.PURPLE_WOOL);
-			      p_29841_.put(DyeColor.BLUE, Blocks.BLUE_WOOL);
-			      p_29841_.put(DyeColor.BROWN, Blocks.BROWN_WOOL);
-			      p_29841_.put(DyeColor.GREEN, Blocks.GREEN_WOOL);
-			      p_29841_.put(DyeColor.RED, Blocks.RED_WOOL);
-			      p_29841_.put(DyeColor.BLACK, Blocks.BLACK_WOOL);
-			   });
 	}
 	
 }
