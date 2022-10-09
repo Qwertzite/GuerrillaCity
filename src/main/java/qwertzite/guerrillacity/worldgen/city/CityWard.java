@@ -1,5 +1,6 @@
 package qwertzite.guerrillacity.worldgen.city;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.ModLog;
@@ -55,6 +57,7 @@ public class CityWard {
 		
 		
 		// generate city blocks and make them do their jobs.
+		// TODO: implement
 		
 		
 		this.initialised = true;
@@ -62,13 +65,35 @@ public class CityWard {
 		ModLog.info("Initialied city ward at " + this.offset);
 	}
 	
-	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(@Nullable BoundingBox bb) {
+	/**
+	 * 
+	 * @param bb absolute coordinate
+	 * @return absolute coordinates and new block states.
+	 */
+	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(BlockPos origin, @Nullable BoundingBox bb) {
+		HashMap<BlockPos, BlockState> map = new HashMap<>();
 		
+		int x0 = bb.minX();
+		int y0 = 64;
+		int z0 = bb.minZ();
+//		int x0 = bb.minX() - origin.getX();
+//		int y0 = 64;
+//		int z0 = bb.minX() - origin.getX();
+		BlockState state = Blocks.REDSTONE_BLOCK.defaultBlockState();
 		
 		// TODO: implement
+		for (int x = 1; x < 15; x++) {
+			for (int z = 1; z < 15; z++) {
+				map.put(new BlockPos(x0 + x, y0 , z0 + z), state);
+			}
+		}
+		map.put(new BlockPos(x0 + 0, y0 , z0 + 0), state);
+		map.put(new BlockPos(x0 + 0, y0 , z0 +15), state);
+		map.put(new BlockPos(x0 +15, y0 , z0 + 0), state);
+		map.put(new BlockPos(x0 +15, y0 , z0 +15), state);
 		
-		
-		return Map.of();
+		return map;
+//		return Map.of();
 	}
 
 	

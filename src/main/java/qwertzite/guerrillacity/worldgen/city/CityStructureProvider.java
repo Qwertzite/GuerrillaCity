@@ -30,7 +30,7 @@ public class CityStructureProvider {
 		synchronized (CityStructureProvider.class) {
 			if (CityStructureProvider.seed != seed) {
 				CityStructureProvider.seed = seed;
-				CityStructureProvider.CACHE.clear(); // XXX: notify workers to abort all process.
+				CityStructureProvider.CACHE.clear(); // OPTIMISE: notify workers to abort all process.
 			}
 		}
 		WardPos wardPos = WardPos.of(chunkPos);
@@ -46,9 +46,10 @@ public class CityStructureProvider {
 		}
 		
 		var chunkBB = new BoundingBox(
-				chunkPos.getMinBlockX(),  0, chunkPos.getMinBlockZ(),
-				chunkPos.getMaxBlockX(), 64, chunkPos.getMaxBlockZ());
-		return cityWard.computeBlockStateForBoudingBox(chunkBB);
+				chunkPos.getMinBlockX(),                                                     0, chunkPos.getMinBlockZ(),
+				chunkPos.getMaxBlockX(), GcConsts.GROUND_HEIGHT + GcConsts.MAX_BUILDING_HEIGHT, chunkPos.getMaxBlockZ());
+		System.out.println(chunkPos.getWorldPosition() +  " " + chunkBB);
+		return cityWard.computeBlockStateForBoudingBox(chunkPos.getWorldPosition(), chunkBB);
 	}
 	
 	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
