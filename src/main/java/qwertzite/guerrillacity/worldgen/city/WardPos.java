@@ -73,7 +73,7 @@ public record WardPos(int wx, int wz) {
 			private final int wzc = getChunkZ();
 			private int cx;
 			private int cz;
-			private final int max = 1 << SectionPos.SECTION_BITS;
+			private final int max = 1 << CityWard.WARD_SIZE_BIT;
 			
 			@Override
 			public boolean tryAdvance(Consumer<? super ChunkPos> action) {

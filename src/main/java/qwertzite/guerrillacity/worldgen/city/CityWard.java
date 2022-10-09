@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -47,8 +49,8 @@ public class CityWard {
 	
 	/**
 	 * All building elements must intersect with validArea and must not with forbiddenArea.
-	 * @param validArea relative position to CityWarda
-	 * @param forbiddenArea relative position to CityWard
+	 * @param validArea
+	 * @param forbiddenArea
 	 */
 	public synchronized void beginInitialisation(Set<BoundingBox> validArea, Set<BoundingBox> forbiddenArea) {
 		assert(!this.initialised);
@@ -58,7 +60,17 @@ public class CityWard {
 		
 		// generate city blocks and make them do their jobs.
 		// TODO: implement
-		
+		this.buildings = IntStream.range(0, 16*16/2).parallel().mapToObj(i ->  {
+			Random rand = new Random();
+			int xWidth = rand.nextInt(8, 32);
+			int zWidth = rand.nextInt(8, 32);
+			int height = rand.nextInt(4, 12);
+			int posX = this.offset.getX() + rand.nextInt(1, 16*16 - xWidth - 1);
+			int posZ = this.offset.getZ() + rand.nextInt(1, 16*16 - zWidth - 1);
+			BoundingBox circumBB = new BoundingBox(posX, 64, posZ, posX + xWidth, 64 + height, posZ + zWidth);
+			if (forbiddenArea.stream().anyMatch(bb -> bb.intersects(circumBB))) return null; // 範囲外のものがあったら
+			return new BuildingEntry(circumBB);
+		}).filter(e -> e != null).collect(Collectors.toSet());
 		
 		this.initialised = true;
 		this.initialising = false;
@@ -67,33 +79,53 @@ public class CityWard {
 	
 	/**
 	 * 
-	 * @param bb absolute coordinate
+	 * @param genAreaBB absolute coordinate
 	 * @return absolute coordinates and new block states.
 	 */
-	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(BlockPos origin, @Nullable BoundingBox bb) {
+	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(@Nullable BoundingBox genAreaBB) {
 		HashMap<BlockPos, BlockState> map = new HashMap<>();
 		
-		int x0 = bb.minX();
-		int y0 = GcConsts.GROUND_HEIGHT;
-		int z0 = bb.minZ();
+//		int x0 = genAreaBB.minX();
+//		int y0 = GcConsts.GROUND_HEIGHT;
+//		int z0 = genAreaBB.minZ();
 //		int x0 = bb.minX() - origin.getX();
 //		int y0 = 64;
 //		int z0 = bb.minX() - origin.getX();
-		BlockState state = Blocks.REDSTONE_BLOCK.defaultBlockState();
+//		BlockState state = Blocks.REDSTONE_BLOCK.defaultBlockState();
+		BlockState stone = Blocks.STONE.defaultBlockState();
 		
 		// TODO: implement
-		for (int x = 1; x < 15; x++) {
-			for (int z = 1; z < 15; z++) {
-				map.put(new BlockPos(x0 + x, y0 , z0 + z), state);
+//		for (int x = 1; x < 15; x++) {
+//			for (int z = 1; z < 15; z++) {
+//				map.put(new BlockPos(x0 + x, y0 , z0 + z), state);
+//			}
+//		}
+//		map.put(new BlockPos(x0 + 0, y0 , z0 + 0), state);
+//		map.put(new BlockPos(x0 + 0, y0 , z0 +15), state);
+//		map.put(new BlockPos(x0 +15, y0 , z0 + 0), state);
+//		map.put(new BlockPos(x0 +15, y0 , z0 +15), state);
+		
+		
+		Set<BuildingEntry> buildings = this.buildings.stream().filter(
+				building -> building.getCircumBox().intersects(genAreaBB)).collect(Collectors.toSet());
+		System.out.println("valid buildings = " + buildings.size());
+		
+		buildings.stream().forEach(building -> {
+			BoundingBox bb = building.getCircumBox();
+			for (int x = bb.minX(); x <= bb.maxX(); x++) {
+				for (int y = bb.minY(); y <= bb.maxY(); y++) {
+					for (int z = bb.minZ(); z <= bb.maxZ(); z++) {
+						BlockPos pos = new BlockPos(x, y, z);
+						if (genAreaBB.isInside(pos)) {
+							map.put(pos, stone);
+						}
+					}
+				}
 			}
-		}
-		map.put(new BlockPos(x0 + 0, y0 , z0 + 0), state);
-		map.put(new BlockPos(x0 + 0, y0 , z0 +15), state);
-		map.put(new BlockPos(x0 +15, y0 , z0 + 0), state);
-		map.put(new BlockPos(x0 +15, y0 , z0 +15), state);
+		});
+		System.out.println("CityWard#compute map=" + map.size());
 		
 		return map;
-//		return Map.of();
 	}
 
 	

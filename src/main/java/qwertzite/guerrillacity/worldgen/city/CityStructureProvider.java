@@ -48,18 +48,15 @@ public class CityStructureProvider {
 		var chunkBB = new BoundingBox(
 				chunkPos.getMinBlockX(),                                                     0, chunkPos.getMinBlockZ(),
 				chunkPos.getMaxBlockX(), GcConsts.GROUND_HEIGHT + GcConsts.MAX_BUILDING_HEIGHT, chunkPos.getMaxBlockZ());
-		System.out.println(chunkPos.getWorldPosition() +  " " + chunkBB);
-		return cityWard.computeBlockStateForBoudingBox(chunkPos.getWorldPosition(), chunkBB);
+		
+		return cityWard.computeBlockStateForBoudingBox(chunkBB);
 	}
 	
 	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
 		
-		BlockPos wardOffset = cityWard.getOffset().multiply(-1); // subtract Ward origin to make BB relative.
-		
 		Map<Boolean, Set<BoundingBox>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
 				cp -> checkAChunkApplicaleBiome(biomeSource, cp, validBiome),
-				Collectors.mapping(chunk -> PosUtil.getChunkBoundingBox(chunk)
-						.moved(wardOffset.getX(), wardOffset.getY(), wardOffset.getZ()), Collectors.toSet())));
+				Collectors.mapping(chunk -> PosUtil.getChunkBoundingBox(chunk), Collectors.toSet())));
 		
 		cityWard.beginInitialisation(groups.get(true), groups.get(false));
 	}
