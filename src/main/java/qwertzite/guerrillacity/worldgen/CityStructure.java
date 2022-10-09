@@ -18,6 +18,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GenerationStep.Decoration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -29,7 +30,9 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.util.PosUtil;
+import qwertzite.guerrillacity.worldgen.city.CityStructureProvider;
 
 public class CityStructure extends Structure {
 	
@@ -81,12 +84,23 @@ public class CityStructure extends Structure {
 		public void postProcess(WorldGenLevel genLevel, StructureManager structureManager, ChunkGenerator generator,
 				RandomSource rand, BoundingBox bb, ChunkPos chunkPos, BlockPos blockPos) {
 			
+			@SuppressWarnings("deprecation")
+			Map<BlockPos, BlockState> statemap = CityStructureProvider.getBlockStatesForChunk(
+					chunkPos, genLevel.getSeed(), genLevel, BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains); // 本当はstructure側から情報を取りたいところ...
+			
+			for (var e : statemap.entrySet()) {
+				genLevel.setBlock(e.getKey(), e.getValue(), Block.UPDATE_CLIENTS);
+			}
+			
+			var state = (chunkPos.x % 16 == 0 || chunkPos.z % 16 == 0) ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.DIAMOND_BLOCK.defaultBlockState();
 			for (int y = 60; y <= 80; y++) {
 				var pos = chunkPos.getBlockAt(0, y, 0);
 				if (!genLevel.getBlockState(pos).isAir() && y != 256) continue;
-				genLevel.setBlock(pos, Blocks.DIAMOND_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+				genLevel.setBlock(pos, state, Block.UPDATE_CLIENTS);
 			}
-			genLevel.setBlock(chunkPos.getBlockAt(0, 70, 0), Blocks.DIAMOND_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+			genLevel.setBlock(chunkPos.getBlockAt(0, 70, 0), state, Block.UPDATE_CLIENTS);
+			
+			ModLog.trace("Generated City piece at chunk pos " + chunkPos);
 		}
 		
 	}

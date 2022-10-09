@@ -58,4 +58,8 @@ public class ModLog {
 	public static void debug(String message) {
 		ModLog.log(Level.DEBUG, message);
 	}
+	
+	public static void trace(String message) {
+		ModLog.log(Level.TRACE, message);
+	}
 }
