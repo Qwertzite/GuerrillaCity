@@ -74,7 +74,7 @@ public class CityWard {
 		HashMap<BlockPos, BlockState> map = new HashMap<>();
 		
 		int x0 = bb.minX();
-		int y0 = 64;
+		int y0 = GcConsts.GROUND_HEIGHT;
 		int z0 = bb.minZ();
 //		int x0 = bb.minX() - origin.getX();
 //		int y0 = 64;

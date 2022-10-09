@@ -93,9 +93,9 @@ public class CityStructure extends Structure {
 			}
 			
 			var state = (chunkPos.x % 16 == 0 || chunkPos.z % 16 == 0) ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.DIAMOND_BLOCK.defaultBlockState();
-			for (int y = 60; y <= 80; y++) {
+			for (int y = 60; y <= 70; y++) {
 				var pos = chunkPos.getBlockAt(0, y, 0);
-				if (!genLevel.getBlockState(pos).isAir() && y != 256) continue;
+				if (!genLevel.getBlockState(pos).isAir() && y != 70) continue;
 				genLevel.setBlock(pos, state, Block.UPDATE_CLIENTS);
 			}
 			genLevel.setBlock(chunkPos.getBlockAt(0, 70, 0), state, Block.UPDATE_CLIENTS);
