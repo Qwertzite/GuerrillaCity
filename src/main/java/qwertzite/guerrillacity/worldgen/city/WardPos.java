@@ -30,17 +30,17 @@ public record WardPos(int wx, int wz) {
 	}
 	
 	public static WardPos of(ChunkPos chunkPos) {
-		int wardX = chunkPos.x >> CityWard.WARD_SIZE_BIT;
-		int wardZ = chunkPos.z >> CityWard.WARD_SIZE_BIT;
+		int wardX = chunkPos.x >> CityConst.WARD_SIZE_BIT;
+		int wardZ = chunkPos.z >> CityConst.WARD_SIZE_BIT;
 		return WardPos.of(wardX, wardZ);
 	}
 	
 	public int getChunkX() {
-		return this.wx << CityWard.WARD_SIZE_BIT;
+		return this.wx << CityConst.WARD_SIZE_BIT;
 	}
 	
 	public int getChunkZ() {
-		return this.wz << CityWard.WARD_SIZE_BIT;
+		return this.wz << CityConst.WARD_SIZE_BIT;
 	}
 	
 	public int getBlockX() {
@@ -65,7 +65,7 @@ public record WardPos(int wx, int wz) {
 	 * @return parallel stream
 	 */
 	public Stream<ChunkPos> getChunksWithin() {
-		long streamSize = 1L << (CityWard.WARD_SIZE_BIT + CityWard.WARD_SIZE_BIT);
+		long streamSize = 1L << (CityConst.WARD_SIZE_BIT + CityConst.WARD_SIZE_BIT);
 		int attributes = Spliterator.CONCURRENT | Spliterator.DISTINCT | Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.SIZED | Spliterator.SUBSIZED;
 		
 		return StreamSupport.stream(new Spliterators.AbstractSpliterator<ChunkPos>(streamSize, attributes) {
@@ -73,7 +73,7 @@ public record WardPos(int wx, int wz) {
 			private final int wzc = getChunkZ();
 			private int cx;
 			private int cz;
-			private final int max = 1 << CityWard.WARD_SIZE_BIT;
+			private final int max = 1 << CityConst.WARD_SIZE_BIT;
 			
 			@Override
 			public boolean tryAdvance(Consumer<? super ChunkPos> action) {
