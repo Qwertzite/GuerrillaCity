@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CityGenResult {
-	public static final CityGenResult EMPTY = new CityGenResult();
+	public static final CityGenResult EMPTY = new EmptyCityGenResult();
 	
 	private Set<BuildingEntry> buildings = new HashSet<>();
 	private double score = 0.0d;
@@ -28,4 +28,8 @@ public class CityGenResult {
 	public double addScore(double score) { return this.score += score; }
 	public double getScore() { return this.score; }
 	
+	private static class EmptyCityGenResult extends CityGenResult {
+		@Override public void addBuilding(BuildingEntry building) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
+		@Override public void addBuildings(Set<BuildingEntry> buildings) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
+	}
 }
