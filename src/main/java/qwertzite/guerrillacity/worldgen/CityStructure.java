@@ -46,7 +46,7 @@ public class CityStructure extends Structure {
 		super(new Structure.StructureSettings(
 				BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY),
 				Map.of(),
-				Decoration.SURFACE_STRUCTURES,
+				Decoration.TOP_LAYER_MODIFICATION,
 				TerrainAdjustment.NONE));
 	}
 
