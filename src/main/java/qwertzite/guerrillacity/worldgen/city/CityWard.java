@@ -1,6 +1,5 @@
 package qwertzite.guerrillacity.worldgen.city;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.ModLog;
@@ -28,7 +28,7 @@ public class CityWard {
 	private boolean initialising;
 	private volatile boolean initialised = false;
 	
-	private Set<BuildingEntry> buildings;
+	private CityGenResult result;
 	
 	public CityWard(WardPos wardPos, long worldSeed) {
 		this(wardPos.getBaseBlockPos(GcConsts.GROUND_HEIGHT), new Random(worldSeed + 17*wardPos.hashCode()).nextLong());
@@ -61,14 +61,15 @@ public class CityWard {
 						this.offset.getX() + 1, this.offset.getY(), this.offset.getZ() + 1,
 						this.offset.getX() + CityConst.WARD_SIZE_BLOCKS -2, this.offset.getY() + 64, this.offset.getZ() + CityConst.WARD_SIZE_BLOCKS -2),
 				validArea, forbiddenArea, this.offset.getY());
-		CityGenResult result = cityBlock.init(new ForkJoinPool());
+		this.result = cityBlock.init(new ForkJoinPool());
 		
-		this.buildings = result.getBuildings();
+//		this.result.addBuildings(validArea.stream().map(area -> new DummyBuilding(area, 63, Blocks.CYAN_STAINED_GLASS.defaultBlockState())).collect(Collectors.toSet()));
+//		this.result.addBuildings(forbiddenArea.stream().map(area -> new DummyBuilding(area, 63, Blocks.RED_STAINED_GLASS.defaultBlockState())).collect(Collectors.toSet()));
 		
 		this.initialised = true;
 		this.initialising = false;
 		ModLog.info("Initialied city ward at " + this.offset);
-		ModLog.info("Buildings: " + this.buildings.size());
+//		ModLog.info("Buildings: " + this.buildings.size());
 	}
 	
 	/**
@@ -77,16 +78,21 @@ public class CityWard {
 	 * @return absolute coordinates and new block states.
 	 */
 	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(@Nullable BoundingBox genAreaBB) {
-		Map<BlockPos, BlockState> map = new HashMap<>();
+		CityGenContext context = new CityGenContext(genAreaBB);
 		
-		this.buildings.stream().filter(
-				building -> building.getCircumBox().intersects(genAreaBB)).forEach(building -> building.generate(map));
-		Map<BlockPos, BlockState> mapmap = map.entrySet().stream()
-				.filter(e -> genAreaBB.isInside(e.getKey()))
-				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+		Set<RoadElement> roads = this.result.getRoadElements().stream().filter(e -> e.getCircumBox().intersects(genAreaBB)).collect(Collectors.toSet());
+		roads.stream().forEach(e -> e.generateRoadBase(context));
+		roads.stream().forEach(e -> e.generateRoadBody(context));
+		roads.stream().forEach(e -> e.generateRoadSurface(context));
 		
+		this.result.getBuildings().stream().filter(e -> e.getCircumBox().intersects(genAreaBB)).forEach(e -> e.generate(context));
+//		this.buildings.stream().filter(
+//				building -> building.getCircumBox().intersects(genAreaBB)).forEach(building -> building.generate(map));
+//		Map<BlockPos, BlockState> mapmap = map.entrySet().stream()
+//				.filter(e -> genAreaBB.isInside(e.getKey()))
+//				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 		
-		return mapmap;
+		return context.getStateMap();
 	}
 	
 	public BlockPos getOffset() {

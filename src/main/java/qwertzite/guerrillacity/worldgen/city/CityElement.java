@@ -1,16 +1,12 @@
 package qwertzite.guerrillacity.worldgen.city;
 
-import java.util.Map;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public class BuildingEntry {
+public class CityElement {
 	
 	private BoundingBox circumBox;
 	
-	public BuildingEntry(BoundingBox circumBox) {
+	public CityElement(BoundingBox circumBox) {
 		this.circumBox = circumBox;
 	}
 	
@@ -22,9 +18,9 @@ public class BuildingEntry {
 		return this.circumBox;
 	}
 	
-	public void generate(Map<BlockPos, BlockState> context) {
+	public void generate(CityGenContext context) {
 		
 	}
-
+	
 	
 }

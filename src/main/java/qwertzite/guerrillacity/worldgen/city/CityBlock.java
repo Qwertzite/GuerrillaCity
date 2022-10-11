@@ -7,6 +7,9 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /**
@@ -25,6 +28,8 @@ public class CityBlock {
 	
 	private Supplier<CityGenResult> task1;
 	private Supplier<CityGenResult> task2;
+	private boolean isDivXdirection;
+	private int roadPos;
 	
 	public CityBlock(long seed, int level, BoundingBox blockArea, Set<BoundingBox> validArea, Set<BoundingBox> forbiddenArea, int groundHeght) {
 		this.seed = seed;
@@ -45,9 +50,9 @@ public class CityBlock {
 		// 自前で建物を配置する
 		CityGenResult result0 = new CityGenResult();
 		result0.setScore(10.0d);
-		result0.addBuilding(new DummyBuilding(new BoundingBox(
-				this.blockArea.minX(), this.groundHeight, this.blockArea.minZ(),
-				this.blockArea.maxX(), this.groundHeight, this.blockArea.maxZ()), this.groundHeight));
+//		result0.addBuilding(new DummyBuilding(new BoundingBox(
+//				this.blockArea.minX(), this.groundHeight, this.blockArea.minZ(),
+//				this.blockArea.maxX(), this.groundHeight, this.blockArea.maxZ()), this.groundHeight));
 //		if (this.level >= 2) return result0;
 		
 		//		// スコアを比較する
@@ -59,31 +64,48 @@ public class CityBlock {
 		if (result0.getScore() > scoreDivision) return result0;
 
 		// 分割したほうがスコアがいい場合
-		// TODO: 道を追加する
-		return CityGenResult.integrate(result1, result2);
+		CityGenResult result3 = CityGenResult.integrate(result1, result2);
+		Axis roadDir = this.isDivXdirection ? Axis.Z : Axis.X;
+		int roadWidth = CityConst.getRoadWidthForLevel(level);
+
+		if (this.isDivXdirection) {
+			int minX = this.blockArea.minX() + this.roadPos;
+			for (int z4 = this.blockArea.minZ() - Mth.positiveModulo(this.blockArea.minZ(), 4); z4 <= this.blockArea.maxZ(); z4 += 4) {
+				RoadElement element = new RoadElement(new BlockPos(minX, this.groundHeight, z4), roadDir, roadWidth);
+				if (!this.forbiddenArea.stream().anyMatch(bb -> bb.intersects(element.getCircumBox()))) result3.addRoadElement(element);
+			}
+		} else {
+			int minZ = this.blockArea.minZ() + this.roadPos;
+			for (int x4 = this.blockArea.minX() - Mth.positiveModulo(this.blockArea.minX(), 4); x4 <= this.blockArea.maxX(); x4 += 4) {
+				RoadElement element = new RoadElement(new BlockPos(x4, this.groundHeight, minZ), roadDir, roadWidth);
+				if (!this.forbiddenArea.stream().anyMatch(bb -> bb.intersects(element.getCircumBox()))) result3.addRoadElement(element);
+			}
+		}
+		
+		return result3;
 	}
 	
-	private int devideAndGenerate(Random rand, ForkJoinPool fjp) {
-		if (this.level >= 4) {
+	private void devideAndGenerate(Random rand, ForkJoinPool fjp) {
+		if (this.level >= 5) {
 			this.task1 = () -> CityGenResult.EMPTY;
 			this.task2 = () -> CityGenResult.EMPTY;
-			return 0;
+			return;
 		}
 		
 		int roadWidth = CityConst.getRoadWidthForLevel(level);
 		final int minBlocksize = CityConst.MIN_BUILDING_SIZE;
 		int xSize = blockArea.getXSpan() - roadWidth - minBlocksize*2;
 		int zSize = blockArea.getZSpan() - roadWidth - minBlocksize*2;
-		System.out.println(this.level + " x=" + xSize + ", z=" + zSize);
+		
 		if (xSize <= 0 && zSize <= 0) {
 			this.task1 = () -> CityGenResult.EMPTY;
 			this.task2 = () -> CityGenResult.EMPTY;
-			return 0;
+			return;
 		}
 		if (xSize < 0) xSize = 0;
 		if (zSize < 0) zSize = 0;
-		boolean isXdirection =  xSize*xSize > rand.nextInt(xSize*xSize + zSize*zSize); // 分割方向 
-		System.out.println(this.level + " dir x=" + isXdirection);
+		boolean isXdirection =  xSize*xSize > rand.nextInt(xSize*xSize + zSize*zSize); // 分割方向 true ならx方向の長さが小さくなる
+		
 		int possibleRange = isXdirection ? xSize : zSize;
 		int roadPos = minBlocksize + rand.nextInt((possibleRange) / 2 + 1) + rand.nextInt((possibleRange + 1) / 2 + 1);
 		
@@ -115,7 +137,8 @@ public class CityBlock {
 			this.task2 = () -> task2.join();
 		} else this.task2 = () -> CityGenResult.EMPTY;
 		
-		return roadPos;
+		this.roadPos = roadPos;
+		this.isDivXdirection = isXdirection;
 	}
 	
 	private CityBlock createChildCityBlock(long seed, BoundingBox childArea) {
@@ -126,5 +149,6 @@ public class CityBlock {
 		CityBlock child = new CityBlock(seed, this.level+1, childArea, valid, forbidden, this.groundHeight);
 		return child;
 	}
+	
 	
 }
