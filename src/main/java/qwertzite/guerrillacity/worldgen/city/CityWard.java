@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.ModLog;
@@ -77,8 +77,8 @@ public class CityWard {
 	 * @param genAreaBB absolute coordinate
 	 * @return absolute coordinates and new block states.
 	 */
-	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(@Nullable BoundingBox genAreaBB) {
-		CityGenContext context = new CityGenContext(genAreaBB);
+	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(LevelAccessor level, @Nullable BoundingBox genAreaBB) {
+		CityGenContext context = new CityGenContext(level, genAreaBB);
 		
 		Set<RoadElement> roads = this.result.getRoadElements().stream().filter(e -> e.getCircumBox().intersects(genAreaBB)).collect(Collectors.toSet());
 		roads.stream().forEach(e -> e.generateRoadBase(context));

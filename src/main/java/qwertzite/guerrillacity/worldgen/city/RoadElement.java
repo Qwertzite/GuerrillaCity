@@ -3,6 +3,7 @@ package qwertzite.guerrillacity.worldgen.city;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
@@ -45,68 +46,68 @@ public class RoadElement {
 		BlockState cobble = Blocks.COBBLESTONE.defaultBlockState();
 		BlockState dirt = Blocks.DIRT.defaultBlockState();
 		
-		int miny = this.boundingBox.minY();
-		int maxx = this.boundingBox.maxX();
-		int minz = this.boundingBox.minZ();
-		int maxz = this.boundingBox.maxZ();
-		for (int x = this.boundingBox.minX(); x <= maxx; x++) {
-			for (int z = minz; z <= maxz; z++) {
-				for (int y = miny; y <= miny + 1; y++) {
-					ctx.setBlockState(new BlockPos(x, y, z), base);
-				}
-				ctx.setBlockState(new BlockPos(x, miny + 2, z), cobble);
-				ctx.setBlockState(new BlockPos(x, miny + 3, z), dirt);
+		ctx.pushMatrix();
+		this.setupTranslation(ctx);
+		
+		int minx = -3;
+		int maxx = this.roadWidth + 3;
+		int minz = 0;
+		int maxz = 4; // exclusive
+		for (int z = minz; z < maxz; z++) {
+			for (int x = minx; x < maxx; x++) {
+				ctx.setBlockState(new BlockPos(x, -5, z), base);
+				ctx.setBlockState(new BlockPos(x, -4, z), base);
+				ctx.setBlockState(new BlockPos(x, -3, z), cobble);
 			}
+			ctx.setBlockState(new BlockPos(minx  , -2, z), dirt);
+			ctx.setBlockState(new BlockPos(maxx-1, -2, z), dirt);
 		}
+		ctx.popMatrix();
 	}
 	
 	public void generateRoadBody(CityGenContext ctx) {
 		BlockState body = Blocks.SMOOTH_STONE.defaultBlockState();
-		int minx = this.boundingBox.minX() + (this.axis == Axis.Z ?  1 : 0);
-		int maxx = this.boundingBox.maxX() + (this.axis == Axis.Z ? -1 : 0);
-		int minz = this.boundingBox.minZ() + (this.axis == Axis.Z ?  0 : 1);
-		int maxz = this.boundingBox.maxZ() + (this.axis == Axis.Z ?  0 :-1);
-		int ypos = this.boundingBox.minY() + 3;
-		for (int x = minx; x <= maxx; x++) {
-			for (int z = minz; z <= maxz; z++) {
-				ctx.setBlockState(new BlockPos(x, ypos, z), body);
+		
+		ctx.pushMatrix();
+		this.setupTranslation(ctx);
+		
+		int minx = -2;
+		int maxx = this.roadWidth + 2;
+		int minz = 0;
+		int maxz = 4; // exclusive
+		for (int z = minz; z < maxz; z++) {
+			for (int x = minx; x < maxx; x++) {
+				ctx.setBlockState(new BlockPos(x, -2, z), body);
 			}
+			ctx.setBlockState(new BlockPos(minx+1, -1, z), body);
+			ctx.setBlockState(new BlockPos(maxx-2, -1, z), body);
 		}
-		if (this.axis == Axis.Z) {
-			int x = this.pos.getX() - 1;
-			int y = this.pos.getY() - 1;
-			for (int z = this.pos.getZ(); z < this.pos.getZ() + 4; z++) {
-				ctx.setBlockState(new BlockPos(x, y, z), body);
-			}
-			x = this.pos.getX() + this.roadWidth;
-			for (int z = this.pos.getZ(); z < this.pos.getZ() + 4; z++) {
-				ctx.setBlockState(new BlockPos(x, y, z), body);
-			}
-		} else {
-			int z = this.pos.getZ() - 1;
-			int y = this.pos.getY() - 1;
-			for (int x = this.pos.getX(); x < this.pos.getX() + 4; x++) {
-				ctx.setBlockState(new BlockPos(x, y, z), body);
-			}
-			z = this.pos.getZ() + this.roadWidth;
-			for (int x = this.pos.getX(); x < this.pos.getX() + 4; x++) {
-				ctx.setBlockState(new BlockPos(x, y, z), body);
-			}
-		}
+		ctx.popMatrix();
 	}
 	
 	public void generateRoadSurface(CityGenContext ctx) {
 		BlockState surface = Blocks.DEEPSLATE.defaultBlockState();
-		int minx = this.pos.getX();
-		int maxx = this.pos.getX() + (this.axis == Axis.Z ? this.roadWidth : 4);
-		int minz = this.pos.getZ();
-		int maxz = this.pos.getZ() + (this.axis != Axis.Z ? this.roadWidth : 4);
-		int ypos = this.pos.getY() - 1;
-		for (int x = minx; x < maxx; x++) {
-			for (int z = minz; z < maxz; z++) {
-				ctx.setBlockState(new BlockPos(x, ypos, z), surface);
+		
+		ctx.pushMatrix();
+		this.setupTranslation(ctx);
+		
+		int minx = 0;
+		int maxx = this.roadWidth;
+		int minz = 0;
+		int maxz = 4; // exclusive
+		for (int z = minz; z < maxz; z++) {
+			for (int x = minx; x < maxx; x++) {
+				ctx.setBlockState(new BlockPos(x, -1, z), surface);
 			}
 		}
+		ctx.popMatrix();
 	}
-
+	
+	private void setupTranslation(CityGenContext ctx) {
+		ctx.translate(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+		if (this.axis == Axis.X) {
+			ctx.rotate(Rotation.COUNTERCLOCKWISE_90);
+			ctx.mirror();
+		}
+	}
 }

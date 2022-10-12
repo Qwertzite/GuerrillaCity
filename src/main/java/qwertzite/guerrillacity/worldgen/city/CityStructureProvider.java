@@ -26,7 +26,7 @@ public class CityStructureProvider {
 	private static final Map<WardPos, CityWard> CACHE = new ConcurrentHashMap<>();
 	private static long seed;
 	
-	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
+	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor levelAccessor, Predicate<Holder<Biome>> validBiome) {
 		synchronized (CityStructureProvider.class) {
 			if (CityStructureProvider.seed != seed) {
 				CityStructureProvider.seed = seed;
@@ -39,7 +39,7 @@ public class CityStructureProvider {
 			if (!CACHE.containsKey(wardPos)) {
 				cityWard = new CityWard(wardPos, seed);
 				CACHE.put(wardPos, cityWard);
-				CityStructureProvider.initialiseCityWard(cityWard, wardPos, biomeSource, validBiome);
+				CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
 			} else {
 				cityWard = CACHE.get(wardPos);
 			}
@@ -49,7 +49,7 @@ public class CityStructureProvider {
 				chunkPos.getMinBlockX(),                                                     0, chunkPos.getMinBlockZ(),
 				chunkPos.getMaxBlockX(), GcConsts.GROUND_HEIGHT + GcConsts.MAX_BUILDING_HEIGHT, chunkPos.getMaxBlockZ());
 		
-		return cityWard.computeBlockStateForBoudingBox(chunkBB);
+		return cityWard.computeBlockStateForBoudingBox(levelAccessor, chunkBB);
 	}
 	
 	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
