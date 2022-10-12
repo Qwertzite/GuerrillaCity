@@ -20,7 +20,7 @@ public class CityGenContext {
 	private Map<BlockPos, BlockState> resultMap = new HashMap<BlockPos, BlockState>();
 	
 	private Deque<Matrix4x4> stack = new LinkedList<>();
-	public Matrix4x4 current = Matrix4x4.E;
+	private Matrix4x4 current = Matrix4x4.E;
 	
 	private Rotation rotation = Rotation.NONE;
 	private boolean mirror = false;
