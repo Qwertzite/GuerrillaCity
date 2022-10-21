@@ -1,5 +1,7 @@
 package qwertzite.guerrillacity.worldgen.city;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +26,7 @@ import qwertzite.guerrillacity.core.util.PosUtil;
  */
 public class CityStructureProvider {
 	private static final Map<WardPos, CityWard> CACHE = new ConcurrentHashMap<>();
+	private static final Set<CityWard> INITIALISED = new HashSet<>();
 	private static long seed;
 	
 	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor levelAccessor, Predicate<Holder<Biome>> validBiome) {
@@ -35,13 +38,18 @@ public class CityStructureProvider {
 		}
 		WardPos wardPos = WardPos.of(chunkPos);
 		CityWard cityWard;
-		synchronized (wardPos) { // This is possible because wardPos is interned.
+		synchronized (CACHE) { // This is possible because wardPos is interned.
 			if (!CACHE.containsKey(wardPos)) {
 				cityWard = new CityWard(wardPos, seed);
 				CACHE.put(wardPos, cityWard);
-				CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
 			} else {
 				cityWard = CACHE.get(wardPos);
+			}
+		}
+		synchronized(cityWard) {
+			if (!INITIALISED.contains(cityWard)) {
+				CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
+				INITIALISED.add(cityWard);
 			}
 		}
 		

@@ -1,5 +1,6 @@
 package qwertzite.guerrillacity.worldgen.city;
 
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -55,21 +57,30 @@ public class CityWard {
 		this.initialising = true;
 		
 		// generate city blocks and make them do their jobs.
+		EnumMap<Direction, Integer> roadMap = new EnumMap<>(Direction.class);
+		roadMap.put(Direction.EAST, 100);
+		roadMap.put(Direction.WEST, 100);
+		roadMap.put(Direction.NORTH, 100);
+		roadMap.put(Direction.SOUTH, 100);
 		
 		CityBlock cityBlock = new CityBlock(wardSeed, 0,
 				new BoundingBox(
 						this.offset.getX() + 1, this.offset.getY(), this.offset.getZ() + 1,
 						this.offset.getX() + CityConst.WARD_SIZE_BLOCKS -2, this.offset.getY() + 64, this.offset.getZ() + CityConst.WARD_SIZE_BLOCKS -2),
-				validArea, forbiddenArea, this.offset.getY());
+				validArea, forbiddenArea, this.offset.getY(), roadMap);
 		this.result = cityBlock.init(new ForkJoinPool());
-		
-//		this.result.addBuildings(validArea.stream().map(area -> new DummyBuilding(area, 63, Blocks.CYAN_STAINED_GLASS.defaultBlockState())).collect(Collectors.toSet()));
-//		this.result.addBuildings(forbiddenArea.stream().map(area -> new DummyBuilding(area, 63, Blocks.RED_STAINED_GLASS.defaultBlockState())).collect(Collectors.toSet()));
 		
 		this.initialised = true;
 		this.initialising = false;
 		ModLog.info("Initialied city ward at " + this.offset);
-//		ModLog.info("Buildings: " + this.buildings.size());
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("Initalised city ward" + "\n");
+		sb.append("Position: " + this.offset + "\n");
+		sb.append("Buildings: " + this.result.getBuildings().size() + "\n");
+		sb.append("Road count: " + this.result.getRoadCount() + "\n");
+		sb.append("Road length: " + this.result.getRoadElements().size()*4 + "\n");
+		ModLog.info(sb.toString());
 	}
 	
 	/**
@@ -86,8 +97,8 @@ public class CityWard {
 		roads.stream().forEach(e -> e.generateRoadSurface(context));
 		
 		this.result.getBuildings().stream().filter(e -> e.getCircumBox().intersects(genAreaBB)).forEach(e -> e.generate(context));
-//		this.buildings.stream().filter(
-//				building -> building.getCircumBox().intersects(genAreaBB)).forEach(building -> building.generate(map));
+		this.result.getBuildings().stream().filter(
+				building -> building.getCircumBox().intersects(genAreaBB)).forEach(building -> building.generate(context));
 //		Map<BlockPos, BlockState> mapmap = map.entrySet().stream()
 //				.filter(e -> genAreaBB.isInside(e.getKey()))
 //				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));

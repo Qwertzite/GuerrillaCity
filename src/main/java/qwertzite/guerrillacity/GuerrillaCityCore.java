@@ -17,6 +17,7 @@ import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
+import qwertzite.guerrillacity.worldgen.city.BuildingLoader;
 
 @Mod(GuerrillaCityCore.MODID)
 public class GuerrillaCityCore {
@@ -40,10 +41,11 @@ public class GuerrillaCityCore {
 				() -> BootstrapServerSide::new);
 		
 		this.init();
-		
 	}
 	
 	private void init() {
+		BuildingLoader.loadResources();
+		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		bus.register(this);
 		BiomeRegister.initialise(bus);
