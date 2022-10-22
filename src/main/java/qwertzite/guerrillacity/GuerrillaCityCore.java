@@ -4,20 +4,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import qwertzite.guerrillacity.construction.GcConstructionModule;
 import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
+import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
+import qwertzite.guerrillacity.worldgen.GcBiomeTagsProvider;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 import qwertzite.guerrillacity.worldgen.city.BuildingLoader;
 
@@ -49,10 +52,15 @@ public class GuerrillaCityCore {
 		BuildingLoader.loadResources();
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		bus.addListener(this::onFmlCommonRegistryEvent);
 		bus.register(this);
+		bus.addListener(this::onResourceGeneration);
+		
 		BiomeRegister.initialise(bus);
+		ItemRegister.initialise(bus);
 		
 		this.registerModModule(new GcWorldGenModule(bus));
+		this.registerModModule(new GcConstructionModule());
 		
 		// ...
 		
@@ -63,9 +71,14 @@ public class GuerrillaCityCore {
 		this.modules.add(module);
 	}
 	
+	public void onResourceGeneration(GatherDataEvent event) {
+		var generator = event.getGenerator();
+		var existingFileHelper = event.getExistingFileHelper();
+		generator.addProvider(true, new GcBiomeTagsProvider(generator, existingFileHelper));
+		generator.addProvider(true, ItemRegister.getModelProvider(generator, existingFileHelper));
+	}
 	// ...
 	
-	@SubscribeEvent
 	public void onFmlCommonRegistryEvent(FMLCommonSetupEvent event) {
 		event.enqueueWork(() -> {
 			RegionRegister.enqueueToFmlCommonSetupEvent();
@@ -78,4 +91,5 @@ public class GuerrillaCityCore {
 			module.onServerStarting(event);
 		}
 	}
+
 }
