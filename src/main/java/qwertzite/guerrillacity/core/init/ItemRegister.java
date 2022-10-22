@@ -14,38 +14,47 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.datagen.GcItemModelProvider;
+import qwertzite.guerrillacity.core.datagen.ModelBase;
 
 public class ItemRegister {
 	
-	private static final Set<ItemRegister> ITEM_ENTRY = new HashSet<>();
-	private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(Registry.ITEM_REGISTRY, GuerrillaCityCore.MODID);
-	public static void initialise(IEventBus bus) { ITEM_REGISTRY.register(bus); }
-	
-	public static ItemRegister $(ResourceKey<Item> regKey, Supplier<Item> item) {
-		return new ItemRegister(regKey, item);
-	}
+	private static final Set<ItemRegister> ENTRY = new HashSet<>();
+	private static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(Registry.ITEM_REGISTRY, GuerrillaCityCore.MODID);
+	public static void initialise(IEventBus bus) { REGISTRY.register(bus); }
 	
 	public static ResourceKey<Item> registryKey(String name) {
 		return ResourceKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(GuerrillaCityCore.MODID, name));
 	}
 	
 	public static GcItemModelProvider getModelProvider(DataGenerator generator, ExistingFileHelper fileHelper) {
-		return new GcItemModelProvider(ITEM_ENTRY, generator, fileHelper);
+		return new GcItemModelProvider(ENTRY, generator, fileHelper);
+	}
+	
+	public static ItemRegister $(ResourceKey<Item> regKey, Supplier<Item> item) {
+		return new ItemRegister(regKey, item);
 	}
 	
 	private ResourceKey<Item> registryKey;
 	private Supplier<Item> item;
-	private RegistryObject<Item> registryObject;
+	
+	private ModelBase model;
 	
 	private ItemRegister(ResourceKey<Item> regKey, Supplier<Item> item) {
 		this.registryKey = regKey;
 		this.item = item;
 	}
 	
-	public RegistryObject<Item> register() {
-		ITEM_ENTRY.add(this);
-		return this.registryObject = ITEM_REGISTRY.register(this.registryKey.location().getPath(), this.item);
+	public ItemRegister setModel(ModelBase model) {
+		this.model = model;
+		return this;
 	}
 	
-	public ResourceKey getRegistrykey() { return this.registryKey; }
+	public RegistryObject<Item> register() {
+		ENTRY.add(this);
+		return REGISTRY.register(this.registryKey.location().getPath(), this.item);
+	}
+	
+	public ResourceKey<Item> getRegistrykey() { return this.registryKey; }
+	public ModelBase getCustomModel() { return this.model; }
 }

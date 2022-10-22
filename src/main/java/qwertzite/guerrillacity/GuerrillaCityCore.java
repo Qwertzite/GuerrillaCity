@@ -16,6 +16,7 @@ import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
+import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
@@ -58,6 +59,7 @@ public class GuerrillaCityCore {
 		
 		BiomeRegister.initialise(bus);
 		ItemRegister.initialise(bus);
+		BlockRegister.initialise(bus);
 		
 		this.registerModModule(new GcWorldGenModule(bus));
 		this.registerModModule(new GcConstructionModule());
@@ -76,6 +78,7 @@ public class GuerrillaCityCore {
 		var existingFileHelper = event.getExistingFileHelper();
 		generator.addProvider(true, new GcBiomeTagsProvider(generator, existingFileHelper));
 		generator.addProvider(true, ItemRegister.getModelProvider(generator, existingFileHelper));
+		generator.addProvider(true, BlockRegister.getBlockStateProvider(generator, existingFileHelper));
 	}
 	// ...
 	
