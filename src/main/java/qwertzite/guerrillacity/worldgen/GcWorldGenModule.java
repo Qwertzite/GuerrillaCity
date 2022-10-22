@@ -2,6 +2,9 @@ package qwertzite.guerrillacity.worldgen;
 
 import java.util.List;
 
+import com.mojang.brigadier.CommandDispatcher;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +15,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -20,6 +24,7 @@ import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
+import qwertzite.guerrillacity.worldgen.command.GcGenCommand;
 import terrablender.api.SurfaceRuleManager.RuleCategory;
 
 /**
@@ -86,5 +91,11 @@ public class GcWorldGenModule extends GcModuleBase {
 		STRUCTURE_SET_REGISTRY.register(bus);
 		STRUCTURE_PIECE_REGISTER.register(bus);
 		STRUCTURE_PLACEMENT_REGISTER.register(bus);
+	}
+	
+	@Override
+	public void onServerStarting(ServerStartingEvent evt) {
+		CommandDispatcher<CommandSourceStack> dispatcher = evt.getServer().getCommands().getDispatcher();
+		GcGenCommand.register(dispatcher);
 	}
 }

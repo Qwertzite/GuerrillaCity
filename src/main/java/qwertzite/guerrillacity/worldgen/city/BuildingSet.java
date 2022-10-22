@@ -5,8 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -44,13 +42,13 @@ public class BuildingSet {
 			minMargin[i] = Math.max(ms0.posveSideMinMargin(), ms1.negveSideMinMargin());
 			maxMargin[i] = Math.min(ms0.posveSideMaxMargin(), ms1.negveSideMaxMargin());
 		}
-		StringBuilder sb = new StringBuilder();
-		sb.append("margin min:");
-		for (int i : minMargin) { sb.append(String.format(" %d", i)); }
-		sb.append("\n");
-		sb.append("margin max:");
-		for (int i : maxMargin) { sb.append(String.format(" %d", i)); }
-		System.out.println(sb.toString());
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("margin min:");
+//		for (int i : minMargin) { sb.append(String.format(" %d", i)); }
+//		sb.append("\n");
+//		sb.append("margin max:");
+//		for (int i : maxMargin) { sb.append(String.format(" %d", i)); }
+//		System.out.println(sb.toString());
 		
 		for (Iterator<int[]> iter = new VariableDigitIterator(minMargin, maxMargin); iter.hasNext();) {
 			int[] margin = iter.next();

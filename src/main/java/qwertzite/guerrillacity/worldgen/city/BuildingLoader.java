@@ -55,20 +55,20 @@ public class BuildingLoader {
 		
 		ModLog.info("Loaded buildings and components.");
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("min building size = " + minSize + "\n");
-		sb.append("loaded buildings " + buildings.size() + "\n");
-		for (var bt : buildings.values()) {
-			sb.append("  " + bt.getTypeName() + " w=" + bt.getWeight() + " :" + bt.getWidth() + " x " + bt.getLength() + "\n");
-		}
-		
-		for (var e : buildingSets.int2ObjectEntrySet()) {
-			sb.append("" + e.getIntKey() + "\n");
-			for (var ee : e.getValue()) {
-				sb.append("  " + ee.getIntA() + " " + ee.getB() + "\n");
-			}
-		}
-		System.out.println(sb);
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("min building size = " + minSize + "\n");
+//		sb.append("loaded buildings " + buildings.size() + "\n");
+//		for (var bt : buildings.values()) {
+//			sb.append("  " + bt.getTypeName() + " w=" + bt.getWeight() + " :" + bt.getWidth() + " x " + bt.getLength() + "\n");
+//		}
+//		
+//		for (var e : buildingSets.int2ObjectEntrySet()) {
+//			sb.append("" + e.getIntKey() + "\n");
+//			for (var ee : e.getValue()) {
+//				sb.append("  " + ee.getIntA() + " " + ee.getB() + "\n");
+//			}
+//		}
+//		System.out.println(sb);
 	}
 	
 	private static void generateBuildingSets() {

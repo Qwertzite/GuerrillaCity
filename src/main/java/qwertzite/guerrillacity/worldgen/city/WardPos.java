@@ -12,6 +12,7 @@ import com.google.common.collect.Interners;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /**
  * It is recommended to obtain WardPos instance via {@link WardPos#of(int, int)} to obtain interned object.
@@ -33,6 +34,16 @@ public record WardPos(int wx, int wz) {
 		int wardX = chunkPos.x >> CityConst.WARD_SIZE_BIT;
 		int wardZ = chunkPos.z >> CityConst.WARD_SIZE_BIT;
 		return WardPos.of(wardX, wardZ);
+	}
+	
+	public static WardPos contains(BlockPos pos) {
+		int wardX = wardPosFromBlockPos(pos.getX());
+		int wardZ = wardPosFromBlockPos(pos.getZ());
+		return WardPos.of(wardX, wardZ);
+	}
+	
+	public static int wardPosFromBlockPos(int blockCoord) {
+		return SectionPos.blockToSectionCoord(blockCoord) >> CityConst.WARD_SIZE_BIT;
 	}
 	
 	public int getChunkX() {
@@ -91,5 +102,14 @@ public record WardPos(int wx, int wz) {
 				return true;
 			}
 		}, true);
+	}
+	
+	public BoundingBox getWardBoundingBox() {
+		int size = CityConst.WARD_SIZE_BLOCKS-1;
+		int posX = this.getBlockX();
+		int posZ = this.getBlockZ();
+		return new BoundingBox(
+				posX, 0, posZ,
+				posX + size, 256, posZ + size);
 	}
 }

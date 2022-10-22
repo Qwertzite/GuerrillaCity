@@ -3,6 +3,8 @@ package qwertzite.guerrillacity;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -53,6 +55,8 @@ public class GuerrillaCityCore {
 		this.registerModModule(new GcWorldGenModule(bus));
 		
 		// ...
+		
+		MinecraftForge.EVENT_BUS.addListener(this::onServerStarting);
 	}
 	
 	private void registerModModule(GcModuleBase module) {
@@ -62,12 +66,16 @@ public class GuerrillaCityCore {
 	// ...
 	
 	@SubscribeEvent
-	public void onFmlCommonRegistruyEvent(FMLCommonSetupEvent event) {
+	public void onFmlCommonRegistryEvent(FMLCommonSetupEvent event) {
 		event.enqueueWork(() -> {
 			RegionRegister.enqueueToFmlCommonSetupEvent();
 			SurfaceRuleRegister.enqueueToFmlCommonSetupEvent();
 		});
 	}
 	
-
+	public void onServerStarting(ServerStartingEvent event) {
+		for(var module : this.modules) {
+			module.onServerStarting(event);
+		}
+	}
 }
