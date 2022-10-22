@@ -16,7 +16,6 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.util.DoubleObjTuple;
-import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.IntObjTuple;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
 

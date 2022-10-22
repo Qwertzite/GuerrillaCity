@@ -49,7 +49,7 @@ public class BuildingType {
 		int zSize =    dir.getStepX() * wid - dir.getStepZ() * len;
 		
 		BoundingBox bb = McUtil.boundingBox(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + xSize, pos.getY(), pos.getZ() + zSize);
-		return new DummyBuilding(bb, pos.getY(), ITEM_BY_DYE.get(rand.nextInt(16)), pos.above(), dir);
+		return new DummyBuilding(bb, pos.getY(), ITEM_BY_DYE.get(rand.nextInt(16)), pos, dir);
 	}
 	
 	private static final Map<Integer, BlockState> ITEM_BY_DYE = Util.make(new HashMap<>(), (p_29841_) -> {
