@@ -10,6 +10,7 @@ import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
@@ -55,6 +56,7 @@ public class BlockRegister {
 	private Supplier<Block> block;
 	
 	private ModelBase defaultModel;
+	private CreativeModeTab tab;
 	
 	private RegistryObject<Block> regObj;
 	
@@ -68,10 +70,15 @@ public class BlockRegister {
 		return this;
 	}
 	
+	public BlockRegister setTab(CreativeModeTab tab) {
+		this.tab = tab;
+		return this;
+	}
+	
 	public RegistryObject<Block> register() {
 		ENTRY.add(this);
 		this.regObj = REGISTRY.register(this.registryKey.location().getPath(), this.block);
-		ItemRegister.$(ItemRegister.registryKey(this.registryKey.location().getPath()), () -> new BlockItem(regObj.get(), new Item.Properties()))
+		ItemRegister.$(ItemRegister.registryKey(this.registryKey.location().getPath()), () -> new BlockItem(regObj.get(), new Item.Properties().tab(this.tab)))
 		.setModel(new ModelBlockItem(this.registryKey))
 		.register();
 		return this.regObj;
