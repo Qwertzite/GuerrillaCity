@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -17,6 +18,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.datagen.GcLootTblBlockDrop;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
 import qwertzite.guerrillacity.core.datagen.ModelBase;
 import qwertzite.guerrillacity.core.datagen.ModelBlockItem;
@@ -27,13 +29,23 @@ public class BlockRegister {
 	private static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(Registry.BLOCK_REGISTRY, GuerrillaCityCore.MODID);
 	public static void initialise(IEventBus bus) { REGISTRY.register(bus); }
 	
+	// ==== util ====
+	
 	public static ResourceKey<Block> registryKey(String name) {
 		return ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(GuerrillaCityCore.MODID, name));
 	}
 	
+	// ==== providers ====
+	
 	public static BlockStateProvider getBlockStateProvider(DataGenerator gen, ExistingFileHelper fileHelper) {
 		return new GcBlockStateProvider(ENTRY, gen, fileHelper);
 	}
+	
+	public static BlockLoot getBlockDropProvider() {
+		return new GcLootTblBlockDrop(ENTRY);
+	}
+	
+	// ==== main ====
 	
 	public static BlockRegister $(ResourceKey<Block> regKey, Supplier<Block> block) {
 		return new BlockRegister(regKey, block);
