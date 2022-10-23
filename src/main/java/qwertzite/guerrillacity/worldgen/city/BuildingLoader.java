@@ -63,10 +63,10 @@ public class BuildingLoader {
 		// XXX: load from actual resources, internal and external. see remiliaMarine.guerrillaCity.world.external.ExternalBuilding
 		MarginSettings margin = new MarginSettings(1, 3, 1, 3);
 		for (int i = 0; i < 10; i++) {
-			int w = rand.nextInt(5, 10) + rand.nextInt(0, 10);
-			int l = rand.nextInt(5, 10) + rand.nextInt(0, 10);
+			int w = rand.nextInt(10, 15) + rand.nextInt(0, 15);
+			int l = rand.nextInt(10, 15) + rand.nextInt(0, 15);
 			String name = "tb_" + i;
-			buildings.put(name, new BuildingType(name, w, l, margin, 10, McUtil.getColouredWool(rand.nextInt(16))));
+			buildings.put(name, new BuildingType(name, w, l, margin, 10, McUtil.getColouredWool(i)));
 			if (minSize > w) minSize = w;
 			if (minSize > l) minSize = l;
 		}
@@ -77,30 +77,9 @@ public class BuildingLoader {
 	private static void generateBuildingSets() {
 		List<BuildingType> loadedTypes = new ArrayList<>(buildings.values());
 		
-		loadedTypes.sort((e1, e2) -> e1.getTypeName().compareTo(e2.getTypeName())); // DEBUG remove
-		
 		List<BuildingType> types = new LinkedList<>();
 		int typeNum = buildings.size();
 		recursiveBuildingSet(0, types, loadedTypes, typeNum);
-		
-//		for (Entry<List<BuildingSet>> entry : buildingSets.int2ObjectEntrySet()) {
-//			int width = entry.getIntKey();
-//			List<BuildingSet> list = entry.getValue();
-//			list.sort((e1, e2) -> Double.compare(e1.getMaxWeight(width), e2.getMaxWeight(width)));
-//			int minLength = Integer.MAX_VALUE;
-//			for (int i = list.size() - 1; i >= 0; i--) {
-//				IntObjTuple<BuildingSet> tuple = list.get(i);
-//				minLength = Math.min(minLength, tuple.getB().getMinLength());
-//				tuple.setA(minLength);
-//			}
-//		}
-		System.out.print("width distrib "); // DEBUG
-		var listlist = new ArrayList<>(buildingSets.int2ObjectEntrySet());
-		listlist.sort((e1, e2) -> Integer.compare(e1.getIntKey(), e2.getIntKey()));
-		for (var list : listlist) {
-			System.out.print(list.getIntKey() + ":" + list.getValue().size() + " ");
-		}
-		System.out.println();
 	}
 	
 	private static void recursiveBuildingSet(int index, List<BuildingType> types, final List<BuildingType> loadedTypes, final int typeNum) {

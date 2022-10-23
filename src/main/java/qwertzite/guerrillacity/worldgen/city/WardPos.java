@@ -109,7 +109,6 @@ public record WardPos(int wx, int wz) {
 		int size = CityConst.WARD_SIZE_BLOCKS-1;
 		int posX = this.getBlockX();
 		int posZ = this.getBlockZ();
-		System.out.println("buildhight=%d, %d".formatted(level.getMinBuildHeight(), level.getMaxBuildHeight())); // DEBUG remove
 		return new BoundingBox(
 				posX, level.getMinBuildHeight(), posZ,
 				posX + size, level.getMaxBuildHeight(), posZ + size);

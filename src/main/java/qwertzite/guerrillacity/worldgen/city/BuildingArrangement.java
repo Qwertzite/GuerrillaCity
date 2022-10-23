@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.IntObjTuple;
 import qwertzite.guerrillacity.core.util.Vec2i;
@@ -82,15 +84,25 @@ public class BuildingArrangement {
 		
 		int maxLength = 0;
 		double weight = 0;
+		Object2IntMap<BuildingType> duplicate = new Object2IntOpenHashMap<>();
 		for (BuildingType type : types) {
-			weight += type.getWeight();
+			int div = duplicate.computeInt(type, (t, i) -> i == null ? 1 : i+1);
+			weight += type.getWeight() / div;
 			if (maxLength < type.getLength()) maxLength = type.getLength();
 		}
 		this.weightSum = weight;
 		this.maxLength = maxLength;
 	}
 	
+	public double getWeight(int length) {
+		return this.computeConfiguredScore(length, 0, 7.0d / 8);
+	}
+	
 	public double getScore(int length) {
+		return this.computeConfiguredScore(length, 1, 15.0 / 16);
+	}
+	
+	private double computeConfiguredScore(int length, int bias, double base) {
 		if (length < this.maxLength) return 0.0d;
 		
 		int decraction = 0;
@@ -104,7 +116,7 @@ public class BuildingArrangement {
 		}
 		decraction += this.baseDecraction;
 		
-		return this.weightSum * (1 + GcUtil.pow(7 / 8.0d, decraction));
+		return this.weightSum * (bias + GcUtil.pow(base, decraction));
 	}
 	
 	public List<IntObjTuple<BuildingType>> getPositions() {
