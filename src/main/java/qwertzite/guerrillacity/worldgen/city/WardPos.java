@@ -12,6 +12,7 @@ import com.google.common.collect.Interners;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /**
@@ -104,12 +105,13 @@ public record WardPos(int wx, int wz) {
 		}, true);
 	}
 	
-	public BoundingBox getWardBoundingBox() {
+	public BoundingBox getWardBoundingBox(Level level) {
 		int size = CityConst.WARD_SIZE_BLOCKS-1;
 		int posX = this.getBlockX();
 		int posZ = this.getBlockZ();
+		System.out.println("buildhight=%d, %d".formatted(level.getMinBuildHeight(), level.getMaxBuildHeight())); // DEBUG remove
 		return new BoundingBox(
-				posX, 0, posZ,
-				posX + size, 256, posZ + size);
+				posX, level.getMinBuildHeight(), posZ,
+				posX + size, level.getMaxBuildHeight(), posZ + size);
 	}
 }
