@@ -43,7 +43,7 @@ public class RoadElement {
 	public BoundingBox getCircumBox() { return this.boundingBox; }
 	
 	public void generateRoadBase(CityGenContext ctx) {
-		BlockState base = GcConstructionModule.GREEN_SANDBAG.get().defaultBlockState(); // XXX: use water-bound gravel instead.
+		BlockState base = GcConstructionModule.WATER_BOUND_GRAVEL.get().defaultBlockState();
 		BlockState cobble = Blocks.COBBLESTONE.defaultBlockState();
 		BlockState dirt = Blocks.DIRT.defaultBlockState();
 		
@@ -87,7 +87,7 @@ public class RoadElement {
 	}
 	
 	public void generateRoadSurface(CityGenContext ctx) {
-		BlockState surface = Blocks.DEEPSLATE.defaultBlockState();
+		BlockState surface = GcConstructionModule.TARMAC.get().defaultBlockState();
 		
 		ctx.pushMatrix();
 		this.setupTranslation(ctx);

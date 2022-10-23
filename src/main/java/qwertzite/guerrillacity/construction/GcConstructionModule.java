@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.datagen.ModelCubeAll;
 import qwertzite.guerrillacity.core.datagen.ModelCubeBottomTop;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
@@ -35,6 +36,8 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final ResourceKey<Block> KEY_GREEN_SANDBAG = BlockRegister.registryKey("sandbag_green");
 	public static final ResourceKey<Block> KEY_GRAY_SANDBAG = BlockRegister.registryKey("sandbag_gray");
 	public static final ResourceKey<Block> KEY_SAND_SANDBAG = BlockRegister.registryKey("sandbag_sand");
+	public static final ResourceKey<Block> KEY_TARMAC = BlockRegister.registryKey("tarmac");
+	public static final ResourceKey<Block> KEY_WATER_BOUND_GRAVEL = BlockRegister.registryKey("water_bound_gravel");
 	
 	public static final RegistryObject<Item> WHITE_EMPTY_SAND_BAG = 
 			ItemRegister.$(KEY_WHITE_EMPTY_SAND_BAG, () -> new Item(new Item.Properties().tab(GC_CREATIVE_TAB))).register();
@@ -64,6 +67,18 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final RegistryObject<Block> SAND_SANDBAG = BlockRegister.$(KEY_SAND_SANDBAG,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.SAND)))
 			.setModel(new ModelCubeBottomTop("sandbag_sand_top", "sandbag_sand", "sandbag_sand"))
+			.setTab(GC_CREATIVE_TAB)
+			.register();
+	
+	public static final RegistryObject<Block> TARMAC = BlockRegister.$(KEY_TARMAC,
+			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(4.0f, 10.0f).sound(SoundType.STONE)))
+			.setModel(new ModelCubeBottomTop("block_tarmac", "block_tarmac_side", "minecraft:stone"))
+			.setTab(GC_CREATIVE_TAB)
+			.register();
+	
+	public static final RegistryObject<Block> WATER_BOUND_GRAVEL = BlockRegister.$(KEY_WATER_BOUND_GRAVEL,
+			() -> new Block(BlockBehaviour.Properties.of(Material.SAND).strength(1.5f, 4.0f).sound(SoundType.GRAVEL)))
+			.setModel(new ModelCubeAll("water_bound_gravel"))
 			.setTab(GC_CREATIVE_TAB)
 			.register();
 }

@@ -10,7 +10,6 @@ public class CitySurfaceRules {
 	private static final SurfaceRules.RuleSource AIR = SurfaceRules.state(Blocks.AIR.defaultBlockState());
 	private static final SurfaceRules.RuleSource GRASS = SurfaceRules.state(Blocks.GRASS_BLOCK.defaultBlockState());
 	private static final SurfaceRules.RuleSource DIRT = SurfaceRules.state(Blocks.DIRT.defaultBlockState());
-	private static final SurfaceRules.RuleSource STONE = SurfaceRules.state(Blocks.STONE.defaultBlockState());
 	
 	private static final SurfaceRules.ConditionSource SURFACE_HEIGHT = SurfaceRules.yBlockCheck(VerticalAnchor.absolute(GcConsts.GROUND_HEIGHT), 0);
 	private static final SurfaceRules.ConditionSource IS_SUPERFICIAL_LAYER = SurfaceRules.yBlockCheck(VerticalAnchor.absolute(GcConsts.GROUND_HEIGHT -1), 0);
