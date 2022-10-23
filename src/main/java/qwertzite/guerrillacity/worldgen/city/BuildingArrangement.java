@@ -105,7 +105,6 @@ public class BuildingArrangement {
 		decraction += this.baseDecraction;
 		
 		return this.weightSum * (1 + GcUtil.pow(7 / 8.0d, decraction));
-//		return length >= this.maxLength ? this.posList.size() * 10.0d : 0.0d;
 	}
 	
 	public List<IntObjTuple<BuildingType>> getPositions() {
