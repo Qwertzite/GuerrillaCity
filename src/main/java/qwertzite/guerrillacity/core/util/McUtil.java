@@ -1,8 +1,15 @@
 package qwertzite.guerrillacity.core.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
@@ -63,4 +70,60 @@ public class McUtil {
 		}
 		return new BoundingBox(x1, y1, z1, x2, y2, z2);
 	}
+	
+	/**
+	 * 
+	 * @param index must be less than 16.
+	 * @return
+	 */
+	public static BlockState getColouredGlass(int index) {
+		return GLASS_BY_DYE.get(index);
+	}
+	
+	private static final Map<Integer, BlockState> GLASS_BY_DYE = Util.make(new HashMap<>(), (p_29841_) -> {
+		p_29841_.put(DyeColor.WHITE.getId(), Blocks.WHITE_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.ORANGE.getId(), Blocks.ORANGE_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.MAGENTA.getId(), Blocks.MAGENTA_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.LIGHT_BLUE.getId(), Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.YELLOW.getId(), Blocks.YELLOW_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.LIME.getId(), Blocks.LIME_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.PINK.getId(), Blocks.PINK_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.GRAY.getId(), Blocks.GRAY_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.LIGHT_GRAY.getId(), Blocks.LIGHT_GRAY_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.CYAN.getId(), Blocks.CYAN_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.PURPLE.getId(), Blocks.PURPLE_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.BLUE.getId(), Blocks.BLUE_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.BROWN.getId(), Blocks.BROWN_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.GREEN.getId(), Blocks.GREEN_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.RED.getId(), Blocks.RED_STAINED_GLASS.defaultBlockState());
+		p_29841_.put(DyeColor.BLACK.getId(), Blocks.BLACK_STAINED_GLASS.defaultBlockState());
+	});
+	
+	/**
+	 * 
+	 * @param index must be less than 16.
+	 * @return
+	 */
+	public static BlockState getColouredWool(int index) {
+		return WOOL_BY_DYE.get(index);
+	}
+	
+	private static final Map<Integer, BlockState> WOOL_BY_DYE = Util.make(new HashMap<>(), (p_29841_) -> {
+		p_29841_.put(DyeColor.WHITE.getId(), Blocks.WHITE_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.ORANGE.getId(), Blocks.ORANGE_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.MAGENTA.getId(), Blocks.MAGENTA_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.LIGHT_BLUE.getId(), Blocks.LIGHT_BLUE_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.YELLOW.getId(), Blocks.YELLOW_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.LIME.getId(), Blocks.LIME_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.PINK.getId(), Blocks.PINK_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.GRAY.getId(), Blocks.GRAY_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.LIGHT_GRAY.getId(), Blocks.LIGHT_GRAY_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.CYAN.getId(), Blocks.CYAN_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.PURPLE.getId(), Blocks.PURPLE_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.BLUE.getId(), Blocks.BLUE_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.BROWN.getId(), Blocks.BROWN_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.GREEN.getId(), Blocks.GREEN_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.RED.getId(), Blocks.RED_WOOL.defaultBlockState());
+		p_29841_.put(DyeColor.BLACK.getId(), Blocks.BLACK_WOOL.defaultBlockState());
+	});
 }

@@ -54,12 +54,9 @@ public class CityBlock {
 	public CityGenResult init(ForkJoinPool fjp) {
 		Random rand = new Random(this.seed);
 		
-		// 分割して建物を配置する
-		// divide and place buildings.
-		this.devideAndGenerate(rand, fjp);
+		this.devideAndGenerate(rand, fjp); // divide city block.
 		
-		// 自前で建物を配置する
-		CityGenResult result0 = this.arrangeBuildingSet(rand);
+		CityGenResult result0 = this.arrangeBuildingSet(rand); // arrange buildings on their own.
 		if (!this.devide) return result0;
 		
 		//		// スコアを比較する
@@ -67,30 +64,26 @@ public class CityBlock {
 		CityGenResult result2 = task2.get();
 		double scoreDivision = result1.getScore() + result2.getScore();
 		
+		System.out.println("level=%d, own=%f, %s, dev=%f (%f + %f)"
+				.formatted(this.level, result0.getScore(), result0.getScore() >= scoreDivision ? ">" : "<", scoreDivision, result1.getScore(), result2.getScore()));
 		// 自前で配置したほうが成績が良かったらそのまま返す
-		if (result0.getScore() > scoreDivision) return result0;
+		if (result0.getScore() >= scoreDivision) return result0;
 
 		// 分割したほうがスコアがいい場合
 		return this.mergeDevidedBlocks(result1, result2);
 	}
 	
+	// ==== divide block ====
+	// XXX: try several divisions.
 	private void devideAndGenerate(Random rand, ForkJoinPool fjp) {
-		if (this.level >= 100) {
-			this.task1 = () -> CityGenResult.EMPTY;
-			this.task2 = () -> CityGenResult.EMPTY;
-			return;
-		}
+		if (this.level >= 100) { return; }
 		
 		int roadWidth = CityConst.getRoadWidthForLevel(level);
 		final int minBlocksize = CityConst.MIN_BUILDING_SIZE;
 		int xSize = blockArea.getXSpan() - roadWidth - minBlocksize*2;
 		int zSize = blockArea.getZSpan() - roadWidth - minBlocksize*2;
+		if (xSize <= 0 && zSize <= 0) { return;}
 		
-		if (xSize <= 0 && zSize <= 0) {
-			this.task1 = () -> CityGenResult.EMPTY;
-			this.task2 = () -> CityGenResult.EMPTY;
-			return;
-		}
 		if (xSize < 0) xSize = 0;
 		if (zSize < 0) zSize = 0;
 		boolean isXdirection =  xSize*xSize > rand.nextInt(xSize*xSize + zSize*zSize); // 分割方向 true ならx方向の長さが小さくなる
@@ -160,9 +153,10 @@ public class CityBlock {
 			}
 		}
 		result3.incrementRoadCount();
-		
 		return result3;
 	}
+	
+	// ==== place buildings on their own ===
 	
 	private CityGenResult arrangeBuildingSet(Random rand) {
 		
@@ -196,7 +190,6 @@ public class CityBlock {
 		
 		// XXX: add other placement patterns
 		// compare results.
-//		result0.addBuilding(new DummyBuilding(this.blockArea, groundHeight));
 		return result0;
 	}
 	
@@ -213,15 +206,13 @@ public class CityBlock {
 		if (arrangement == null) return result;
 		
 		this.arrangeBuildings(result, arrangement, dir, rand);
+		result.addScore(arrangement.getScore(length));
 		return result;
 	}
 	
 	private void arrangeBuildings(CityGenResult result, BuildingArrangement arrangement, Direction dir, Random rand) {
 		BlockPos origin = this.generationPoint(dir);
 		Direction sideWays = dir.getClockWise();
-		
-//		BuildingType type = arrangement.getPositions().get(0).getB();
-//		result.addBuilding(type.getBuildingInstance(origin, dir, rand.nextLong()));
 		
 		for (IntObjTuple<BuildingType> t : arrangement.getPositions()) {
 			int pos = t.getIntA();

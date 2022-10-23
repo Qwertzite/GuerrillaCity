@@ -7,7 +7,7 @@ import java.util.Random;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import qwertzite.guerrillacity.core.util.DoubleObjTuple;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.VariableDigitIterator;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
@@ -18,7 +18,7 @@ public class BuildingSet {
 	
 	private final Int2ObjectMap<List<BuildingArrangement>> possibleMargins;
 	
-	public BuildingSet(List<BuildingType> buildingTypes) {
+	public BuildingSet(List<BuildingType> buildingTypes, Int2ObjectMap<List<BuildingSet>> buildingSets) {
 		this.buildingTypes = new ArrayList<>(buildingTypes);
 		this.possibleMargins = new Int2ObjectOpenHashMap<>();
 		
@@ -42,25 +42,16 @@ public class BuildingSet {
 			minMargin[i] = Math.max(ms0.posveSideMinMargin(), ms1.negveSideMinMargin());
 			maxMargin[i] = Math.min(ms0.posveSideMaxMargin(), ms1.negveSideMaxMargin());
 		}
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("margin min:");
-//		for (int i : minMargin) { sb.append(String.format(" %d", i)); }
-//		sb.append("\n");
-//		sb.append("margin max:");
-//		for (int i : maxMargin) { sb.append(String.format(" %d", i)); }
-//		System.out.println(sb.toString());
 		
 		for (Iterator<int[]> iter = new VariableDigitIterator(minMargin, maxMargin); iter.hasNext();) {
 			int[] margin = iter.next();
 			int finalWidth = buildingWidthSum + GcUtil.sumArray(margin);
 			this.possibleMargins.computeIfAbsent(finalWidth, i -> new ArrayList<>()).add(new BuildingArrangement(this, margin));
 		}
-	}
-	
-	public IntSet getPossibleWidths() {
-		// TODO:
-//		return IntSets.singleton(this.buildingTypes.get(0).getWidth());
-		return possibleMargins.keySet();
+		
+		for (int width : this.possibleMargins.keySet()) {
+			buildingSets.computeIfAbsent(width, i -> new ArrayList<>()).add(this);
+		}
 	}
 	
 	/**
@@ -69,43 +60,31 @@ public class BuildingSet {
 	 * @return
 	 */
 	public double getMaxWeight(int width) {
-		// TODO:
-//		return this.buildingTypes.get(0).getWidth() == width ? 10.0d : 0;
-		return this.getWeightForLength(width, this.getMinLength());
+		return this.getWeightForLength(width, this.getBuildingSetLength());
 	}
 
-	public int getMinLength() {
+	public int getBuildingSetLength() {
 		return length;
 	}
 	
 	public double getWeightForLength(int width, int length) {
 		if (length < this.length) return 0.0d;
-		// TODO:
-		return this.buildingTypes.get(0).getWidth() == width ? 10.0d * this.buildingTypes.size() : 0.0d;
-//		return this.possibleMargins.get(width).stream().mapToDouble(e -> e.getScore(length)).max().getAsDouble();
+		return this.possibleMargins.get(width).stream().mapToDouble(e -> e.getScore(length)).max().getAsDouble(); // OPTIMISE: cache
 	}
 	
 	public BuildingArrangement selectArrangement(int width, int length, Random rand) {
-//		return new BuildingArrangement(this, new int[] {0});
 		
-//		List<BuildingArrangement> arrangements = possibleMargins.get(width);
-//		double sum = 0.0d;
-//		DoubleList list = new DoubleArrayList();
-//		for (BuildingArrangement arrangement : arrangements) {
-//			double w = arrangement.getScore(length);
-//			sum += w;
-//			list.add(sum);
-//		}
-//		double thresh = rand.nextDouble(sum);
-//		int index = GcUtil.binarySearch(0, list.size()-1, i -> list.getDouble(i) > thresh);
-//		return arrangements.get(index); // TODO:
-		
-		var arrangements = possibleMargins.get(width);
-		var list = new ArrayList<BuildingArrangement>();
-		for (BuildingArrangement arr : arrangements) {
-			if (arr.getScore(length) > 0) list.add(arr);
+		List<DoubleObjTuple<BuildingArrangement>> list = new ArrayList<>();
+		for (var arrangements : possibleMargins.get(width)) {
+			double weight = arrangements.getScore(length);
+			if (weight > 0) {
+				list.add(new DoubleObjTuple<>(weight, arrangements));
+			}
 		}
-		return arrangements.get(rand.nextInt(list.size()));
+		if (list.size() == 0) return null;
+		
+		var arrangement = GcUtil.selectWeightedRandom(list, e -> e.getDoubleA(), rand).getB();
+		return arrangement;
 	}
 	
 	public List<BuildingType> getBuildings() {

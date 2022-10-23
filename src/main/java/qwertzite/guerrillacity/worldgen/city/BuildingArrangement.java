@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.IntObjTuple;
 import qwertzite.guerrillacity.core.util.Vec2i;
 
@@ -87,56 +88,27 @@ public class BuildingArrangement {
 		}
 		this.weightSum = weight;
 		this.maxLength = maxLength;
-		
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("type   - ");
-//		for (var e : this.posList) {
-//			sb.append(String.format(" %d: %s (%d,%d)", e.getIntA(), e.getB().getTypeName(), e.getB().getWidth(), e.getB().getLength()));
-//		}
-//		sb.append("\n");
-//		sb.append("margin - ");
-//		for (int i : margins) {
-//			sb.append(String.format(" %d", i));
-//		}
-//		sb.append("\n");
-//		sb.append("posve  - ");
-//		for (Vec2i v2i : posveSideDecPos) {
-//			sb.append(String.format(" %s", v2i));
-//		}
-//		sb.append("\n");
-//		sb.append("negve  - ");
-//		for (Vec2i v2i : negveSideDecPos) {
-//			sb.append(String.format(" %s", v2i));
-//		}
-//		sb.append("\n");
-//		System.out.println(sb.toString());
 	}
 	
 	public double getScore(int length) {
-		return length >= this.maxLength ? this.posList.size() * 10.0d : 0.0d;
-//		BuildingType bt = this.posList.get(0).getB();
-//		return length >= bt.getLength() ? bt.getWeight() : 0;
-//		int maxDec = 0;
-//		for (Vec2i pos : this.negveSideDecPos) {
-//			int dec = Math.min(pos.getX(), (length - pos.getY())*2) * (length - pos.getY());
-//			if (dec > maxDec) maxDec = dec;
-//		}
-//		for (Vec2i pos : this.posveSideDecPos) {
-//			int dec = Math.min(pos.getX(), (length - pos.getY())*2) * (length - pos.getY());
-//			if (dec > maxDec) maxDec = dec;
-//		}
-//		maxDec += this.baseDecraction;
-//		return this.weightSum * Math.pow(7.0d/8, maxDec); TODO
-//		return 10.0 * 
+		if (length < this.maxLength) return 0.0d;
+		
+		int decraction = 0;
+		for (Vec2i v2i : posveSideDecPos) {
+			int dp = length - v2i.getY();
+			decraction += Math.min(dp*2, v2i.getX()) * dp;
+		}
+		for (Vec2i v2i : negveSideDecPos) {
+			int dp = length - v2i.getY();
+			decraction += Math.min(dp*2, v2i.getX()) * dp;
+		}
+		decraction += this.baseDecraction;
+		
+		return this.weightSum * (1 + GcUtil.pow(7 / 8.0d, decraction));
+//		return length >= this.maxLength ? this.posList.size() * 10.0d : 0.0d;
 	}
 	
 	public List<IntObjTuple<BuildingType>> getPositions() {
 		return this.posList;
-	}
-	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		
-		return sb.toString();
 	}
 }
