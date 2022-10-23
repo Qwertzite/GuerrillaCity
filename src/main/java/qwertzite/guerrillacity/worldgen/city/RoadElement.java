@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import qwertzite.guerrillacity.construction.GcConstructionModule;
 
 public class RoadElement {
 	
@@ -42,7 +43,7 @@ public class RoadElement {
 	public BoundingBox getCircumBox() { return this.boundingBox; }
 	
 	public void generateRoadBase(CityGenContext ctx) {
-		BlockState base = Blocks.GRAVEL.defaultBlockState(); // XXX: use water-bound gravel instead.
+		BlockState base = GcConstructionModule.GREEN_SANDBAG.get().defaultBlockState(); // XXX: use water-bound gravel instead.
 		BlockState cobble = Blocks.COBBLESTONE.defaultBlockState();
 		BlockState dirt = Blocks.DIRT.defaultBlockState();
 		

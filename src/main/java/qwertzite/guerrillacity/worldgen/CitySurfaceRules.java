@@ -20,8 +20,7 @@ public class CitySurfaceRules {
 		return SurfaceRules.sequence(
 				SurfaceRules.ifTrue(SURFACE_HEIGHT, AIR), // above ground height
 				SurfaceRules.ifTrue(IS_SUPERFICIAL_LAYER, GRASS), // if this is the top most layer of city biome.
-				SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), DIRT),
-				STONE
+				SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), DIRT)
 		);
 	}
 }
