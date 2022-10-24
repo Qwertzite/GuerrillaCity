@@ -39,21 +39,6 @@ public class BuildingLoader {
 		generateBuildingSets();
 		
 		ModLog.info("Loaded buildings and components.");
-		
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("min building size = " + minSize + "\n");
-//		sb.append("loaded buildings " + buildings.size() + "\n");
-//		for (var bt : buildings.values()) {
-//			sb.append("  " + bt.getTypeName() + " w=" + bt.getWeight() + " :" + bt.getWidth() + " x " + bt.getLength() + "\n");
-//		}
-//		
-//		for (var e : buildingSets.int2ObjectEntrySet()) {
-//			sb.append("" + e.getIntKey() + "\n");
-//			for (var ee : e.getValue()) {
-//				sb.append("  " + ee.getIntA() + " " + ee.getB() + "\n");
-//			}
-//		}
-//		System.out.println(sb);
 	}
 	
 	private static void loadBuildingFiles() {
@@ -62,7 +47,7 @@ public class BuildingLoader {
 		
 		// XXX: load from actual resources, internal and external. see remiliaMarine.guerrillaCity.world.external.ExternalBuilding
 		MarginSettings margin = new MarginSettings(1, 3, 1, 3);
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 12; i++) {
 			int w = rand.nextInt(10, 15) + rand.nextInt(0, 15);
 			int l = rand.nextInt(10, 15) + rand.nextInt(0, 15);
 			String name = "tb_" + i;
@@ -95,10 +80,9 @@ public class BuildingLoader {
 			
 			types.add(t0);
 			new BuildingSet(types, buildingSets);
-			if (index < 4) recursiveBuildingSet(index + 1, types, loadedTypes, typeNum);
+			if (index < 3) recursiveBuildingSet(index + 1, types, loadedTypes, typeNum);
 			types.remove(types.size() - 1);
 		}
-		
 	}
 	
 	@Nonnull

@@ -181,16 +181,22 @@ public class CityBlock {
 		}
 		
 		if (priority.length < 1 || roadLevel.get(priority[0]) >= 100) return new CityGenResult(); // 全て最外周の道だった場合
-		CityGenResult result0 = this.roadSetFrontOnly(priority[0], rand);
+		CityGenResult result;
+		result = this.roadSetFrontOnly(priority[0], rand);
+		
+		CityGenResult withBehind = this.roadSetFrontBack(priority[0], rand);
+		if (result.getScore() < withBehind.getScore()) result = withBehind;
+		
 		// 様々な配置戦略に従って建物を配置する
 		// この時点では幅と奥行きが分かっている
 		
 		// 裏側にも建物を配置する場合について，
 		
+		// COMEBACK
 		
 		// XXX: add other placement patterns
 		// compare results.
-		return result0;
+		return result;
 	}
 	
 	/**
@@ -200,14 +206,52 @@ public class CityBlock {
 	private CityGenResult roadSetFrontOnly(Direction dir, Random rand) {
 		CityGenResult result = new CityGenResult();
 		
-		int width = dir.getAxis() == Axis.X ? this.blockArea.getZSpan() : this.blockArea.getXSpan();
-		int length = dir.getAxis() == Axis.X ? this.blockArea.getXSpan() : this.blockArea.getZSpan();
+		int width = getAreaWidthForDir(dir);
+		int length = getAreaLengthForDir(dir);
 		BuildingArrangement arrangement = BuildingLoader.getBuildingSet(width, length, rand);
 		if (arrangement == null) return result;
 		
 		this.arrangeBuildings(result, arrangement, dir, rand);
-		result.addScore(arrangement.getScore(length));
+		result.addScore(arrangement.getScore(length) * CityConst.getRoadWidthForLevel(this.roadLevel.get(dir)));
 		return result;
+	}
+	
+	private CityGenResult roadSetFrontBack(final Direction frontDir, final Random rand) {
+		
+		final int width = getAreaWidthForDir(frontDir);
+		final int length = getAreaLengthForDir(frontDir);
+		if(length <= CityConst.MIN_BUILDING_SIZE*2+1) return CityGenResult.EMPTY;
+		final double fcoef = CityConst.getRoadWidthForLevel(this.roadLevel.get(frontDir));
+		final double bcoef = CityConst.getRoadWidthForLevel(this.roadLevel.get(frontDir.getOpposite()));
+		
+		CityGenResult result = CityGenResult.EMPTY;
+		double maxScore = 0.0d;
+		for (int i = 0; i < 8; i++) {
+			final int flen = rand.nextInt(length - CityConst.MIN_BUILDING_SIZE*2 - 1) + CityConst.MIN_BUILDING_SIZE;
+			BuildingArrangement front = BuildingLoader.getBuildingSet(width, flen, rand);
+			if (front == null) continue;
+			final int backLength = length - front.getMaxLength() - 1;
+			final BuildingArrangement back = BuildingLoader.getBuildingSet(width, backLength, rand);
+			if (back == null) continue;
+			final double score = front.getScore(flen) * fcoef + back.getScore(backLength) * bcoef;
+			if (score > maxScore || (score == maxScore && rand.nextBoolean())) {
+				maxScore = score;
+				result = new CityGenResult();
+				arrangeBuildings(result, front, frontDir, rand);
+				arrangeBuildings(result, back, frontDir.getOpposite(), rand);
+				result.addScore(score);
+			}
+		}
+		
+		return result;
+	}
+	
+	private int getAreaWidthForDir(Direction dir) {
+		return dir.getAxis() == Axis.X ? this.blockArea.getZSpan() : this.blockArea.getXSpan();
+	}
+	
+	private int getAreaLengthForDir(Direction dir) {
+		return dir.getAxis() == Axis.X ? this.blockArea.getXSpan() : this.blockArea.getZSpan();
 	}
 	
 	private void arrangeBuildings(CityGenResult result, BuildingArrangement arrangement, Direction dir, Random rand) {

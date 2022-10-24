@@ -86,8 +86,8 @@ public class BuildingArrangement {
 		double weight = 0;
 		Object2IntMap<BuildingType> duplicate = new Object2IntOpenHashMap<>();
 		for (BuildingType type : types) {
-			int div = duplicate.computeInt(type, (t, i) -> i == null ? 1 : i+1);
-			weight += type.getWeight() / div;
+			int div = duplicate.computeInt(type, (t, i) -> i == null ? 0 : i+1);
+			weight += type.getWeight() * GcUtil.pow(0.5, div);
 			if (maxLength < type.getLength()) maxLength = type.getLength();
 		}
 		this.weightSum = weight;
@@ -122,4 +122,6 @@ public class BuildingArrangement {
 	public List<IntObjTuple<BuildingType>> getPositions() {
 		return this.posList;
 	}
+	
+	public int getMaxLength() { return this.maxLength; }
 }

@@ -40,6 +40,7 @@ public class CityGenResult {
 	
 	public void setScore(double score) { this.score = score; }
 	public void addScore(double score) { this.score += score; }
+	public void mulScore(double mul) { this.score *= mul; }
 	public double getScore() { return this.score; }
 	
 	private static class EmptyCityGenResult extends CityGenResult {
@@ -51,5 +52,6 @@ public class CityGenResult {
 		@Override public void addBuildings(Set<CityElement> buildings) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
 		@Override public void setScore(double score) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
 		@Override public void addScore(double score) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
+		@Override public void mulScore(double mul) { throw new UnsupportedOperationException("EmptyCityGenResult cannot be modified."); }
 	}
 }
