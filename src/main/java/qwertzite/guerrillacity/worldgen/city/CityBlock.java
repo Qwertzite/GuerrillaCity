@@ -217,6 +217,7 @@ public class CityBlock {
 	}
 	
 	private CityGenResult roadSetFrontBack(final Direction frontDir, final Random rand) {
+		if (this.roadLevel.get(frontDir.getOpposite()) >= 100) return CityGenResult.EMPTY;
 		
 		final int width = getAreaWidthForDir(frontDir);
 		final int length = getAreaLengthForDir(frontDir);
