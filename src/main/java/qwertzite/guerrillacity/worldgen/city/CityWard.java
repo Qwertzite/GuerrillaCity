@@ -13,9 +13,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.util.GcConsts;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
+import qwertzite.guerrillacity.core.util.math.Vec2i;
 
 /**
  * Generates CityBlocks and sequentially place blocks for each building.
@@ -51,7 +52,7 @@ public class CityWard {
 	 * @param validArea
 	 * @param forbiddenArea
 	 */
-	public synchronized void beginInitialisation(Set<BoundingBox> validArea, Set<BoundingBox> forbiddenArea) {
+	public synchronized void beginInitialisation(Set<Rectangle> validArea, Set<Rectangle> forbiddenArea) {
 		assert(!this.initialised);
 		assert(!this.initialising);
 		this.initialising = true;
@@ -64,11 +65,11 @@ public class CityWard {
 		roadMap.put(Direction.SOUTH, 100);
 		
 		CityBlock cityBlock = new CityBlock(wardSeed, 0,
-				new BoundingBox(
-						this.offset.getX() + 1, this.offset.getY(), this.offset.getZ() + 1,
-						this.offset.getX() + CityConst.WARD_SIZE_BLOCKS -2, this.offset.getY() + 64, this.offset.getZ() + CityConst.WARD_SIZE_BLOCKS -2),
+				new Rectangle(new Vec2i(offset.getX() + 1, offset.getZ() + 1), new Vec2i(CityConst.WARD_SIZE_BLOCKS - 2, CityConst.WARD_SIZE_BLOCKS - 2)),
 				validArea, forbiddenArea, this.offset.getY(), roadMap);
-		this.result = cityBlock.init(new ForkJoinPool());
+		var fjp = new ForkJoinPool();
+		cityBlock.init(fjp);
+		this.result = cityBlock.postInit(fjp);
 		
 		this.initialised = true;
 		this.initialising = false;
@@ -88,7 +89,7 @@ public class CityWard {
 	 * @param genAreaBB absolute coordinate
 	 * @return absolute coordinates and new block states.
 	 */
-	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(LevelAccessor level, @Nullable BoundingBox genAreaBB) {
+	public Map<BlockPos, BlockState> computeBlockStateForBoudingBox(LevelAccessor level, @Nullable Rectangle genAreaBB) {
 		CityGenContext context = new CityGenContext(level, genAreaBB);
 		
 		Set<RoadElement> roads = this.result.getRoadElements().stream().filter(e -> e.getCircumBox().intersects(genAreaBB)).collect(Collectors.toSet());

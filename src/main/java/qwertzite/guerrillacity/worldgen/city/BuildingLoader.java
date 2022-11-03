@@ -1,20 +1,23 @@
 package qwertzite.guerrillacity.worldgen.city;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.ToDoubleFunction;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import qwertzite.guerrillacity.core.ModLog;
-import qwertzite.guerrillacity.core.util.DoubleObjTuple;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.McUtil;
+import qwertzite.guerrillacity.core.util.math.DoubleObjTuple;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
 
 public class BuildingLoader {
@@ -85,21 +88,48 @@ public class BuildingLoader {
 		}
 	}
 	
-	@Nonnull
-	public static BuildingArrangement getBuildingSet(int width, int length, Random rand) {
-		
-		if (!buildingSets.containsKey(width)) return null; // When no BuildingSet with the given width exists.
-		List<DoubleObjTuple<BuildingSet>> possibleBuildingSets = new ArrayList<>();
-		
-		for (var bd : buildingSets.get(width)) {
-			double weight = bd.getWeightForLength(width, length);
-			if (weight > 0) {
-				possibleBuildingSets.add(new DoubleObjTuple<BuildingSet>(weight, bd));
-			}
-		}
-		if (possibleBuildingSets.size() == 0) return null;
-		
-		BuildingSet buildingSet = GcUtil.selectWeightedRandom(possibleBuildingSets, e -> e.getDoubleA(), rand).getB();
-		return buildingSet.selectArrangement(width, length, rand);
+	/**
+	 * Returns a list of BuildingSet which has the same width and less length than given length.
+	 * @param width
+	 * @param maxLength
+	 * @return
+	 */
+	public static List<BuildingSet> getApplicableBuildginSets(int width, int maxLength) {
+		return buildingSets.getOrDefault(width, Collections.emptyList()).stream().filter(bs -> bs.getBuildingSetLength() <= maxLength).toList();
 	}
+	
+//	@Nullable
+//	public static List<BuildingArrangement> getRandomArrangement(int width, int length, Random rand, int count) {
+//		
+//		if (!buildingSets.containsKey(width)) return null; // When no BuildingSet with the given width exists.
+//		List<DoubleObjTuple<BuildingSet>> possibleBuildingSets = new ArrayList<>();
+//		
+//		for (var bs : buildingSets.get(width)) {
+//			double weight = bs.getMaxWeight(width);
+//			if (weight > 0) {
+//				possibleBuildingSets.add(new DoubleObjTuple<BuildingSet>(weight, bs));
+//			}
+//		}
+//		if (possibleBuildingSets.size() == 0) return null;
+//		
+//		List<DoubleObjTuple<BuildingSet>> buildingSet = GcUtil.selectWeightedMultipleRandom(possibleBuildingSets, e -> e.getDoubleA(), rand, count);
+//		return buildingSet.stream().map(e -> e.getB().selectArrangement(width, length, rand)).toList();
+//	}
+//	
+//	public static BuildingArrangement getBestArrangement(int width, int length, Random rand) {
+//		
+//		if (!buildingSets.containsKey(width)) return null; // When no BuildingSet with the given width exists.
+//		List<DoubleObjTuple<BuildingSet>> possibleBuildingSets = new ArrayList<>();
+//		
+//		for (var bs : buildingSets.get(width)) {
+//			double weight = bs.getWeightForLength(width, length);
+//			if (weight > 0) {
+//				possibleBuildingSets.add(new DoubleObjTuple<BuildingSet>(weight, bs));
+//			}
+//		}
+//		if (possibleBuildingSets.size() == 0) return null;
+//		
+//		BuildingSet buildingSet = GcUtil.selectWeightedRandom(possibleBuildingSets, e -> e.getDoubleA(), rand).getB();
+//		return buildingSet.selectArrangement(width, length, rand);
+//	}
 }

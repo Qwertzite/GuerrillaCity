@@ -3,8 +3,7 @@ package qwertzite.guerrillacity.worldgen.city;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import qwertzite.guerrillacity.core.util.McUtil;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 public class BuildingType {
 	private final String typeName;
@@ -20,7 +19,7 @@ public class BuildingType {
 		this.width = width;
 		this.length = length;
 		this.margin = margin;
-		this.baseWeight = weight;
+		this.baseWeight = weight*width*length;
 		this.blockState = state;
 	}
 	
@@ -43,7 +42,7 @@ public class BuildingType {
 		int xSize =  - dir.getStepX() * len - dir.getStepZ() * wid;
 		int zSize =    dir.getStepX() * wid - dir.getStepZ() * len;
 		
-		BoundingBox bb = McUtil.boundingBox(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + xSize, pos.getY(), pos.getZ() + zSize);
+		Rectangle bb = Rectangle.area(pos.getX(), pos.getZ(), pos.getX() + xSize, pos.getZ() + zSize);
 		return new DummyBuilding(bb, pos.getY(), blockState, pos, dir);
 	}
 	

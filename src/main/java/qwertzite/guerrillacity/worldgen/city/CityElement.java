@@ -1,12 +1,12 @@
 package qwertzite.guerrillacity.worldgen.city;
 
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 public class CityElement {
 	
-	private BoundingBox circumBox;
+	private Rectangle circumBox;
 	
-	public CityElement(BoundingBox circumBox) {
+	public CityElement(Rectangle circumBox) {
 		this.circumBox = circumBox;
 	}
 	
@@ -14,7 +14,7 @@ public class CityElement {
 	 * All consisting blocks must be within this BoudingBox, including embankment blocks and surrounding air blocks to ensure spacing between other biomes.
 	 * @return
 	 */
-	public BoundingBox getCircumBox() {
+	public Rectangle getCircumBox() {
 		return this.circumBox;
 	}
 	

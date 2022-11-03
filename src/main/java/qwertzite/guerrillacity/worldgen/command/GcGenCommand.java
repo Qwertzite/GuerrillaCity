@@ -11,9 +11,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
 import qwertzite.guerrillacity.core.ModLog;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 import qwertzite.guerrillacity.worldgen.city.CityWard;
 import qwertzite.guerrillacity.worldgen.city.WardPos;
 
@@ -51,7 +51,7 @@ public class GcGenCommand {
 		try {
 			WardPos wardPos = WardPos.contains(pos);
 			CityWard ward = new CityWard(wardPos.getBaseBlockPos(pos.getY()), 0);
-			BoundingBox boundingBox = wardPos.getWardBoundingBox(source.getLevel());
+			Rectangle boundingBox = wardPos.getWardBoundingRectangle(source.getLevel());
 			ward.beginInitialisation(Set.of(boundingBox), Set.of());
 			ModLog.info("initialised city ward");
 			ServerLevel level = source.getLevel();

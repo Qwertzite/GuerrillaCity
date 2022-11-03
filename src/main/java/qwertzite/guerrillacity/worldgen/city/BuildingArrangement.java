@@ -7,8 +7,8 @@ import java.util.List;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import qwertzite.guerrillacity.core.util.GcUtil;
-import qwertzite.guerrillacity.core.util.IntObjTuple;
-import qwertzite.guerrillacity.core.util.Vec2i;
+import qwertzite.guerrillacity.core.util.math.IntObjTuple;
+import qwertzite.guerrillacity.core.util.math.Vec2i;
 
 /**
  * 建物同士の間隔や並び順を含めたもの
@@ -52,11 +52,11 @@ public class BuildingArrangement {
 		
 		{
 			var list = this.negveSideDecPos = new LinkedList<>();
-			int len = types.get(0).getLength();
-			for (int i = 1; i < posvePos.length; i++) {
+			int len = 0;
+			for (int i = 0; i < posvePos.length; i++) {
 				int length = types.get(i).getLength();
 				if (length > len) {
-					list.add(new Vec2i(negvePos[i], len));
+					list.add(new Vec2i(negvePos[i], length));
 					len = length;
 				}
 			}
@@ -64,24 +64,26 @@ public class BuildingArrangement {
 		}
 		{
 			var list = this.posveSideDecPos = new LinkedList<>();
-			int len = types.get(types.size()-1).getLength();
+			int len = 0;
 			int maxPos = posvePos[posvePos.length-1];
-			for (int i = posvePos.length-2; i > 0; i--) {
+			for (int i = posvePos.length-1; i >= 0; i--) {
 				int length = types.get(i).getLength();
 				if (length > len) {
-					list.add(new Vec2i(maxPos - posvePos[i], len));
+					list.add(new Vec2i(maxPos - posvePos[i], length));
 					len = length;
 				}
 			}
 			list.add(new Vec2i(maxPos - negvePos[0], len));
 		}
 		
+		// ==== init front margin decraction ====
 		int decraction = 0;
 		for (int i = 0; i < margins.length; i++) {
 			decraction += margins[i] * margins[i];
 		}
 		this.baseDecraction = decraction;
 		
+		// ==== init weight and length ====
 		int maxLength = 0;
 		double weight = 0;
 		Object2IntMap<BuildingType> duplicate = new Object2IntOpenHashMap<>();
@@ -94,29 +96,36 @@ public class BuildingArrangement {
 		this.maxLength = maxLength;
 	}
 	
-	public double getWeight(int length) {
-		return this.computeConfiguredScore(length, 0, 7.0d / 8);
+	public double getBaseScore() {
+		return this.weightSum - this.baseDecraction;
 	}
 	
-	public double getScore(int length) {
-		return this.computeConfiguredScore(length, 1, 15.0 / 16);
+	public int getNegativeSideDecraction(int depth) {
+		int sum = 0;
+		int prevLength = 0;
+		for (var pos : negveSideDecPos) {
+			if (depth <= pos.getX()) break;
+			sum += (pos.getY() - prevLength) * (depth - pos.getX());
+		}
+		return depth * this.getMaxLength() - sum;
 	}
 	
-	private double computeConfiguredScore(int length, int bias, double base) {
-		if (length < this.maxLength) return 0.0d;
-		
-		int decraction = 0;
-		for (Vec2i v2i : posveSideDecPos) {
-			int dp = length - v2i.getY();
-			decraction += Math.min(dp*2, v2i.getX()) * dp;
+	public int getPositiveveSideDecraction(int depth) {
+		int sum = 0;
+		int prevLength = 0;
+		for (var pos : posveSideDecPos) {
+			if (depth <= pos.getX()) break;
+			sum += (pos.getY() - prevLength) * (depth - pos.getX());
 		}
-		for (Vec2i v2i : negveSideDecPos) {
-			int dp = length - v2i.getY();
-			decraction += Math.min(dp*2, v2i.getX()) * dp;
-		}
-		decraction += this.baseDecraction;
-		
-		return this.weightSum * (bias + GcUtil.pow(base, decraction));
+		return depth * this.getMaxLength() - sum;
+	}
+	
+	public int getNegativeSideOpening() {
+		return this.maxLength - negveSideDecPos.get(0).getY();
+	}
+	
+	public int getPositiveSideOpening() {
+		return this.maxLength - posveSideDecPos.get(0).getY();
 	}
 	
 	public List<IntObjTuple<BuildingType>> getPositions() {

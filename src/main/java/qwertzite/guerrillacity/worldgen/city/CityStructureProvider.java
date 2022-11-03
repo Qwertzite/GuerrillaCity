@@ -14,9 +14,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.util.GcConsts;
 import qwertzite.guerrillacity.core.util.PosUtil;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 /**
  * Provides each chunk with BlockPos and BlockState by creating according wards.
@@ -52,18 +52,18 @@ public class CityStructureProvider {
 			}
 		}
 		
-		var chunkBB = new BoundingBox(
-				chunkPos.getMinBlockX(),                                                     0, chunkPos.getMinBlockZ(),
-				chunkPos.getMaxBlockX(), GcConsts.GROUND_HEIGHT + GcConsts.MAX_BUILDING_HEIGHT, chunkPos.getMaxBlockZ());
+		var chunkBB = new Rectangle(
+				chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(),
+				chunkPos.getMaxBlockX(), chunkPos.getMaxBlockZ());
 		
 		return cityWard.computeBlockStateForBoudingBox(levelAccessor, chunkBB);
 	}
 	
 	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
 		
-		Map<Boolean, Set<BoundingBox>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
+		Map<Boolean, Set<Rectangle>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
 				cp -> checkAChunkApplicaleBiome(biomeSource, cp, validBiome),
-				Collectors.mapping(chunk -> PosUtil.getChunkBoundingBox(chunk), Collectors.toSet())));
+				Collectors.mapping(chunk -> PosUtil.getChunkBoundingRectangle(chunk), Collectors.toSet())));
 		
 		cityWard.beginInitialisation(groups.get(true), groups.get(false));
 	}

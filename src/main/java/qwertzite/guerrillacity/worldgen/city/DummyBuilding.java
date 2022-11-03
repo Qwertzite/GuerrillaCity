@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 public class DummyBuilding extends CityElement {
 
@@ -13,15 +13,15 @@ public class DummyBuilding extends CityElement {
 	private BlockPos centre;
 	private Direction direction;
 	
-	public DummyBuilding(BoundingBox circumBox, int y) {
+	public DummyBuilding(Rectangle circumBox, int y) {
 		this(circumBox, y, Blocks.GRAY_STAINED_GLASS.defaultBlockState());
 	}
-	public DummyBuilding(BoundingBox circumBox, int y, BlockState state) {
+	public DummyBuilding(Rectangle circumBox, int y, BlockState state) {
 		super(circumBox);
 		this.y = y;
 		this.state = state;
 	}
-	public DummyBuilding(BoundingBox circumBox, int y, BlockState state, BlockPos centre, Direction dir) {
+	public DummyBuilding(Rectangle circumBox, int y, BlockState state, BlockPos centre, Direction dir) {
 		this(circumBox, y, state);
 		this.centre = centre;
 		this.direction = dir;
@@ -29,10 +29,10 @@ public class DummyBuilding extends CityElement {
 	
 	@Override
 	public void generate(CityGenContext context) {
-		BoundingBox bb = this.getCircumBox();
-		for (int x = bb.minX(); x <= bb.maxX(); x++) {
-			for (int z = bb.minZ(); z <= bb.maxZ(); z++) {
-				context.setBlockState(new BlockPos(x, this.y, z), state);
+		Rectangle bb = this.getCircumBox();
+		for (int x = bb.getMinX(); x <= bb.getMaxX(); x++) {
+			for (int z = bb.getMinY(); z <= bb.getMaxY(); z++) {
+					context.setBlockState(new BlockPos(x, this.y, z), state);
 			}
 		}
 		if (this.centre != null) {

@@ -1,13 +1,12 @@
 package qwertzite.guerrillacity.worldgen.city;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import qwertzite.guerrillacity.core.util.DoubleObjTuple;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.VariableDigitIterator;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
@@ -54,56 +53,60 @@ public class BuildingSet {
 		}
 	}
 	
-	/**
-	 * no need to cache because this method is called only on reloading.
-	 * @param width
-	 * @return
-	 */
-	public double getMaxWeight(int width) {
-		return this.getWeightForLength(width, this.getBuildingSetLength());
-	}
+//	/**
+//	 * no need to cache because this method is called only on reloading.
+//	 * @param width
+//	 * @return
+//	 */
+//	public double getMaxWeight(int width) {
+//		return this.getWeightForLength(width, this.getBuildingSetLength());
+//	}
 
 	public int getBuildingSetLength() {
 		return length;
 	}
 	
-	public double getWeightForLength(int width, int length) {
-		if (length < this.length) return 0.0d;
-		return this.possibleMargins.get(width).stream().mapToDouble(e -> e.getScore(length)).max().getAsDouble(); // OPTIMISE: cache
+	public List<BuildingArrangement> getApplicableArrangements(int width) {
+		return this.possibleMargins.getOrDefault(width, Collections.emptyList());
 	}
 	
-	public BuildingArrangement selectArrangement(int width, int length, Random rand) {
-		
-		List<DoubleObjTuple<BuildingArrangement>> list = new ArrayList<>();
-		for (var arrangements : possibleMargins.get(width)) {
-			double weight = arrangements.getScore(length);
-			if (weight > 0) {
-				list.add(new DoubleObjTuple<>(weight, arrangements));
-			}
-		}
-		if (list.size() == 0) return null;
-		
-		var arrangement = GcUtil.selectWeightedRandom(list, e -> e.getDoubleA(), rand).getB();
-		return arrangement;
-	}
+//	public double getWeightForLength(int width, int length) {
+//		if (length < this.length) return 0.0d;
+//		return this.possibleMargins.get(width).stream().mapToDouble(e -> e.getScore(length)).max().getAsDouble(); // OPTIMISE: cache
+//	}
+	
+//	public BuildingArrangement selectArrangement(int width, int length, Random rand) {
+//		
+//		List<DoubleObjTuple<BuildingArrangement>> list = new ArrayList<>();
+//		for (var arrangements : possibleMargins.get(width)) {
+//			double weight = arrangements.getScore(length);
+//			if (weight > 0) {
+//				list.add(new DoubleObjTuple<>(weight, arrangements));
+//			}
+//		}
+//		if (list.size() == 0) return null;
+//		
+//		var arrangement = GcUtil.selectWeightedRandom(list, e -> e.getDoubleA(), rand).getB();
+//		return arrangement;
+//	}
 	
 	public List<BuildingType> getBuildings() {
 		return this.buildingTypes;
 	}
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (var bt : this.buildingTypes) {
-			sb.append(bt.getTypeName() + " ");
-		}
-		sb.append("\n");
-		for (var arr : this.possibleMargins.int2ObjectEntrySet()) {
-			sb.append("  width=" + arr.getIntKey() + "\n   ");
-			for (var a : arr.getValue()) {
-				sb.append(" " + a.getScore(20));
-			}
-		}
-		return sb.toString();
-	}
+//	
+//	@Override
+//	public String toString() {
+//		StringBuilder sb = new StringBuilder();
+//		for (var bt : this.buildingTypes) {
+//			sb.append(bt.getTypeName() + " ");
+//		}
+//		sb.append("\n");
+//		for (var arr : this.possibleMargins.int2ObjectEntrySet()) {
+//			sb.append("  width=" + arr.getIntKey() + "\n   ");
+//			for (var a : arr.getValue()) {
+//				sb.append(" " + a.getScore(20));
+//			}
+//		}
+//		return sb.toString();
+//	}
 }

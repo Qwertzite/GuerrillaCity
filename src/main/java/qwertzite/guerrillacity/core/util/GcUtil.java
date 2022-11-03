@@ -1,5 +1,7 @@
 package qwertzite.guerrillacity.core.util;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.IntPredicate;
@@ -80,6 +82,59 @@ public class GcUtil {
 		final double thresh = rand.nextDouble(sum);
 		int index = binarySearch(0, size-1, i -> scoreList[i] > thresh);
 		return list.get(index);
+	}
+	
+	/**
+	 * Select randomly with give weight function.
+	 * @param <T> type to be returned.
+	 * @param list
+	 * @param weight must return positive weight associated with each entries.
+	 * @param rand
+	 * @return
+	 */
+	public static <T> List<T> selectWeightedMultipleRandom(List<T> list, ToDoubleFunction<T> weight, Random rand, int count) {
+		final int size = list.size();
+		double scoreSum = 0.0d;
+		double[] scoreList = new double[size];
+		for (int i = 0; i < size; i++) {
+			scoreList[i] = weight.applyAsDouble(list.get(i));
+			scoreSum += scoreList[i];
+		}
+		count = Math.min(list.size(), count);
+		List<T> ret = new ArrayList<>(count);
+		outer: for (int i = 0; i < count; i++) {
+			final double thresh = rand.nextDouble(scoreSum);
+			double sum = 0.0d;
+			for (int j = 0; j < list.size(); j++) {
+				sum += scoreList[j];
+				if (sum > thresh) {
+					ret.add(list.get(j));
+					scoreSum -= scoreList[j];
+					scoreList[j] = 0;
+					continue outer;
+				}
+			}
+			ret.add(list.get(scoreList.length-1));
+			scoreSum -= scoreList[scoreList.length-1];
+			scoreList[scoreList.length-1] = 0;
+		}
+		return ret;
+	}
+	
+	public static <T> T selectBestRandom(List<T> list, ToDoubleFunction<T> weight, Random rand) {
+		List<T> bests = new LinkedList<>();
+		double best = Double.MIN_VALUE;
+		for (T e : list) {
+			double score = weight.applyAsDouble(e);
+			if (score > best) {
+				bests.add(e);
+			} else if (score == best) {
+				bests.clear();
+				bests.add(e);
+				best = score;
+			}
+		}
+		return bests.get(rand.nextInt(bests.size()));
 	}
 	
 	public static double pow(double base, int exponent) {

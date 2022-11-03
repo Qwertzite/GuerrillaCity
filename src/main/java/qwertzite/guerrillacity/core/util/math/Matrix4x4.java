@@ -1,4 +1,4 @@
-package qwertzite.guerrillacity.core.util;
+package qwertzite.guerrillacity.core.util.math;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Rotation;

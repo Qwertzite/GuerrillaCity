@@ -10,13 +10,13 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import qwertzite.guerrillacity.core.util.Matrix4x4;
+import qwertzite.guerrillacity.core.util.math.Matrix4x4;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 public class CityGenContext {
 	
 	private LevelAccessor level;
-	private BoundingBox genArea;
+	private Rectangle genArea;
 	private Map<BlockPos, BlockState> resultMap = new HashMap<BlockPos, BlockState>();
 	
 	private Deque<Matrix4x4> stack = new LinkedList<>();
@@ -25,7 +25,7 @@ public class CityGenContext {
 	private Rotation rotation = Rotation.NONE;
 	private boolean mirror = false;
 	
-	public CityGenContext(LevelAccessor level, BoundingBox genArea) {
+	public CityGenContext(LevelAccessor level, Rectangle genArea) {
 		this.level = level;
 		this.genArea = genArea;
 	}

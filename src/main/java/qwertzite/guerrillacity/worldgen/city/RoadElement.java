@@ -5,13 +5,13 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.construction.GcConstructionModule;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 public class RoadElement {
 	
 	private final BlockPos pos;
-	private final BoundingBox boundingBox;
+	private final Rectangle boundingBox;
 	private final Axis axis;
 	private final int roadWidth;
 	
@@ -24,13 +24,13 @@ public class RoadElement {
 	public RoadElement(BlockPos pos, Axis axis, int roadWidth) {
 		this.pos = pos;
 		if (axis == Axis.X) {
-			this.boundingBox = new BoundingBox(
-					pos.getX()    , pos.getY() - 5, pos.getZ() - 3,
-					pos.getX() + 3, pos.getY() - 1, pos.getZ() + roadWidth + 2);
+			this.boundingBox = new Rectangle(
+					pos.getX(), pos.getZ() - 3,
+					4, roadWidth + 6);
 		} else if (axis == Axis.Z) {
-			this.boundingBox = new BoundingBox(
-					pos.getX() - 3            , pos.getY() - 5, pos.getZ(),
-					pos.getX() + roadWidth + 2, pos.getY() - 1, pos.getZ() + 3);
+			this.boundingBox = new Rectangle(
+					pos.getX() - 3 , pos.getZ(),
+					roadWidth + 6, 4);
 		} else {
 			assert(false);
 			this.boundingBox = null;
@@ -40,7 +40,7 @@ public class RoadElement {
 		this.roadWidth = roadWidth;
 	}
 	
-	public BoundingBox getCircumBox() { return this.boundingBox; }
+	public Rectangle getCircumBox() { return this.boundingBox; }
 	
 	public void generateRoadBase(CityGenContext ctx) {
 		BlockState base = GcConstructionModule.WATER_BOUND_GRAVEL.get().defaultBlockState();

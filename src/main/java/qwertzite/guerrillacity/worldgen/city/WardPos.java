@@ -14,6 +14,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import qwertzite.guerrillacity.core.util.math.Rectangle;
 
 /**
  * It is recommended to obtain WardPos instance via {@link WardPos#of(int, int)} to obtain interned object.
@@ -112,5 +113,14 @@ public record WardPos(int wx, int wz) {
 		return new BoundingBox(
 				posX, level.getMinBuildHeight(), posZ,
 				posX + size, level.getMaxBuildHeight(), posZ + size);
+	}
+	
+	public Rectangle getWardBoundingRectangle(Level level) {
+		int size = CityConst.WARD_SIZE_BLOCKS-1;
+		int posX = this.getBlockX();
+		int posZ = this.getBlockZ();
+		return new Rectangle(
+				posX, posZ,
+				posX + size, posZ + size);
 	}
 }

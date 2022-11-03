@@ -1,4 +1,4 @@
-package qwertzite.guerrillacity.core.util;
+package qwertzite.guerrillacity.core.util.math;
 
 import java.util.stream.IntStream;
 
