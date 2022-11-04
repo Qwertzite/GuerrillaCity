@@ -9,7 +9,7 @@ public class CityConst {
 
 	public static int MIN_BUILDING_SIZE = 8;
 	
-	private static final int[] ROAD_WIDTH = new int[] { 20, 16, 14, 12, 10, 8, 7, 6, 5, 4 };
+	private static final int[] ROAD_WIDTH = new int[] { 20, 14, 10, 7, 5, 4 }; //  { 20, 16, 14, 12, 10, 8, 7, 6, 5, 4 };
 	public static int getRoadWidthForLevel(int level) {
 		int count = ROAD_WIDTH.length;
 		if (level >= count) level = count - 1;

@@ -130,18 +130,11 @@ public class CityBlock {
 					this.roadLevel.get(front.getClockWise()) < this.roadLevel.get(front.getCounterClockWise()) ? front.getClockWise() : front.getCounterClockWise();
 		final Direction side2 = side1.getOpposite();
 		final Direction back = front.getOpposite();
-		if (roadLevel.get(front) >= 100) return -10000; // If surrounded by the outermost roads, no buildings can be placed.
-		System.out.println("(%d,%d), front=%s (%d), side=%s (%d)"
-				.formatted(
-						this.blockShape.getMinX(),
-						this.blockShape.getMinY(),
-						front, this.roadLevel.get(front),
-						side1, this.roadLevel.get(side1)));
-		
+		if (roadLevel.get(front) >= 100) return MIN_SCORE; // If surrounded by the outermost roads, no buildings can be placed.
 		final int blockWidth = getAreaWidthForDir(front);
 		final int blockLength = getAreaLengthForDir(front);
 		
-		double bestScore = -10000;
+		double bestScore = MIN_SCORE;
 		
 		{ // front only
 			int width = blockWidth;
