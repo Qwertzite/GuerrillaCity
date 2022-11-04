@@ -6,6 +6,7 @@ import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.Util;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
 public class Vec2i implements Comparable<Vec2i> {
@@ -91,7 +92,22 @@ public class Vec2i implements Comparable<Vec2i> {
 			return pScalar == 0 ? ZERO : new Vec2i(this.getX() * pScalar, this.getY() * pScalar);
 		}
 	}
-
+	
+	/**
+	 * NORTH: negative y<br>
+	 * SOUTH: positive y<br>
+	 * WEST: negative x<br>
+	 * EAST: positive x<br>
+	 * @param direction UP and DOWN are not defined. (assertion exception)
+	 * @param distance
+	 * @return
+	 */
+	public Vec2i relative(Direction direction, int distance) {
+		assert(direction != Direction.UP && direction != Direction.DOWN);
+		return distance == 0 ? this :
+			new Vec2i(this.getX() + direction.getStepX() * distance, this.getY() + direction.getStepZ() * distance);
+	}
+	
 	public int distManhattan(Vec2i pVector) {
 		float f = (float) Math.abs(pVector.getX() - this.getX());
 		float f1 = (float) Math.abs(pVector.getY() - this.getY());

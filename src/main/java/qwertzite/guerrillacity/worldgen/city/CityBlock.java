@@ -1,6 +1,5 @@
 package qwertzite.guerrillacity.worldgen.city;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +15,6 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.util.Mth;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.McUtil;
-import qwertzite.guerrillacity.core.util.math.DoubleObjTuple;
-import qwertzite.guerrillacity.core.util.math.IntObjTuple;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
 import qwertzite.guerrillacity.core.util.math.Vec2i;
 
@@ -29,6 +26,7 @@ import qwertzite.guerrillacity.core.util.math.Vec2i;
  * @date 2022/10/09
  */
 public class CityBlock {
+	private static final double MIN_SCORE = -Double.MAX_VALUE * (1.0d / (1 << 16));
 	
 	private final long seed;
 	private final int level;
@@ -126,25 +124,31 @@ public class CityBlock {
 	
 	private double arrangeBuildingSet(Random rand) {
 		
-		final Direction front = GcUtil.selectBestRandom(List.of(McUtil.horizontalDir()), d -> this.roadLevel.get(d), rand); // The adjacent road with highest priority.
+		final Direction front = GcUtil.selectBestRandom(List.of(McUtil.horizontalDir()), d -> -this.roadLevel.get(d), rand); // The adjacent road with highest priority.
 		final Direction side1 = this.roadLevel.get(front.getClockWise()) == this.roadLevel.get(front.getCounterClockWise()) ?
 				rand.nextBoolean() ? front.getClockWise() : front.getCounterClockWise() :
 					this.roadLevel.get(front.getClockWise()) < this.roadLevel.get(front.getCounterClockWise()) ? front.getClockWise() : front.getCounterClockWise();
 		final Direction side2 = side1.getOpposite();
 		final Direction back = front.getOpposite();
-		if (roadLevel.get(front) >= 100) return 0.0d; // If surrounded by the outermost roads, no buildings can be placed.
+		if (roadLevel.get(front) >= 100) return -10000; // If surrounded by the outermost roads, no buildings can be placed.
+		System.out.println("(%d,%d), front=%s (%d), side=%s (%d)"
+				.formatted(
+						this.blockShape.getMinX(),
+						this.blockShape.getMinY(),
+						front, this.roadLevel.get(front),
+						side1, this.roadLevel.get(side1)));
 		
 		final int blockWidth = getAreaWidthForDir(front);
 		final int blockLength = getAreaLengthForDir(front);
 		
-		double bestScore = Double.MIN_VALUE;
+		double bestScore = -10000;
 		
 		{ // front only
 			int width = blockWidth;
 			int length = blockLength;
 			var buildingsets = BuildingLoader.getApplicableBuildingSets(width, length);
 			var arrangement = buildingsets.stream()
-					.map(bs -> bs.computeBuildingArrangement(width, arr -> computeScoreForFrontOnly(arr, front, length), front, rand))
+					.map(bs -> bs.computeBuildingArrangement(width, arr -> computeScoreForFrontOnly(arr, front, length), rand))
 					.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA())); // bs -> bs score -> arr
 			if (arrangement.isPresent()) {
 				var selectedArr = arrangement.get().getB();
@@ -152,13 +156,7 @@ public class CityBlock {
 				if (bestScore <= arrScore) {
 					bestScore = arrScore;
 					this.arrangements.clear();
-					this.arrangements.add(new ArrangementPlacement(selectedArr, switch (front) {
-					case EAST -> this.blockShape.getNorthEast();
-					case NORTH -> this.blockShape.getNorthWest();
-					case SOUTH -> this.blockShape.getSouthEast();
-					case WEST -> this.blockShape.getSouthWest();
-					default -> null;
-					}, front));
+					this.arrangements.add(new ArrangementPlacement(selectedArr, this.getCornerPos(front, 0), front));
 				}
 			}
 		}
@@ -166,19 +164,16 @@ public class CityBlock {
 				GcUtil.selectWeightedMultipleRandom(
 						BuildingLoader.getApplicableBuildingSets(blockWidth, blockLength)
 						.stream()
-						.map(bs -> bs.computeBuildingArrangement(blockWidth, arr -> computeScoreForFrontOnly(arr, front, arr.getMaxLength()), front, rand))
+						.map(bs -> bs.computeBuildingArrangement(blockWidth, arr -> computeScoreForFrontOnly(arr, front, arr.getMaxLength()), rand))
 						.toList(), e -> e.getDoubleA(), rand, 8)
 				.stream().map(e -> e.getB()).toList();
 		{ // front and back
 			int width = blockWidth;
 			for (var frontArrangement : fronts) {
+				int length = blockLength - frontArrangement.getMaxLength() - 1;
 				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
-				var arrangement = BuildingLoader.getApplicableBuildingSets(width, blockLength - frontArrangement.getMaxLength() - 1).stream()
-						.map(bs -> {
-							List<BuildingArrangement> backArrangements = bs.getApplicableArrangements(blockWidth);
-							double bestArrScore = Double.MIN_VALUE;
-							List<DoubleObjTuple<BuildingArrangement>> weightedArrangements = new ArrayList<>();
-							for (BuildingArrangement arr : backArrangements) {
+				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
+						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 								double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(back);
 								int negTotalOpening = blockLength - arr.getPositiveSideLength() - frontArrangement.getNegativeSideLength();
 								int posTotalOpening = blockLength - arr.getNegativeSideLength() - frontArrangement.getPositiveSideLength();
@@ -186,37 +181,45 @@ public class CityBlock {
 								arrScore -= arr.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(back.getCounterClockWise());
 								arrScore -= frontArrangement.getPositiveSideDecraction(posTotalOpening) * this.getRoadCoef(front.getClockWise());
 								arrScore -= frontArrangement.getNegativeSideDecraction(negTotalOpening) * this.getRoadCoef(front.getCounterClockWise());
-								if (arrScore > bestArrScore) bestArrScore = arrScore;
-								if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
-							}
-							var selectedArr = GcUtil.selectWeightedRandom(weightedArrangements, e -> e.getDoubleA(), rand);
-							return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
-						})
+								return arrScore;
+						}, rand))
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
 						bestScore = arrangement.get().getDoubleA();
 						this.arrangements.clear();
-						this.arrangements.add(new ArrangementPlacement(frontArrangement, switch (front) {
-						case EAST -> this.blockShape.getNorthEast();
-						case NORTH -> this.blockShape.getNorthWest();
-						case SOUTH -> this.blockShape.getSouthEast();
-						case WEST -> this.blockShape.getSouthWest();
-						default -> null;
-						}, front));
-						this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(), switch (back) {
-						case EAST -> this.blockShape.getNorthEast();
-						case NORTH -> this.blockShape.getNorthWest();
-						case SOUTH -> this.blockShape.getSouthEast();
-						case WEST -> this.blockShape.getSouthWest();
-						default -> null;
-						}, back));
+						this.arrangements.add(new ArrangementPlacement(frontArrangement, this.getCornerPos(front, 0), front));
+						this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(), this.getCornerPos(back, 0), back));
 					}
 				}
 			}
 		}
-		{
-			
+		{ // front and side
+			for (var frontArrangement : fronts) {
+				int width = blockLength - frontArrangement.getMaxLength() - 1;
+				int length = blockWidth;
+				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
+				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
+						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
+							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side1);
+							arrScore -= frontArrangement.getPositiveSideDecraction(frontArrangement.getMaxLength() - frontArrangement.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
+							arrScore -= frontArrangement.getNegativeSideDecraction(frontArrangement.getMaxLength() - frontArrangement.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise());
+							arrScore -= side1 == front.getCounterClockWise() ?
+									arr.getNegativeSideDecraction(length - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()):
+									arr.getPositiveSideDecraction(length - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
+							return arrScore;
+						}, rand))
+						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
+				if (arrangement.isPresent()) {
+					if (bestScore <= arrangement.get().getDoubleA()) {
+						bestScore = arrangement.get().getDoubleA();
+						this.arrangements.clear();
+						this.arrangements.add(new ArrangementPlacement(frontArrangement, this.getCornerPos(front, 0), front));
+						this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(),
+								this.getCornerPos(side1, side1 == front.getCounterClockWise() ? 0 : frontArrangement.getMaxLength()+1), side1));
+					}
+				}
+			}
 		}
 		// COMEBACK: とりあえず正面だけから順に実装する
 		// 実装したら比較して共通部分を抜きだす
@@ -233,6 +236,16 @@ public class CityBlock {
 	
 	private int getRoadCoef(Direction dir) {
 		return CityConst.getRoadWidthForLevel(this.roadLevel.get(dir));
+	}
+	
+	private Vec2i getCornerPos(Direction dir, int offset) {
+		return switch (dir) {
+		case EAST -> this.blockShape.getNorthEast().relative(dir.getClockWise(), offset);
+		case NORTH -> this.blockShape.getNorthWest().relative(dir.getClockWise(), offset);
+		case SOUTH -> this.blockShape.getSouthEast().relative(dir.getClockWise(), offset);
+		case WEST -> this.blockShape.getSouthWest().relative(dir.getClockWise(), offset);
+		default -> null;
+		};
 	}
 	
 //	/**
@@ -296,36 +309,6 @@ public class CityBlock {
 	
 	private int getAreaLengthForDir(Direction dir) {
 		return dir.getAxis() == Axis.X ? this.blockShape.getXSpan() : this.blockShape.getYSpan();
-	}
-	
-	private void arrangeBuildings(CityGenResult result, BuildingArrangement arrangement, Direction dir, Random rand) {
-		BlockPos origin = this.generationPoint(dir);
-		Direction sideWays = dir.getClockWise();
-		
-		for (IntObjTuple<BuildingType> t : arrangement.getPositions()) {
-			int pos = t.getIntA();
-			BuildingType type = t.getB();
-			result.addBuilding(type.getBuildingInstance(origin.relative(sideWays, pos), dir, rand.nextLong()));
-		}
-	}
-	
-	/**
-	 * BuildingSetを配置する位置
-	 * @param dir
-	 * @return
-	 */
-	private BlockPos generationPoint(Direction dir) {
-		Rectangle rect = this.blockShape;
-		return switch (dir) {
-		case EAST  -> new BlockPos(rect.getMaxX(), this.groundHeight, rect.getMinY());
-		case WEST  -> new BlockPos(rect.getMinX(), this.groundHeight, rect.getMaxY());
-		case NORTH -> new BlockPos(rect.getMinX(), this.groundHeight, rect.getMinY());
-		case SOUTH -> new BlockPos(rect.getMaxX(), this.groundHeight, rect.getMaxY());
-		default -> {
-			assert(false);
-			yield null;
-			}
-		};
 	}
 	
 	// ==== * ==== posit init ==== * ====

@@ -9,7 +9,6 @@ import java.util.function.ToDoubleFunction;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.core.Direction;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.VariableDigitIterator;
 import qwertzite.guerrillacity.core.util.math.DoubleObjTuple;
@@ -59,13 +58,12 @@ public class BuildingSet {
 	
 	/**
 	 * Returns a weighted randomly chosen array based on the given evaluation function, and the score of this BuildingSet.
-	 * @param width
+	 * @param width the width of the arrangement to be returned.
 	 * @param scoreFunc
-	 * @param front
 	 * @param rand
 	 * @return
 	 */
-	public DoubleObjTuple<BuildingArrangement> computeBuildingArrangement(int width, ToDoubleFunction<BuildingArrangement> scoreFunc, Direction front, Random rand) {
+	public DoubleObjTuple<BuildingArrangement> computeBuildingArrangement(int width, ToDoubleFunction<BuildingArrangement> scoreFunc, Random rand) {
 		List<BuildingArrangement> arrangements = this.getApplicableArrangements(width);
 		double bestArrScore = Double.MIN_VALUE;
 		List<DoubleObjTuple<BuildingArrangement>> weightedArrangements = new ArrayList<>();

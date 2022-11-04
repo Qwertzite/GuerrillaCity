@@ -123,15 +123,15 @@ public class GcUtil {
 	
 	public static <T> T selectBestRandom(List<T> list, ToDoubleFunction<T> weight, Random rand) {
 		List<T> bests = new LinkedList<>();
-		double best = Double.MIN_VALUE;
+		double best = -Double.MAX_VALUE;
 		for (T e : list) {
 			double score = weight.applyAsDouble(e);
 			if (score > best) {
-				bests.add(e);
-			} else if (score == best) {
 				bests.clear();
 				bests.add(e);
 				best = score;
+			} else if (score == best) {
+				bests.add(e);
 			}
 		}
 		return bests.get(rand.nextInt(bests.size()));
