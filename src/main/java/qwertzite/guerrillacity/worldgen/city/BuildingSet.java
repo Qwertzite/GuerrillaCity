@@ -58,7 +58,7 @@ public class BuildingSet {
 	}
 	
 	/**
-	 * 与えられた評価関数に基づき加重ランダムで選んだ配列とこのBuildingASetのスコアを返す．
+	 * Returns a weighted randomly chosen array based on the given evaluation function, and the score of this BuildingSet.
 	 * @param width
 	 * @param scoreFunc
 	 * @param front

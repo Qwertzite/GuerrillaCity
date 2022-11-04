@@ -147,10 +147,12 @@ public class CityBlock {
 					.map(bs -> bs.computeBuildingArrangement(width, arr -> computeScoreForFrontOnly(arr, front, length), front, rand))
 					.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA())); // bs -> bs score -> arr
 			if (arrangement.isPresent()) {
-				if (bestScore <= arrangement.get().getDoubleA()) {
-					bestScore = arrangement.get().getDoubleA();
+				var selectedArr = arrangement.get().getB();
+				double arrScore = computeScoreForFrontOnly(selectedArr, front, length);
+				if (bestScore <= arrScore) {
+					bestScore = arrScore;
 					this.arrangements.clear();
-					this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(), switch (front) {
+					this.arrangements.add(new ArrangementPlacement(selectedArr, switch (front) {
 					case EAST -> this.blockShape.getNorthEast();
 					case NORTH -> this.blockShape.getNorthWest();
 					case SOUTH -> this.blockShape.getSouthEast();
@@ -170,7 +172,7 @@ public class CityBlock {
 		{ // front and back
 			int width = blockWidth;
 			for (var frontArrangement : fronts) {
-				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front);
+				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, blockLength - frontArrangement.getMaxLength() - 1).stream()
 						.map(bs -> {
 							List<BuildingArrangement> backArrangements = bs.getApplicableArrangements(blockWidth);
@@ -183,7 +185,7 @@ public class CityBlock {
 								arrScore -= arr.getPositiveSideDecraction(negTotalOpening) * this.getRoadCoef(back.getClockWise());
 								arrScore -= arr.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(back.getCounterClockWise());
 								arrScore -= frontArrangement.getPositiveSideDecraction(posTotalOpening) * this.getRoadCoef(front.getClockWise());
-								arrScore -= frontArrangement.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(front.getCounterClockWise());
+								arrScore -= frontArrangement.getNegativeSideDecraction(negTotalOpening) * this.getRoadCoef(front.getCounterClockWise());
 								if (arrScore > bestArrScore) bestArrScore = arrScore;
 								if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
 							}
@@ -191,7 +193,6 @@ public class CityBlock {
 							return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
 						})
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
-				
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
 						bestScore = arrangement.get().getDoubleA();
@@ -214,6 +215,9 @@ public class CityBlock {
 				}
 			}
 		}
+		{
+			
+		}
 		// COMEBACK: とりあえず正面だけから順に実装する
 		// 実装したら比較して共通部分を抜きだす
 		
@@ -221,7 +225,7 @@ public class CityBlock {
 	}
 	
 	private double computeScoreForFrontOnly(BuildingArrangement frontArr, Direction front, int baseLength) {
-		double score = frontArr.getBaseScore() * this.getRoadCoef(front);
+		double score = frontArr.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
 		score -= frontArr.getNegativeSideDecraction(baseLength - frontArr.getNegativeSideLength()) * this.getRoadCoef(front.getCounterClockWise());
 		score -= frontArr.getPositiveSideDecraction(baseLength - frontArr.getPositiveSideLength()) * this.getRoadCoef(front.getClockWise());
 		return score;
