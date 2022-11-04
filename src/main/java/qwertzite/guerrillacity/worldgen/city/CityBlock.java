@@ -126,12 +126,12 @@ public class CityBlock {
 	
 	private double arrangeBuildingSet(Random rand) {
 		
-		Direction front = GcUtil.selectBestRandom(List.of(McUtil.horizontalDir()), d -> this.roadLevel.get(d), rand); // The adjacent road with highest priority.
-		Direction side1 = this.roadLevel.get(front.getClockWise()) == this.roadLevel.get(front.getCounterClockWise()) ?
+		final Direction front = GcUtil.selectBestRandom(List.of(McUtil.horizontalDir()), d -> this.roadLevel.get(d), rand); // The adjacent road with highest priority.
+		final Direction side1 = this.roadLevel.get(front.getClockWise()) == this.roadLevel.get(front.getCounterClockWise()) ?
 				rand.nextBoolean() ? front.getClockWise() : front.getCounterClockWise() :
 					this.roadLevel.get(front.getClockWise()) < this.roadLevel.get(front.getCounterClockWise()) ? front.getClockWise() : front.getCounterClockWise();
-		Direction side2 = side1.getOpposite();
-		Direction back = front.getOpposite();
+		final Direction side2 = side1.getOpposite();
+		final Direction back = front.getOpposite();
 		if (roadLevel.get(front) >= 100) return 0.0d; // If surrounded by the outermost roads, no buildings can be placed.
 		
 		final int blockWidth = getAreaWidthForDir(front);
@@ -142,22 +142,9 @@ public class CityBlock {
 		{ // front only
 			int width = blockWidth;
 			int length = blockLength;
-			var buildingsets = BuildingLoader.getApplicableBuildginSets(width, length);
+			var buildingsets = BuildingLoader.getApplicableBuildingSets(width, length);
 			var arrangement = buildingsets.stream()
-					.map(bs -> {
-						var arrangements = bs.getApplicableArrangements(width);
-						double bestArrScore = Double.MIN_VALUE;
-						List<DoubleObjTuple<BuildingArrangement>> weightedArrangements = new ArrayList<>();
-						for (BuildingArrangement arr : arrangements) {
-							double arrScore = arr.getBaseScore() * this.getRoadCoef(front);
-							arrScore -= arr.getNegativeSideDecraction((length - arr.getNegativeSideOpening())*2) * this.getRoadCoef(front.getCounterClockWise());
-							arrScore -= arr.getPositiveveSideDecraction((length - arr.getPositiveSideOpening())*2) * this.getRoadCoef(front.getClockWise());
-							if (arrScore > bestArrScore) bestArrScore = arrScore;
-							if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
-						}
-						var selectedArr = GcUtil.selectWeightedRandom(weightedArrangements, e -> e.getDoubleA(), rand);
-						return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
-					})
+					.map(bs -> bs.computeBuildingArrangement(width, arr -> computeScoreForFrontOnly(arr, front, length), front, rand))
 					.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA())); // bs -> bs score -> arr
 			if (arrangement.isPresent()) {
 				if (bestScore <= arrangement.get().getDoubleA()) {
@@ -173,10 +160,71 @@ public class CityBlock {
 				}
 			}
 		}
-		
+		List<BuildingArrangement> fronts =
+				GcUtil.selectWeightedMultipleRandom(
+						BuildingLoader.getApplicableBuildingSets(blockWidth, blockLength)
+						.stream()
+						.map(bs -> bs.computeBuildingArrangement(blockWidth, arr -> computeScoreForFrontOnly(arr, front, arr.getMaxLength()), front, rand))
+						.toList(), e -> e.getDoubleA(), rand, 8)
+				.stream().map(e -> e.getB()).toList();
+		{ // front and back
+			int width = blockWidth;
+			for (var frontArrangement : fronts) {
+				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front);
+				var arrangement = BuildingLoader.getApplicableBuildingSets(width, blockLength - frontArrangement.getMaxLength() - 1).stream()
+						.map(bs -> {
+							List<BuildingArrangement> backArrangements = bs.getApplicableArrangements(blockWidth);
+							double bestArrScore = Double.MIN_VALUE;
+							List<DoubleObjTuple<BuildingArrangement>> weightedArrangements = new ArrayList<>();
+							for (BuildingArrangement arr : backArrangements) {
+								double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(back);
+								int negTotalOpening = blockLength - arr.getPositiveSideLength() - frontArrangement.getNegativeSideLength();
+								int posTotalOpening = blockLength - arr.getNegativeSideLength() - frontArrangement.getPositiveSideLength();
+								arrScore -= arr.getPositiveSideDecraction(negTotalOpening) * this.getRoadCoef(back.getClockWise());
+								arrScore -= arr.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(back.getCounterClockWise());
+								arrScore -= frontArrangement.getPositiveSideDecraction(posTotalOpening) * this.getRoadCoef(front.getClockWise());
+								arrScore -= frontArrangement.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(front.getCounterClockWise());
+								if (arrScore > bestArrScore) bestArrScore = arrScore;
+								if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
+							}
+							var selectedArr = GcUtil.selectWeightedRandom(weightedArrangements, e -> e.getDoubleA(), rand);
+							return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
+						})
+						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
+				
+				if (arrangement.isPresent()) {
+					if (bestScore <= arrangement.get().getDoubleA()) {
+						bestScore = arrangement.get().getDoubleA();
+						this.arrangements.clear();
+						this.arrangements.add(new ArrangementPlacement(frontArrangement, switch (front) {
+						case EAST -> this.blockShape.getNorthEast();
+						case NORTH -> this.blockShape.getNorthWest();
+						case SOUTH -> this.blockShape.getSouthEast();
+						case WEST -> this.blockShape.getSouthWest();
+						default -> null;
+						}, front));
+						this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(), switch (back) {
+						case EAST -> this.blockShape.getNorthEast();
+						case NORTH -> this.blockShape.getNorthWest();
+						case SOUTH -> this.blockShape.getSouthEast();
+						case WEST -> this.blockShape.getSouthWest();
+						default -> null;
+						}, back));
+					}
+				}
+			}
+		}
 		// COMEBACK: とりあえず正面だけから順に実装する
+		// 実装したら比較して共通部分を抜きだす
 		
 		return bestScore;
+	}
+	
+	private double computeScoreForFrontOnly(BuildingArrangement frontArr, Direction front, int baseLength) {
+		double score = frontArr.getBaseScore() * this.getRoadCoef(front);
+		score -= frontArr.getNegativeSideDecraction(baseLength - frontArr.getNegativeSideLength()) * this.getRoadCoef(front.getCounterClockWise());
+		score -= frontArr.getPositiveSideDecraction(baseLength - frontArr.getPositiveSideLength()) * this.getRoadCoef(front.getClockWise());
+		return score;
 	}
 	
 	private int getRoadCoef(Direction dir) {

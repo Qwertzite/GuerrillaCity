@@ -115,8 +115,8 @@ public record WardPos(int wx, int wz) {
 				posX + size, level.getMaxBuildHeight(), posZ + size);
 	}
 	
-	public Rectangle getWardBoundingRectangle(Level level) {
-		int size = CityConst.WARD_SIZE_BLOCKS-1;
+	public Rectangle getWardBoundingRectangle() {
+		int size = CityConst.WARD_SIZE_BLOCKS;
 		int posX = this.getBlockX();
 		int posZ = this.getBlockZ();
 		return new Rectangle(

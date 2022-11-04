@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
+import java.util.function.ToDoubleFunction;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.Direction;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.VariableDigitIterator;
+import qwertzite.guerrillacity.core.util.math.DoubleObjTuple;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
 
 public class BuildingSet {
@@ -53,15 +57,28 @@ public class BuildingSet {
 		}
 	}
 	
-//	/**
-//	 * no need to cache because this method is called only on reloading.
-//	 * @param width
-//	 * @return
-//	 */
-//	public double getMaxWeight(int width) {
-//		return this.getWeightForLength(width, this.getBuildingSetLength());
-//	}
-
+	/**
+	 * 与えられた評価関数に基づき加重ランダムで選んだ配列とこのBuildingASetのスコアを返す．
+	 * @param width
+	 * @param scoreFunc
+	 * @param front
+	 * @param rand
+	 * @return
+	 */
+	public DoubleObjTuple<BuildingArrangement> computeBuildingArrangement(int width, ToDoubleFunction<BuildingArrangement> scoreFunc, Direction front, Random rand) {
+		List<BuildingArrangement> arrangements = this.getApplicableArrangements(width);
+		double bestArrScore = Double.MIN_VALUE;
+		List<DoubleObjTuple<BuildingArrangement>> weightedArrangements = new ArrayList<>();
+		for (BuildingArrangement arr : arrangements) {
+			double arrScore = scoreFunc.applyAsDouble(arr);
+			if (arrScore > bestArrScore) bestArrScore = arrScore;
+			if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
+		}
+		var selectedArr = GcUtil.selectWeightedRandom(weightedArrangements, e -> e.getDoubleA(), rand);
+		return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
+	
+	}
+	
 	public int getBuildingSetLength() {
 		return length;
 	}
@@ -69,26 +86,6 @@ public class BuildingSet {
 	public List<BuildingArrangement> getApplicableArrangements(int width) {
 		return this.possibleMargins.getOrDefault(width, Collections.emptyList());
 	}
-	
-//	public double getWeightForLength(int width, int length) {
-//		if (length < this.length) return 0.0d;
-//		return this.possibleMargins.get(width).stream().mapToDouble(e -> e.getScore(length)).max().getAsDouble(); // OPTIMISE: cache
-//	}
-	
-//	public BuildingArrangement selectArrangement(int width, int length, Random rand) {
-//		
-//		List<DoubleObjTuple<BuildingArrangement>> list = new ArrayList<>();
-//		for (var arrangements : possibleMargins.get(width)) {
-//			double weight = arrangements.getScore(length);
-//			if (weight > 0) {
-//				list.add(new DoubleObjTuple<>(weight, arrangements));
-//			}
-//		}
-//		if (list.size() == 0) return null;
-//		
-//		var arrangement = GcUtil.selectWeightedRandom(list, e -> e.getDoubleA(), rand).getB();
-//		return arrangement;
-//	}
 	
 	public List<BuildingType> getBuildings() {
 		return this.buildingTypes;

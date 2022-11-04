@@ -100,7 +100,8 @@ public class BuildingArrangement {
 		return this.weightSum - this.baseDecraction;
 	}
 	
-	public int getNegativeSideDecraction(int depth) {
+	public int getNegativeSideDecraction(int totalOpening) {
+		int depth = 2*totalOpening;
 		int sum = 0;
 		int prevLength = 0;
 		for (var pos : negveSideDecPos) {
@@ -110,7 +111,7 @@ public class BuildingArrangement {
 		return depth * this.getMaxLength() - sum;
 	}
 	
-	public int getPositiveveSideDecraction(int depth) {
+	public int getPositiveSideDecraction(int depth) {
 		int sum = 0;
 		int prevLength = 0;
 		for (var pos : posveSideDecPos) {
@@ -120,12 +121,12 @@ public class BuildingArrangement {
 		return depth * this.getMaxLength() - sum;
 	}
 	
-	public int getNegativeSideOpening() {
-		return this.maxLength - negveSideDecPos.get(0).getY();
+	public int getNegativeSideLength() {
+		return negveSideDecPos.get(0).getY();
 	}
 	
-	public int getPositiveSideOpening() {
-		return this.maxLength - posveSideDecPos.get(0).getY();
+	public int getPositiveSideLength() {
+		return posveSideDecPos.get(0).getY();
 	}
 	
 	public List<IntObjTuple<BuildingType>> getPositions() {

@@ -54,7 +54,7 @@ public class BuildingLoader {
 			int w = rand.nextInt(10, 15) + rand.nextInt(0, 15);
 			int l = rand.nextInt(10, 15) + rand.nextInt(0, 15);
 			String name = "tb_" + i;
-			buildings.put(name, new BuildingType(name, w, l, margin, 10, McUtil.getColouredWool(i)));
+			buildings.put(name, new BuildingType(name, w, l, margin, 10, McUtil.getColouredGlass(i)));
 			if (minSize > w) minSize = w;
 			if (minSize > l) minSize = l;
 		}
@@ -94,7 +94,7 @@ public class BuildingLoader {
 	 * @param maxLength
 	 * @return
 	 */
-	public static List<BuildingSet> getApplicableBuildginSets(int width, int maxLength) {
+	public static List<BuildingSet> getApplicableBuildingSets(int width, int maxLength) {
 		return buildingSets.getOrDefault(width, Collections.emptyList()).stream().filter(bs -> bs.getBuildingSetLength() <= maxLength).toList();
 	}
 	

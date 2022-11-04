@@ -32,7 +32,9 @@ public class DummyBuilding extends CityElement {
 		Rectangle bb = this.getCircumBox();
 		for (int x = bb.getMinX(); x <= bb.getMaxX(); x++) {
 			for (int z = bb.getMinY(); z <= bb.getMaxY(); z++) {
-					context.setBlockState(new BlockPos(x, this.y, z), state);
+				for (int y = this.y-1; y <= this.y; y++) {
+					context.setBlockState(new BlockPos(x, y, z), state);
+				}
 			}
 		}
 		if (this.centre != null) {
