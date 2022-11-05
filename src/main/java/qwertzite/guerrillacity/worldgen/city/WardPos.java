@@ -121,6 +121,6 @@ public record WardPos(int wx, int wz) {
 		int posZ = this.getBlockZ();
 		return new Rectangle(
 				posX, posZ,
-				posX + size, posZ + size);
+				size, size);
 	}
 }

@@ -52,6 +52,7 @@ public class GcGenCommand {
 			WardPos wardPos = WardPos.contains(pos);
 			CityWard ward = new CityWard(wardPos.getBaseBlockPos(pos.getY()), 0);
 			Rectangle boundingBox = wardPos.getWardBoundingRectangle();
+			System.out.println("%s, %s(x=%d,y=%d)".formatted(boundingBox, wardPos, wardPos.getBlockX(), wardPos.getBlockZ())); // DEBUG
 			ward.beginInitialisation(Set.of(boundingBox), Set.of());
 			ModLog.info("initialised city ward");
 			ServerLevel level = source.getLevel();

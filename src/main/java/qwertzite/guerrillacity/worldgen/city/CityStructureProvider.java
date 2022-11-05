@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -54,7 +55,7 @@ public class CityStructureProvider {
 		
 		var chunkBB = new Rectangle(
 				chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(),
-				chunkPos.getMaxBlockX(), chunkPos.getMaxBlockZ());
+				SectionPos.SECTION_SIZE, SectionPos.SECTION_SIZE);
 		
 		return cityWard.computeBlockStateForBoudingBox(levelAccessor, chunkBB);
 	}
