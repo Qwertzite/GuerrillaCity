@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.McUtil;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
@@ -164,7 +165,7 @@ public class CityBlock {
 			int width = blockWidth;
 			for (var frontArrangement : fronts) {
 				int length = blockLength - frontArrangement.getMaxLength() - 1;
-				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
+				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front); // - this.blockShape.getXSpan() * this.blockShape.getYSpan();
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
 						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 								double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(back);
@@ -191,7 +192,7 @@ public class CityBlock {
 			for (var frontArrangement : fronts) {
 				int width = blockLength - frontArrangement.getMaxLength() - 1;
 				int length = blockWidth;
-				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front) - this.blockShape.getXSpan() * this.blockShape.getYSpan();
+				double baseScore = frontArrangement.getBaseScore() * this.getRoadCoef(front); // - this.blockShape.getXSpan() * this.blockShape.getYSpan();
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
 						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side1);
@@ -214,8 +215,66 @@ public class CityBlock {
 				}
 			}
 		}
+		// Tuple<front, side>
+		List<Tuple<BuildingArrangement, BuildingArrangement>> frontSideTuple = fronts.stream()
+				.flatMap(frontArr -> {
+					final int width = blockLength - frontArr.getMaxLength() - 1;
+					final int length = blockWidth;
+					final double baseScore = frontArr.getBaseScore() * this.getRoadCoef(front); // - this.blockShape.getXSpan() * this.blockShape.getYSpan();
+					var arrangement = GcUtil.selectWeightedMultipleRandom(
+							BuildingLoader.getApplicableBuildingSets(width, length).stream()
+							.map(bs -> bs.computeBuildingArrangement(width, arr -> {
+								double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side1);
+								arrScore -= frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise());
+								arrScore -= frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
+								arrScore -= side1 == front.getCounterClockWise() ?
+										arr.getNegativeSideDecraction(arr.getMaxLength() - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()) :
+										arr.getPositiveSideDecraction(arr.getMaxLength() - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
+								return arrScore;
+							}, rand)).toList(), e -> e.getDoubleA(), rand, 8);
+					return arrangement.stream().map(arr -> new Tuple<>(frontArr, arr.getB()));
+				}).toList();
+		{	// front side back
+			for (var frontSideArrangement : frontSideTuple) {
+				var frontArr = frontSideArrangement.getA();
+				var sideArr = frontSideArrangement.getB();
+				int length = blockLength - frontArr.getMaxLength() - 1;
+				int width = blockWidth - sideArr.getMaxLength() - 1;
+				double baseScore =
+						frontArr.getBaseScore() * this.getRoadCoef(front)
+						+ sideArr.getBaseScore() * this.getRoadCoef(side1);
+				boolean isSideRight = side1 == front.getCounterClockWise();
+				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
+						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
+							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(back);
+							int opening = isSideRight ?
+									blockLength - frontArr.getPositiveSideLength() - arr.getNegativeSideLength() :
+									blockLength - frontArr.getNegativeSideLength() - arr.getPositiveSideLength();
+							arrScore -= isSideRight ?
+									arr.getNegativeSideDecraction(opening):
+									arr.getPositiveSideDecraction(opening);
+							arrScore -= isSideRight ?
+									frontArr.getPositiveSideDecraction(opening):
+									frontArr.getNegativeSideDecraction(opening);
+							return arrScore;
+						}, rand))
+						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
+				if (arrangement.isPresent()) {
+					if (bestScore <= arrangement.get().getDoubleA()) {
+						bestScore = arrangement.get().getDoubleA();
+						this.arrangements.clear();
+						this.arrangements.add(new ArrangementPlacement(frontArr, this.getCornerPos(front, 0), front));
+						this.arrangements.add(new ArrangementPlacement(sideArr,
+								this.getCornerPos(side1, isSideRight ? 0 : frontArr.getMaxLength()+1), side1));
+						this.arrangements.add(new ArrangementPlacement(arrangement.get().getB(),
+								this.getCornerPos(back, isSideRight ? 0 : sideArr.getMaxLength()+1), back));
+					}
+				}
+			}
+		}
+		// front side side
+		// front side side back
 		// COMEBACK: とりあえず正面だけから順に実装する
-		// 実装したら比較して共通部分を抜きだす
 		
 		return bestScore;
 	}

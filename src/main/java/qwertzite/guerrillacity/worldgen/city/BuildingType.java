@@ -19,7 +19,7 @@ public class BuildingType {
 		this.width = width;
 		this.length = length;
 		this.margin = margin;
-		this.baseWeight = (weight + 1)*width*length;
+		this.baseWeight = weight*width*length;
 		this.blockState = state;
 	}
 	
