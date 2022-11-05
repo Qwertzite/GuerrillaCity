@@ -101,15 +101,23 @@ public class BuildingArrangement {
 	}
 	
 	public int getNegativeSideDecraction(int totalOpening) {
-		return internalSideDecrantion(totalOpening, negveSideDecPos);
+		return this.getNegativeSideDecraction(totalOpening, Integer.MAX_VALUE);
+	}
+	
+	public int getNegativeSideDecraction(int totalOpening, int depthLimit) {
+		return internalSideDecrantion(totalOpening, depthLimit, negveSideDecPos);
 	}
 	
 	public int getPositiveSideDecraction(int totalOpening) {
-		return internalSideDecrantion(totalOpening, posveSideDecPos);
+		return getPositiveSideDecraction(totalOpening, Integer.MAX_VALUE);
 	}
 	
-	private int internalSideDecrantion(int totalOpening, List<Vec2i> posList) {
-		int depth = 2*totalOpening;
+	public int getPositiveSideDecraction(int totalOpening, int depthLimit) {
+		return internalSideDecrantion(totalOpening, depthLimit, posveSideDecPos);
+	}
+	
+	private int internalSideDecrantion(int totalOpening, int depthLimit, List<Vec2i> posList) {
+		int depth = Math.min(2*totalOpening, depthLimit);
 		int sum = 0;
 		int prevLength = 0;
 		for (var pos : posList) {
@@ -117,7 +125,8 @@ public class BuildingArrangement {
 			sum += (pos.getY() - prevLength) * (depth - pos.getX());
 			prevLength = pos.getY();
 		}
-		return depth * this.getMaxLength() - sum;	}
+		return depth * this.getMaxLength() - sum;
+	}
 	
 	public int getNegativeSideLength() {
 		return negveSideDecPos.get(0).getY();

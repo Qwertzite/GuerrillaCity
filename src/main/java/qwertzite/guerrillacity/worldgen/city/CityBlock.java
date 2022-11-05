@@ -248,8 +248,8 @@ public class CityBlock {
 								frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise()):
 								frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise()))
 						- (isSideRight ?
-								sideArr.getNegativeSideDecraction(sideArr.getMaxLength() - sideArr.getNegativeSideLength() + 1):
-								sideArr.getPositiveSideDecraction(sideArr.getMaxLength() - sideArr.getPositiveSideLength() + 1)) * this.getRoadCoef(back);
+								sideArr.getNegativeSideDecraction(sideArr.getMaxLength() - sideArr.getNegativeSideLength() + 1, blockLength - frontArr.getMaxLength()):
+								sideArr.getPositiveSideDecraction(sideArr.getMaxLength() - sideArr.getPositiveSideLength() + 1, blockLength - frontArr.getMaxLength())) * this.getRoadCoef(back);
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
 						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(back);
@@ -290,6 +290,7 @@ public class CityBlock {
 						+ sideArr.getBaseScore() * this.getRoadCoef(side1)
 						- frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise())
 						- frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
+				int depthLimit = blockWidth - frontArr.getMaxLength();
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
 						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side2);
@@ -297,8 +298,8 @@ public class CityBlock {
 									blockWidth - sideArr.getNegativeSideLength() - arr.getPositiveSideLength():
 									blockWidth - sideArr.getPositiveSideLength() - arr.getNegativeSideLength();
 							arrScore -= (isSideRight ?
-									sideArr.getNegativeSideDecraction(opening) + arr.getPositiveSideDecraction(opening):
-									sideArr.getPositiveSideDecraction(opening) + arr.getNegativeSideDecraction(opening)) * this.getRoadCoef(back);
+									sideArr.getNegativeSideDecraction(opening, depthLimit) + arr.getPositiveSideDecraction(opening, depthLimit):
+									sideArr.getPositiveSideDecraction(opening, depthLimit) + arr.getNegativeSideDecraction(opening, depthLimit)) * this.getRoadCoef(back);
 							return arrScore;
 						}, rand))
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
@@ -330,6 +331,13 @@ public class CityBlock {
 		return CityConst.getRoadWidthForLevel(this.roadLevel.get(dir));
 	}
 	
+	/**
+	 * Returns origin for BuildingArrangement with the given direction.
+	 * Parameter {@code offset} will move Vec2i in positive direction of BuildingArrangement.
+	 * @param dir direction of BuildingArrangement
+	 * @param offset distance from a corner of this CityBlock.
+	 * @return
+	 */
 	private Vec2i getCornerPos(Direction dir, int offset) {
 		return switch (dir) {
 		case EAST -> this.blockShape.getNorthEast().relative(dir.getClockWise(), offset);
