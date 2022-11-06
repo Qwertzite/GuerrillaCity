@@ -18,6 +18,7 @@ import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.datagen.GcLootTableProvider;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.BlockRegister;
+import qwertzite.guerrillacity.core.init.CommandRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
@@ -92,9 +93,7 @@ public class GuerrillaCityCore {
 	}
 	
 	public void onServerStarting(ServerStartingEvent event) {
-		for(var module : this.modules) {
-			module.onServerStarting(event);
-		}
+		CommandRegister.onServerStarting(event);
 	}
 
 }

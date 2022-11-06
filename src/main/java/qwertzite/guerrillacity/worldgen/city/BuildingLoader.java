@@ -7,17 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.ToDoubleFunction;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import qwertzite.guerrillacity.core.ModLog;
-import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.McUtil;
-import qwertzite.guerrillacity.core.util.math.DoubleObjTuple;
 import qwertzite.guerrillacity.worldgen.city.BuildingType.MarginSettings;
 
 public class BuildingLoader {
