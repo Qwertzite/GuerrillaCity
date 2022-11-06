@@ -20,8 +20,8 @@ public class GcLootTblBlockDrop extends BlockLoot {
 	@Override
 	protected void addTables() {
 		for (BlockRegister register : entries) {
-			System.out.println(register.getRegistryObject().get());
-			dropSelf(register.getRegistryObject().get());
+			if (register.hasCustomDrop()) this.add(register.getRegistryObject().get(), register.getCustomDrop());
+			else dropSelf(register.getRegistryObject().get());
 		}
 	}
 	

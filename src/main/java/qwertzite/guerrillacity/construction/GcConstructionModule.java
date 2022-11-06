@@ -1,13 +1,26 @@
 package qwertzite.guerrillacity.construction;
 
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
+import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.RegistryObject;
@@ -76,9 +89,14 @@ public class GcConstructionModule extends GcModuleBase {
 			.setTab(GC_CREATIVE_TAB)
 			.register();
 	
+	private static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
 	public static final RegistryObject<Block> WATER_BOUND_GRAVEL = BlockRegister.$(KEY_WATER_BOUND_GRAVEL,
 			() -> new Block(BlockBehaviour.Properties.of(Material.SAND).strength(1.5f, 4.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeAll("water_bound_gravel"))
 			.setTab(GC_CREATIVE_TAB)
+			.setCustomDrop((self) -> LootTable.lootTable()
+					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).add(LootItem.lootTableItem(self)))
+					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(Blocks.GRAVEL)))
+					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(LootItemRandomChanceCondition.randomChance(0.25F)).add(LootItem.lootTableItem(Items.CLAY_BALL))))
 			.register();
 }

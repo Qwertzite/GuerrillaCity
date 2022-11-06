@@ -2,6 +2,7 @@ package qwertzite.guerrillacity.core.init;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.minecraft.core.Registry;
@@ -13,14 +14,15 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
-import qwertzite.guerrillacity.core.datagen.GcLootTblBlockDrop;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
+import qwertzite.guerrillacity.core.datagen.GcLootTblBlockDrop;
 import qwertzite.guerrillacity.core.datagen.ModelBase;
 import qwertzite.guerrillacity.core.datagen.ModelBlockItem;
 
@@ -57,6 +59,7 @@ public class BlockRegister {
 	
 	private ModelBase defaultModel;
 	private CreativeModeTab tab;
+	private Function<Block, LootTable.Builder> customDrop;
 	
 	private RegistryObject<Block> regObj;
 	
@@ -75,6 +78,11 @@ public class BlockRegister {
 		return this;
 	}
 	
+	public BlockRegister setCustomDrop(Function<Block, LootTable.Builder> customDrop) {
+		this.customDrop = customDrop;
+		return this;
+	}
+	
 	public RegistryObject<Block> register() {
 		ENTRY.add(this);
 		this.regObj = REGISTRY.register(this.registryKey.location().getPath(), this.block);
@@ -87,4 +95,6 @@ public class BlockRegister {
 	public ResourceKey<Block> getRegistrykey() { return this.registryKey; }
 	public ModelBase getDefaultModel() { return this.defaultModel; }
 	public RegistryObject<Block> getRegistryObject() { return this.regObj; }
+	public boolean hasCustomDrop() { return this.customDrop != null; }
+	public LootTable.Builder getCustomDrop() { return this.customDrop.apply(this.regObj.get()); }
 }
