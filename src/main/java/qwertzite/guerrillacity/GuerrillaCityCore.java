@@ -16,6 +16,7 @@ import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.datagen.GcLootTableProvider;
+import qwertzite.guerrillacity.core.datagen.GcRecipeProvider;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.CommandRegister;
@@ -82,6 +83,7 @@ public class GuerrillaCityCore {
 		generator.addProvider(true, ItemRegister.getModelProvider(generator, existingFileHelper));
 		generator.addProvider(true, BlockRegister.getBlockStateProvider(generator, existingFileHelper));
 		generator.addProvider(true, new GcLootTableProvider(generator));
+		generator.addProvider(true, new GcRecipeProvider(generator));
 	}
 	// ...
 	

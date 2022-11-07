@@ -4,6 +4,7 @@ import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,6 +30,7 @@ import qwertzite.guerrillacity.core.datagen.ModelCubeAll;
 import qwertzite.guerrillacity.core.datagen.ModelCubeBottomTop;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
+import qwertzite.guerrillacity.core.init.RecipeRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 
 public class GcConstructionModule extends GcModuleBase {
@@ -99,4 +101,43 @@ public class GcConstructionModule extends GcModuleBase {
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(Blocks.GRAVEL)))
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(LootItemRandomChanceCondition.randomChance(0.25F)).add(LootItem.lootTableItem(Items.CLAY_BALL))))
 			.register();
+	
+	static {
+		emptySandbagRecipe("white", WHITE_EMPTY_SAND_BAG, Items.WHITE_WOOL, Items.WHITE_DYE);
+		emptySandbagRecipe("green", GREEN_EMPTY_SAND_BAG, Items.GREEN_WOOL, Items.GREEN_DYE);
+		emptySandbagRecipe("gray", GRAY_EMPTY_SAND_BAG, Items.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
+		sandbagFillRecipe("white", WHITE_EMPTY_SAND_BAG, WHITE_SANDBAG, Items.DIRT);
+		sandbagFillRecipe("green", GREEN_EMPTY_SAND_BAG, GREEN_SANDBAG, Items.DIRT);
+		sandbagFillRecipe("gray", GRAY_EMPTY_SAND_BAG, GRAY_SANDBAG, Items.DIRT);
+		sandbagFillRecipe("sand", WHITE_EMPTY_SAND_BAG, SAND_SANDBAG, Items.SAND);
+	}
+
+	private static void emptySandbagRecipe(String name, RegistryObject<Item> sandbag, Item item, Item dye) {
+		RecipeRegister.shaped(sandbag, 16)
+		.setRecipeName("sandbag_empty_" + name + "_from_coloured_wool")
+		.setGroup("empty_sandbag")
+		.setPattern(
+				" W ",
+				"W W",
+				" W ")
+		.putItemDefinition('W', item);
+		
+		RecipeRegister.shaped(sandbag, 16)
+		.setRecipeName("sandbag_empty_" + name + "_with_dye")
+		.setGroup("empty_sandbag")
+		.setPattern(
+				" W ",
+				"WdW",
+				" W ")
+		.putItemDefinition('W', ItemTags.WOOL)
+		.putItemDefinition('d', dye);
+	}
+
+	private static void sandbagFillRecipe(String name, RegistryObject<Item> empty, RegistryObject<Block> filled, Item filler) {
+		RecipeRegister.shapeless(filled, 4)
+		.setGroup("sandbag")
+		.setRecipeName("sandbag_" + name + "_from_empty_bag")
+		.addIngredient(empty)
+		.addIngredient(filler);
+	}
 }
