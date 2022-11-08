@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.core.util.math.IntObjTuple;
@@ -17,9 +18,11 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 	
 	private static final Set<ShapedRecipeRegister> SHAPED_ENTRY = new HashSet<>();
 	private static final Set<ShapelessRecipeRegister> SHAPELESS_ENTRY = new HashSet<>();
+	private static final Set<UpgradeRecipeRegister> UPGRADE_ENTRY = new HashSet<>();
 	
 	public static Set<ShapedRecipeRegister> getShapedRecipeEntries() { return SHAPED_ENTRY; }
 	public static Set<ShapelessRecipeRegister> getShapelessRecipeEntries() { return SHAPELESS_ENTRY; }
+	public static Set<UpgradeRecipeRegister> getUpgradeRecipeEntries() { return UPGRADE_ENTRY; }
 	
 	
 	public static ShapedRecipeRegister shaped(RegistryObject<? extends ItemLike> output) {
@@ -54,6 +57,15 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 		return new ShapelessRecipeRegister(output, count);
 	}
 	
+	public static UpgradeRecipeRegister upgrade(RegistryObject<? extends ItemLike> output) {
+		return upgrade(() -> output.get());
+	}
+	
+	public static UpgradeRecipeRegister upgrade(Supplier<? extends ItemLike> output) {
+		return new UpgradeRecipeRegister(output);
+	}
+	
+	
 	private final Supplier<? extends ItemLike> output;
 	private final int count;
 	private String recipeName;
@@ -64,7 +76,6 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 		this.output = output;
 		this.count = count;
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	public R setRecipeName(String name) {
@@ -110,8 +121,6 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 	}
 	
 	public static class ShapedRecipeRegister extends RecipeRegister<ShapedRecipeRegister> {
-
-
 		
 		private String[] pattern;
 		private final Map<Character, Supplier<ItemLike>> defineItemLike = new HashMap<>();
@@ -119,8 +128,6 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 		
 		private ShapedRecipeRegister(Supplier<? extends ItemLike> output, int count) {
 			super(output, count);
-//			this.output = output;
-//			this.count = count;
 			SHAPED_ENTRY.add(this);
 		}
 		
@@ -154,7 +161,6 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 		public Map<Character, Supplier<TagKey<Item>>> getDefineTagkey() {
 			return defineTagkey;
 		}
-
 	}
 	
 	public static class ShapelessRecipeRegister extends RecipeRegister<ShapelessRecipeRegister> {
@@ -195,6 +201,51 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 	
 		public Set<Supplier<TagKey<Item>>> getIngredientTagKey() {
 			return ingredientTagkey;
+		}
+	}
+	
+	public static class UpgradeRecipeRegister extends RecipeRegister<UpgradeRecipeRegister> {
+		
+		private Supplier<Ingredient> baseItem;
+		private Supplier<Ingredient> material;
+		
+		private UpgradeRecipeRegister(Supplier<? extends ItemLike> output) {
+			super(output, 0);
+			UPGRADE_ENTRY.add(this);
+		}
+		
+		public UpgradeRecipeRegister setBaseItem(RegistryObject<? extends ItemLike> baseItem) {
+			return this.setBaseItem(() -> Ingredient.of(baseItem.get()));
+		}
+		
+		public UpgradeRecipeRegister setBaseItem(ItemLike material) {
+			return this.setBaseItem(() -> Ingredient.of(material));
+		}
+		
+		public UpgradeRecipeRegister setBaseItem(Supplier<Ingredient> baseItem) {
+			this.baseItem = baseItem;
+			return this;
+		}
+		
+		public UpgradeRecipeRegister setMaterial(RegistryObject<? extends ItemLike> baseItem) {
+			return this.setBaseItem(() -> Ingredient.of(baseItem.get()));
+		}
+		
+		public UpgradeRecipeRegister setMaterial(ItemLike material) {
+			return this.setMaterial(() -> Ingredient.of(material));
+		}
+		
+		public UpgradeRecipeRegister setMaterial(Supplier<Ingredient> baseItem) {
+			this.material = baseItem;
+			return this;
+		}
+		
+		public Ingredient getBaseItem() {
+			return this.baseItem.get();
+		}
+		
+		public Ingredient getMaterial() {
+			return this.material.get();
 		}
 	}
 }

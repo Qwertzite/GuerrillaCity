@@ -11,6 +11,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import qwertzite.guerrillacity.combat.GcCombatModule;
 import qwertzite.guerrillacity.construction.GcConstructionModule;
 import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
@@ -66,6 +67,7 @@ public class GuerrillaCityCore {
 		
 		this.registerModModule(new GcWorldGenModule(bus));
 		this.registerModModule(new GcConstructionModule());
+		this.registerModModule(new GcCombatModule());
 		
 		// ...
 		

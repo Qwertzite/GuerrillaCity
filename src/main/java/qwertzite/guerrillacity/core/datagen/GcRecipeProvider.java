@@ -1,13 +1,18 @@
 package qwertzite.guerrillacity.core.datagen;
 
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger.TriggerInstance;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
 import qwertzite.guerrillacity.GuerrillaCityCore;
@@ -72,6 +77,24 @@ public class GcRecipeProvider extends RecipeProvider {
 				builder.save(pFinishedRecipeConsumer);
 			}
 		}
+		
+		for (var register : RecipeRegister.getUpgradeRecipeEntries()) {
+			ItemLike output = register.getOutput().get();
+			Ingredient baseItem = register.getBaseItem();
+			Ingredient material = register.getMaterial();
+			var builder = UpgradeRecipeBuilder.smithing(baseItem, material, output.asItem());
+			builder.unlocks("has_" + ForgeRegistries.ITEMS.getKey(output.asItem()), has(output));
+			builder.unlocks("has_base_item", has(baseItem));
+			builder.unlocks("has_material",  has(material));
+			
+			for (var e : register.getUnlockTrigger().entrySet()) { builder.unlocks(e.getKey(), e.getValue()); }
+			builder.save(pFinishedRecipeConsumer, new ResourceLocation(GuerrillaCityCore.MODID, register.getRecipeName()));
+		}
+	}
+	
+	protected TriggerInstance has(Ingredient ingredient) {
+		return RecipeProvider.inventoryTrigger(ItemPredicate.Builder.item().of(
+				Stream.of(ingredient.getItems()).map(stack -> stack.getItem()).toArray(i -> new ItemLike[i])).build());
 	}
 	
 	@Override

@@ -2,6 +2,11 @@ package qwertzite.guerrillacity.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
@@ -11,6 +16,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
 /**
@@ -126,4 +132,8 @@ public class McUtil {
 		p_29841_.put(DyeColor.RED.getId(), Blocks.RED_WOOL.defaultBlockState());
 		p_29841_.put(DyeColor.BLACK.getId(), Blocks.BLACK_WOOL.defaultBlockState());
 	});
+	
+	public static final Set<ToolAction> toolActionSetOf(ToolAction...actions) {
+		return Stream.of(actions).collect(Collectors.toCollection(Sets::newIdentityHashSet));
+	}
 }
