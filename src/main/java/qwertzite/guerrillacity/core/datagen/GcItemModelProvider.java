@@ -31,6 +31,6 @@ public class GcItemModelProvider extends ItemModelProvider {
 
 	@Override
 	public String getName() {
-		return "ToLaserBlade Item Models";
+		return "GC Item Models";
 	}
 }

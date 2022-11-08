@@ -13,7 +13,7 @@ public class GcCreativeTab {
 		@Override
 		@OnlyIn(Dist.CLIENT)
 		public ItemStack makeIcon() {
-			return new ItemStack(GcConstructionModule.GREEN_SANDBAG.get());
+			return new ItemStack(GcConstructionModule.GREEN_GABION.get());
 		}
 	};
 }

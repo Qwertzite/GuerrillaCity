@@ -99,6 +99,6 @@ public class GcRecipeProvider extends RecipeProvider {
 	
 	@Override
 	public String getName() {
-		return "gc recipes";
+		return "GC Recipes";
 	}
 }

@@ -4,6 +4,7 @@ import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -31,45 +32,45 @@ import qwertzite.guerrillacity.core.module.GcModuleBase;
 
 public class GcConstructionModule extends GcModuleBase {
 	
-	public static final ResourceKey<Item> KEY_WHITE_EMPTY_SAND_BAG = ItemRegister.registryKey("sandbag_empty_white");
-	public static final ResourceKey<Item> KEY_GREEN_EMPTY_SAND_BAG = ItemRegister.registryKey("sandbag_empty_green");
-	public static final ResourceKey<Item> KEY_GRAY_EMPTY_SAND_BAG = ItemRegister.registryKey("sandbag_empty_gray");
+	public static final ResourceKey<Item> KEY_WHITE_EMPTY_GABION = ItemRegister.registryKey("gabion_empty_white");
+	public static final ResourceKey<Item> KEY_GREEN_EMPTY_GABION = ItemRegister.registryKey("gabion_empty_green");
+	public static final ResourceKey<Item> KEY_GRAY_EMPTY_GABION = ItemRegister.registryKey("gabion_empty_gray");
 	
-	public static final ResourceKey<Block> KEY_WHITE_SANDBAG = BlockRegister.registryKey("sandbag_white");
-	public static final ResourceKey<Block> KEY_GREEN_SANDBAG = BlockRegister.registryKey("sandbag_green");
-	public static final ResourceKey<Block> KEY_GRAY_SANDBAG = BlockRegister.registryKey("sandbag_gray");
-	public static final ResourceKey<Block> KEY_SAND_SANDBAG = BlockRegister.registryKey("sandbag_sand");
+	public static final ResourceKey<Block> KEY_WHITE_GABION = BlockRegister.registryKey("gabion_white");
+	public static final ResourceKey<Block> KEY_GREEN_GABION = BlockRegister.registryKey("gabion_green");
+	public static final ResourceKey<Block> KEY_GRAY_GABION = BlockRegister.registryKey("gabion_gray");
+	public static final ResourceKey<Block> KEY_SAND_GABION = BlockRegister.registryKey("gabion_sand");
 	public static final ResourceKey<Block> KEY_TARMAC = BlockRegister.registryKey("tarmac");
 	public static final ResourceKey<Block> KEY_WATER_BOUND_GRAVEL = BlockRegister.registryKey("water_bound_gravel");
 	
-	public static final RegistryObject<Item> WHITE_EMPTY_SAND_BAG = 
-			ItemRegister.$(KEY_WHITE_EMPTY_SAND_BAG, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
-	public static final RegistryObject<Item> GREEN_EMPTY_SAND_BAG = 
-			ItemRegister.$(KEY_GREEN_EMPTY_SAND_BAG, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
-	public static final RegistryObject<Item> GRAY_EMPTY_SAND_BAG = 
-			ItemRegister.$(KEY_GRAY_EMPTY_SAND_BAG, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+	public static final RegistryObject<Item> WHITE_EMPTY_GABION = 
+			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+	public static final RegistryObject<Item> GREEN_EMPTY_GABION = 
+			ItemRegister.$(KEY_GREEN_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+	public static final RegistryObject<Item> GRAY_EMPTY_GABION = 
+			ItemRegister.$(KEY_GRAY_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
 	
-	public static final RegistryObject<Block> WHITE_SANDBAG = BlockRegister.$(KEY_WHITE_SANDBAG,
+	public static final RegistryObject<Block> WHITE_GABION = BlockRegister.$(KEY_WHITE_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
-			.setModel(new ModelCubeBottomTop("sandbag_white_top", "sandbag_white", "sandbag_white"))
+			.setModel(new ModelCubeBottomTop("gabion_white_top", "gabion_white", "gabion_white"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
 			.register();
 	
-	public static final RegistryObject<Block> GREEN_SANDBAG = BlockRegister.$(KEY_GREEN_SANDBAG,
+	public static final RegistryObject<Block> GREEN_GABION = BlockRegister.$(KEY_GREEN_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
-			.setModel(new ModelCubeBottomTop("sandbag_green_top", "sandbag_green", "sandbag_green"))
+			.setModel(new ModelCubeBottomTop("gabion_green_top", "gabion_green", "gabion_green"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
 			.register();
 	
-	public static final RegistryObject<Block> GRAY_SANDBAG = BlockRegister.$(KEY_GRAY_SANDBAG,
+	public static final RegistryObject<Block> GRAY_GABION = BlockRegister.$(KEY_GRAY_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
-			.setModel(new ModelCubeBottomTop("sandbag_gray_top", "sandbag_gray", "sandbag_gray"))
+			.setModel(new ModelCubeBottomTop("gabion_gray_top", "gabion_gray", "gabion_gray"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
 			.register();
 	
-	public static final RegistryObject<Block> SAND_SANDBAG = BlockRegister.$(KEY_SAND_SANDBAG,
+	public static final RegistryObject<Block> SAND_GABION = BlockRegister.$(KEY_SAND_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.SAND)))
-			.setModel(new ModelCubeBottomTop("sandbag_sand_top", "sandbag_sand", "sandbag_sand"))
+			.setModel(new ModelCubeBottomTop("gabion_sand_top", "gabion_sand", "gabion_sand"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
 			.register();
 	
@@ -77,6 +78,7 @@ public class GcConstructionModule extends GcModuleBase {
 			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(4.0f, 10.0f).sound(SoundType.STONE)))
 			.setModel(new ModelCubeBottomTop("block_tarmac", "block_tarmac_side", "minecraft:stone"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.addToTag(BlockTags.MINEABLE_WITH_PICKAXE)
 			.register();
 	
 	private static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
@@ -84,6 +86,7 @@ public class GcConstructionModule extends GcModuleBase {
 			() -> new Block(BlockBehaviour.Properties.of(Material.SAND).strength(1.5f, 4.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeAll("water_bound_gravel"))
 			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.addToTag(BlockTags.MINEABLE_WITH_SHOVEL)
 			.setCustomDrop((self) -> LootTable.lootTable()
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).add(LootItem.lootTableItem(self)))
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(Blocks.GRAVEL)))
@@ -91,28 +94,28 @@ public class GcConstructionModule extends GcModuleBase {
 			.register();
 	
 	static {
-		emptySandbagRecipe("white", WHITE_EMPTY_SAND_BAG, Items.WHITE_WOOL, Items.WHITE_DYE);
-		emptySandbagRecipe("green", GREEN_EMPTY_SAND_BAG, Items.GREEN_WOOL, Items.GREEN_DYE);
-		emptySandbagRecipe("gray", GRAY_EMPTY_SAND_BAG, Items.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
-		sandbagFillRecipe("white", WHITE_EMPTY_SAND_BAG, WHITE_SANDBAG, Items.DIRT);
-		sandbagFillRecipe("green", GREEN_EMPTY_SAND_BAG, GREEN_SANDBAG, Items.DIRT);
-		sandbagFillRecipe("gray", GRAY_EMPTY_SAND_BAG, GRAY_SANDBAG, Items.DIRT);
-		sandbagFillRecipe("sand", WHITE_EMPTY_SAND_BAG, SAND_SANDBAG, Items.SAND);
+		emptyGabionRecipe("white", WHITE_EMPTY_GABION, Items.WHITE_WOOL, Items.WHITE_DYE);
+		emptyGabionRecipe("green", GREEN_EMPTY_GABION, Items.GREEN_WOOL, Items.GREEN_DYE);
+		emptyGabionRecipe("gray", GRAY_EMPTY_GABION, Items.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
+		gabionFillRecipe("white", WHITE_EMPTY_GABION, WHITE_GABION, Items.DIRT);
+		gabionFillRecipe("green", GREEN_EMPTY_GABION, GREEN_GABION, Items.DIRT);
+		gabionFillRecipe("gray", GRAY_EMPTY_GABION, GRAY_GABION, Items.DIRT);
+		gabionFillRecipe("sand", WHITE_EMPTY_GABION, SAND_GABION, Items.SAND);
 	}
 
-	private static void emptySandbagRecipe(String name, RegistryObject<Item> sandbag, Item item, Item dye) {
-		RecipeRegister.shaped(sandbag, 16)
-		.setRecipeName("sandbag_empty_" + name + "_from_coloured_wool")
-		.setGroup("empty_sandbag")
+	private static void emptyGabionRecipe(String name, RegistryObject<Item> gabion, Item item, Item dye) {
+		RecipeRegister.shaped(gabion, 16)
+		.setRecipeName("gabion_empty_" + name + "_from_coloured_wool")
+		.setGroup("empty_gabion")
 		.setPattern(
 				" W ",
 				"W W",
 				" W ")
 		.putItemDefinition('W', item);
 		
-		RecipeRegister.shaped(sandbag, 16)
-		.setRecipeName("sandbag_empty_" + name + "_with_dye")
-		.setGroup("empty_sandbag")
+		RecipeRegister.shaped(gabion, 16)
+		.setRecipeName("gabion_empty_" + name + "_with_dye")
+		.setGroup("empty_gabion")
 		.setPattern(
 				" W ",
 				"WdW",
@@ -121,10 +124,10 @@ public class GcConstructionModule extends GcModuleBase {
 		.putItemDefinition('d', dye);
 	}
 
-	private static void sandbagFillRecipe(String name, RegistryObject<Item> empty, RegistryObject<Block> filled, Item filler) {
+	private static void gabionFillRecipe(String name, RegistryObject<Item> empty, RegistryObject<Block> filled, Item filler) {
 		RecipeRegister.shapeless(filled, 4)
-		.setGroup("sandbag")
-		.setRecipeName("sandbag_" + name + "_from_empty_bag")
+		.setGroup("gabion")
+		.setRecipeName("gabion_" + name + "_from_empty_bag")
 		.addIngredient(empty)
 		.addIngredient(filler);
 	}

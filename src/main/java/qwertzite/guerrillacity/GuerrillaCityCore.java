@@ -86,8 +86,8 @@ public class GuerrillaCityCore {
 		generator.addProvider(true, BlockRegister.getBlockStateProvider(generator, existingFileHelper));
 		generator.addProvider(true, new GcLootTableProvider(generator));
 		generator.addProvider(true, new GcRecipeProvider(generator));
+		generator.addProvider(true, BlockRegister.getBlockTagsProvider(generator, existingFileHelper));
 	}
-	// ...
 	
 	public void onFmlCommonRegistryEvent(FMLCommonSetupEvent event) {
 		event.enqueueWork(() -> {

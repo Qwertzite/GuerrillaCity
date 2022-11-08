@@ -10,6 +10,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -22,6 +23,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
+import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
 import qwertzite.guerrillacity.core.datagen.GcLootTblBlockDrop;
 import qwertzite.guerrillacity.core.datagen.ModelBase;
 import qwertzite.guerrillacity.core.datagen.ModelBlockItem;
@@ -48,6 +50,10 @@ public class BlockRegister {
 		return new GcLootTblBlockDrop(ENTRY);
 	}
 	
+	public static GcBlockTagsProvider getBlockTagsProvider(DataGenerator gen, ExistingFileHelper fileHelper) {
+		return new GcBlockTagsProvider(ENTRY, gen, fileHelper);
+	}
+	
 	// ==== main ====
 	
 	public static BlockRegister $(ResourceKey<Block> regKey, Supplier<Block> block) {
@@ -60,6 +66,7 @@ public class BlockRegister {
 	private ModelBase defaultModel;
 	private CreativeModeTab tab;
 	private Function<Block, LootTable.Builder> customDrop;
+	private Set<TagKey<Block>> tagsToAddThisBlock = new HashSet<>();
 	
 	private RegistryObject<Block> regObj;
 	
@@ -83,6 +90,11 @@ public class BlockRegister {
 		return this;
 	}
 	
+	public BlockRegister addToTag(TagKey<Block> tag) {
+		this.tagsToAddThisBlock.add(tag);
+		return this;
+	}
+	
 	public RegistryObject<Block> register() {
 		ENTRY.add(this);
 		this.regObj = REGISTRY.register(this.registryKey.location().getPath(), this.block);
@@ -97,4 +109,5 @@ public class BlockRegister {
 	public RegistryObject<Block> getRegistryObject() { return this.regObj; }
 	public boolean hasCustomDrop() { return this.customDrop != null; }
 	public LootTable.Builder getCustomDrop() { return this.customDrop.apply(this.regObj.get()); }
+	public Set<TagKey<Block>> getTagsToAdd() { return this.tagsToAddThisBlock; }
 }

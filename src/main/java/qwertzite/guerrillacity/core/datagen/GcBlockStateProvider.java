@@ -33,4 +33,9 @@ public class GcBlockStateProvider extends BlockStateProvider {
 //			simpleBlockItem(block, model);
 		}
 	}
+	
+	@Override
+	public String getName() {
+		return "GC Block States";
+	}
 }

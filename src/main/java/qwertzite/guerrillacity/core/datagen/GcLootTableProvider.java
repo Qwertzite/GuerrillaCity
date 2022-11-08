@@ -45,6 +45,6 @@ public class GcLootTableProvider extends LootTableProvider {
 	
 	@Override
 	public String getName() {
-		return "GuerrillaCity2 loot tables";
+		return "GC Loot Tables";
 	}
 }
