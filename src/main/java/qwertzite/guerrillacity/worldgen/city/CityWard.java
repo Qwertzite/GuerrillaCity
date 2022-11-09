@@ -28,7 +28,6 @@ public class CityWard {
 	private final BlockPos offset;
 	private final long wardSeed; // must be unique for each wards.
 	
-	private boolean initialising;
 	private volatile boolean initialised = false;
 	
 	private CityGenResult result;
@@ -52,28 +51,31 @@ public class CityWard {
 	 * @param validArea
 	 * @param forbiddenArea
 	 */
-	public synchronized void beginInitialisation(Set<Rectangle> validArea, Set<Rectangle> forbiddenArea) {
-		assert(!this.initialised);
-		assert(!this.initialising);
-		this.initialising = true;
+	public void beginInitialisation(Set<Rectangle> validArea, Set<Rectangle> forbiddenArea) {
+		if (this.initialised) return;
+		this.initialised = true;
+		ModLog.info("Begin initialisation of city at " + this.offset);
 		
 		// generate city blocks and make them do their jobs.
-		EnumMap<Direction, Integer> roadMap = new EnumMap<>(Direction.class);
-		roadMap.put(Direction.EAST, 100);
-		roadMap.put(Direction.WEST, 100);
-		roadMap.put(Direction.NORTH, 100);
-		roadMap.put(Direction.SOUTH, 100);
+		if (!validArea.isEmpty()) {
+			EnumMap<Direction, Integer> roadMap = new EnumMap<>(Direction.class);
+			roadMap.put(Direction.EAST, 100);
+			roadMap.put(Direction.WEST, 100);
+			roadMap.put(Direction.NORTH, 100);
+			roadMap.put(Direction.SOUTH, 100);
+			
+			CityBlock cityBlock = new CityBlock(wardSeed, 0,
+					new Rectangle(new Vec2i(offset.getX() + 1, offset.getZ() + 1), new Vec2i(CityConst.WARD_SIZE_BLOCKS - 2, CityConst.WARD_SIZE_BLOCKS - 2)),
+					validArea, forbiddenArea, this.offset.getY(), roadMap);
+			var fjp = new ForkJoinPool();
+			cityBlock.init(fjp);
+			this.result = cityBlock.postInit(fjp);
+			ModLog.info("Initialied city ward at " + this.offset);
+		} else {
+			this.result = CityGenResult.EMPTY;
+			ModLog.info("Initialised city ward with empty result. pos=" + this.offset);
+		}
 		
-		CityBlock cityBlock = new CityBlock(wardSeed, 0,
-				new Rectangle(new Vec2i(offset.getX() + 1, offset.getZ() + 1), new Vec2i(CityConst.WARD_SIZE_BLOCKS - 2, CityConst.WARD_SIZE_BLOCKS - 2)),
-				validArea, forbiddenArea, this.offset.getY(), roadMap);
-		var fjp = new ForkJoinPool();
-		cityBlock.init(fjp);
-		this.result = cityBlock.postInit(fjp);
-		
-		this.initialised = true;
-		this.initialising = false;
-		ModLog.info("Initialied city ward at " + this.offset);
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("Initalised city ward" + "\n");
@@ -109,5 +111,9 @@ public class CityWard {
 	
 	public BlockPos getOffset() {
 		return this.offset;
+	}
+	
+	public boolean isInitialised() {
+		return this.initialised;
 	}
 }

@@ -1,6 +1,5 @@
 package qwertzite.guerrillacity.worldgen.city;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,19 +25,16 @@ import qwertzite.guerrillacity.core.util.math.Rectangle;
  */
 public class CityStructureProvider {
 	private static final Map<WardPos, CityWard> CACHE = new ConcurrentHashMap<>();
-	private static final Set<CityWard> INITIALISED = new HashSet<>();
 	private static long seed;
 	
 	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor levelAccessor, Predicate<Holder<Biome>> validBiome) {
-		synchronized (CityStructureProvider.class) {
+		WardPos wardPos = WardPos.of(chunkPos);
+		CityWard cityWard;
+		synchronized (CACHE) {
 			if (CityStructureProvider.seed != seed) {
 				CityStructureProvider.seed = seed;
 				CityStructureProvider.CACHE.clear(); // OPTIMISE: notify workers to abort all process.
 			}
-		}
-		WardPos wardPos = WardPos.of(chunkPos);
-		CityWard cityWard;
-		synchronized (CACHE) { // This is possible because wardPos is interned.
 			if (!CACHE.containsKey(wardPos)) {
 				cityWard = new CityWard(wardPos, seed);
 				CACHE.put(wardPos, cityWard);
@@ -46,12 +42,7 @@ public class CityStructureProvider {
 				cityWard = CACHE.get(wardPos);
 			}
 		}
-		synchronized(cityWard) {
-			if (!INITIALISED.contains(cityWard)) {
-				CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
-				INITIALISED.add(cityWard);
-			}
-		}
+		CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
 		
 		var chunkBB = new Rectangle(
 				chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(),
@@ -61,12 +52,15 @@ public class CityStructureProvider {
 	}
 	
 	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
-		
-		Map<Boolean, Set<Rectangle>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
-				cp -> checkAChunkApplicaleBiome(biomeSource, cp, validBiome),
-				Collectors.mapping(chunk -> PosUtil.getChunkBoundingRectangle(chunk), Collectors.toSet())));
-		
-		cityWard.beginInitialisation(groups.get(true), groups.get(false));
+		synchronized (cityWard) {
+			if (!cityWard.isInitialised()) {
+				Map<Boolean, Set<Rectangle>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
+						cp -> checkChunkApplicaleBiome(biomeSource, cp, validBiome),
+						Collectors.mapping(chunk -> PosUtil.getChunkBoundingRectangle(chunk), Collectors.toSet())));
+				
+				cityWard.beginInitialisation(groups.get(true), groups.get(false));
+			}
+		}
 	}
 	
 	/**
@@ -76,7 +70,7 @@ public class CityStructureProvider {
 	 * @param validBiome
 	 * @return
 	 */
-	private static boolean checkAChunkApplicaleBiome(LevelAccessor source, ChunkPos chunkPos, Predicate<Holder<Biome>> validBiome) {
+	private static boolean checkChunkApplicaleBiome(LevelAccessor source, ChunkPos chunkPos, Predicate<Holder<Biome>> validBiome) {
 		int cx = chunkPos.getMinBlockX();
 		int cy = GcConsts.GROUND_HEIGHT;
 		int cz = chunkPos.getMinBlockZ();
@@ -96,5 +90,11 @@ public class CityStructureProvider {
 			}
 		}
 		return true;
+	}
+	
+	public static void clearCache() {
+		synchronized (CACHE) {
+			CACHE.clear();
+		}
 	}
 }

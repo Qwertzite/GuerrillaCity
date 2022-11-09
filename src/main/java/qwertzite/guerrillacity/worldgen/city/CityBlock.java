@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
+import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.util.GcUtil;
 import qwertzite.guerrillacity.core.util.McUtil;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
@@ -63,14 +64,21 @@ public class CityBlock {
 		Random rand = new Random(this.seed);
 		
 		this.submitChildCityBlockInit(rand, fjp); // begin computation of child city blocks.
-		
 		double ownScore = this.arrangeBuildingSet(rand); // arrange buildings on their own.
-		return this.collectDivisionResult(ownScore); // returns "ownScore" if that is the best score.
+		double finalScore = this.collectDivisionResult(ownScore); // returns "ownScore" if that is the best score.
+		int iter  = 0;
+		while (this.level == 0 && ownScore == finalScore) {
+			this.submitChildCityBlockInit(rand, fjp); // begin computation of child city blocks.
+			finalScore = this.collectDivisionResult(ownScore); // returns "ownScore" if that is the best score.
+			iter++;
+		}
+		if (this.level == 0 && iter != 0) ModLog.info("Retried %d times to generate ward with seed %d", iter, this.seed);
+		return finalScore;
 	}
 	
 	// ==== * ==== create child city blocks. ==== * ====
 	
-	private void submitChildCityBlockInit(Random rand, ForkJoinPool fjp) {// XXX: try multiple division patterns.
+	private void submitChildCityBlockInit(Random rand, ForkJoinPool fjp) {
 		if (this.level >= 100) { return; } // limiter
 		int roadWidth = CityConst.getRoadWidthForLevel(level);
 		final int minBlocksize = CityConst.MIN_BUILDING_SIZE;
@@ -96,7 +104,7 @@ public class CityBlock {
 		CityBlock child1 = this.createChildCityBlock(rand.nextLong(), new Rectangle(xPos1, zPos1, xSize1, zSize1), isXdirection ? Direction.EAST : Direction.SOUTH);
 		CityBlock child2 = this.createChildCityBlock(rand.nextLong(), new Rectangle(xPos2, zPos2, xSize2, zSize2), isXdirection ? Direction.WEST : Direction.NORTH);
 		
-		if (child1 == null || child2 == null) return;
+		if (child1 == null && child2 == null) return;
 		this.division = new DivEntry(child1, child2, fjp, isXdirection, roadPos);
 	}
 	
@@ -290,7 +298,7 @@ public class CityBlock {
 						+ sideArr.getBaseScore() * this.getRoadCoef(side1)
 						- frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise())
 						- frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
-				int depthLimit = blockWidth - frontArr.getMaxLength();
+				int depthLimit = (blockLength - frontArr.getMaxLength())*2;
 				var arrangement = BuildingLoader.getApplicableBuildingSets(width, length).stream()
 						.map(bs -> bs.computeBuildingArrangement(width, arr -> {
 							double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side2);
@@ -299,7 +307,7 @@ public class CityBlock {
 									blockWidth - sideArr.getPositiveSideLength() - arr.getNegativeSideLength();
 							arrScore -= (isSideRight ?
 									sideArr.getNegativeSideDecraction(opening, depthLimit) + arr.getPositiveSideDecraction(opening, depthLimit):
-									sideArr.getPositiveSideDecraction(opening, depthLimit) + arr.getNegativeSideDecraction(opening, depthLimit)) * this.getRoadCoef(back);
+									sideArr.getPositiveSideDecraction(opening, depthLimit) + arr.getNegativeSideDecraction(opening, depthLimit)) * this.getRoadCoef(back) * 2;
 							return arrScore;
 						}, rand))
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
@@ -416,8 +424,8 @@ public class CityBlock {
 	public CityGenResult postInit(ForkJoinPool fjp) {
 		
 		if (this.division != null) {
-			ForkJoinTask<CityGenResult> task1 = fjp.submit(() -> this.division.child1.postInit(fjp));
-			ForkJoinTask<CityGenResult> task2 = fjp.submit(() -> this.division.child2.postInit(fjp));
+			ForkJoinTask<CityGenResult> task1 = fjp.submit(() -> this.division.child1 != null ? this.division.child1.postInit(fjp) : CityGenResult.EMPTY);
+			ForkJoinTask<CityGenResult> task2 = fjp.submit(() -> this.division.child2 != null ? this.division.child2.postInit(fjp) : CityGenResult.EMPTY);
 			CityGenResult result1 = task1.join();
 			CityGenResult result2 = task2.join();
 			CityGenResult result3 = CityGenResult.integrate(result1, result2);
@@ -457,7 +465,9 @@ public class CityBlock {
 	private static record DivEntry(CityBlock child1, CityBlock child2, ForkJoinTask<Double> task1, ForkJoinTask<Double> task2, boolean divDir, int roadPos) {
 		
 		public DivEntry(CityBlock child1, CityBlock child2, ForkJoinPool fjp, boolean divDir, int roadPos) {
-			this(child1, child2, fjp.submit(() -> child1.init(fjp)), fjp.submit(() -> child2.init(fjp)), divDir, roadPos);
+			this(child1, child2,
+					fjp.submit(() -> child1 != null ? child1.init(fjp) : 0.0d),
+					fjp.submit(() -> child2 != null ? child2.init(fjp) : 0.0d), divDir, roadPos);
 		}
 		
 		public double waitAndGetScore() {

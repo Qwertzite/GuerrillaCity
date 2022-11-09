@@ -12,12 +12,18 @@ import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.command.CommandOption;
 import qwertzite.guerrillacity.core.init.CommandRegister;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
+import qwertzite.guerrillacity.worldgen.city.CityStructureProvider;
 import qwertzite.guerrillacity.worldgen.city.CityWard;
 import qwertzite.guerrillacity.worldgen.city.WardPos;
 
 public class GcGenCommand {
 	
 	public static void registerCommand() {
+		registerGenCommand();
+		registerClearWardCacheCommand();
+	}
+	
+	private static void registerGenCommand() {
 		CommandOption<Long> seed = CommandOption.longArg("seed")
 				.setDefaultValue(ctx -> 0L);
 		CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
@@ -50,5 +56,12 @@ public class GcGenCommand {
 			throw e;
 		}
 		System.out.println("generated city ward at %s".formatted(pos));
+	}
+	
+	private static void registerClearWardCacheCommand() {
+		CommandRegister.$("gen", "clear_cache", ctx -> {
+			CityStructureProvider.clearCache();
+			return Command.SINGLE_SUCCESS;
+		}).setPermissionLevel(2);
 	}
 }
