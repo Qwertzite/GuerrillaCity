@@ -101,6 +101,13 @@ public class GcConstructionModule extends GcModuleBase {
 		gabionFillRecipe("green", GREEN_EMPTY_GABION, GREEN_GABION, Items.DIRT);
 		gabionFillRecipe("gray", GRAY_EMPTY_GABION, GRAY_GABION, Items.DIRT);
 		gabionFillRecipe("sand", WHITE_EMPTY_GABION, SAND_GABION, Items.SAND);
+		RecipeRegister.shapeless(TARMAC, 8)
+		.addIngredient(Items.GRAVEL, 8)
+		.addIngredient(Items.LAVA_BUCKET);
+		RecipeRegister.shapeless(WATER_BOUND_GRAVEL, 4)
+		.addIngredient(Items.GRAVEL, 4)
+		.addIngredient(Items.CLAY_BALL)
+		.addIngredient(Items.WATER_BUCKET);
 	}
 
 	private static void emptyGabionRecipe(String name, RegistryObject<Item> gabion, Item item, Item dye) {

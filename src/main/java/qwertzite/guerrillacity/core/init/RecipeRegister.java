@@ -182,7 +182,11 @@ public abstract class RecipeRegister<R extends RecipeRegister<R>> {
 		}
 		
 		public ShapelessRecipeRegister addIngredient(ItemLike ingredient) {
-			return this.addIngredient(() -> ingredient, 1);
+			return this.addIngredient(ingredient, 1);
+		}
+		
+		public ShapelessRecipeRegister addIngredient(ItemLike ingredient, int count) {
+			return this.addIngredient(() -> ingredient, count);
 		}
 		
 		public ShapelessRecipeRegister addIngredient(Supplier<ItemLike> ingredient, int count) {
