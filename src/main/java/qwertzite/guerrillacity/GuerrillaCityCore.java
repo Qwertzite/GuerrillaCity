@@ -16,6 +16,7 @@ import qwertzite.guerrillacity.construction.GcConstructionModule;
 import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
+import qwertzite.guerrillacity.core.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLootTableProvider;
 import qwertzite.guerrillacity.core.datagen.GcRecipeProvider;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
@@ -54,6 +55,8 @@ public class GuerrillaCityCore {
 	}
 	
 	private void init() {
+		GcCommon.onPreInit();
+		
 		BuildingLoader.loadResources();
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

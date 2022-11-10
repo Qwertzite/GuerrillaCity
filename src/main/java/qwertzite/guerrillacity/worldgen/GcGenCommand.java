@@ -7,6 +7,7 @@ import com.mojang.brigadier.Command;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.command.CommandOption;
@@ -25,13 +26,17 @@ public class GcGenCommand {
 	
 	private static void registerGenCommand() {
 		CommandOption<Long> seed = CommandOption.longArg("seed")
-				.setDefaultValue(ctx -> 0L);
+				.setDefaultValue(ctx -> 0L)
+				.setDescription("Seed to be used to generate a city.");
 		CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
-				.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())));
+				.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
+				.setDescription("Position of city to be generated.");
+		
 		CommandRegister.$("gen", "ward", ctx -> {
 			generate(pos.getValue(), ctx.getSource(), seed.getValue());
 			return Command.SINGLE_SUCCESS;
-		}).setPermissionLevel(2).addOption(seed).addOption(pos);
+		}).setPermissionLevel(2).addOption(seed).addOption(pos)
+		.setUsageString("Generate city.");
 	}
 	
 	private static void generate(BlockPos pos, CommandSourceStack source, long seed) {
@@ -61,7 +66,9 @@ public class GcGenCommand {
 	private static void registerClearWardCacheCommand() {
 		CommandRegister.$("gen", "clear_cache", ctx -> {
 			CityStructureProvider.clearCache();
+			ctx.getSource().sendSuccess(Component.literal("Cleared city gen cache."), true);
 			return Command.SINGLE_SUCCESS;
-		}).setPermissionLevel(2);
+		}).setPermissionLevel(2)
+		.setUsageString("Clears city generation related caches.");
 	}
 }

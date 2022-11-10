@@ -22,7 +22,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraftforge.registries.RegistryObject;
-import qwertzite.guerrillacity.core.GcCreativeTab;
+import qwertzite.guerrillacity.core.GcCommon;
 import qwertzite.guerrillacity.core.datagen.ModelCubeAll;
 import qwertzite.guerrillacity.core.datagen.ModelCubeBottomTop;
 import qwertzite.guerrillacity.core.init.BlockRegister;
@@ -44,40 +44,40 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final ResourceKey<Block> KEY_WATER_BOUND_GRAVEL = BlockRegister.registryKey("water_bound_gravel");
 	
 	public static final RegistryObject<Item> WHITE_EMPTY_GABION = 
-			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
 	public static final RegistryObject<Item> GREEN_EMPTY_GABION = 
-			ItemRegister.$(KEY_GREEN_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_GREEN_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
 	public static final RegistryObject<Item> GRAY_EMPTY_GABION = 
-			ItemRegister.$(KEY_GRAY_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCreativeTab.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_GRAY_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
 	
 	public static final RegistryObject<Block> WHITE_GABION = BlockRegister.$(KEY_WHITE_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_white_top", "gabion_white", "gabion_white"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.register();
 	
 	public static final RegistryObject<Block> GREEN_GABION = BlockRegister.$(KEY_GREEN_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_green_top", "gabion_green", "gabion_green"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.register();
 	
 	public static final RegistryObject<Block> GRAY_GABION = BlockRegister.$(KEY_GRAY_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_gray_top", "gabion_gray", "gabion_gray"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.register();
 	
 	public static final RegistryObject<Block> SAND_GABION = BlockRegister.$(KEY_SAND_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.SAND)))
 			.setModel(new ModelCubeBottomTop("gabion_sand_top", "gabion_sand", "gabion_sand"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.register();
 	
 	public static final RegistryObject<Block> TARMAC = BlockRegister.$(KEY_TARMAC,
 			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(4.0f, 10.0f).sound(SoundType.STONE)))
 			.setModel(new ModelCubeBottomTop("block_tarmac", "block_tarmac_side", "minecraft:stone"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.addToTag(BlockTags.MINEABLE_WITH_PICKAXE)
 			.register();
 	
@@ -85,7 +85,7 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final RegistryObject<Block> WATER_BOUND_GRAVEL = BlockRegister.$(KEY_WATER_BOUND_GRAVEL,
 			() -> new Block(BlockBehaviour.Properties.of(Material.SAND).strength(1.5f, 4.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeAll("water_bound_gravel"))
-			.setTab(GcCreativeTab.GC_CREATIVE_TAB)
+			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.addToTag(BlockTags.MINEABLE_WITH_SHOVEL)
 			.setCustomDrop((self) -> LootTable.lootTable()
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).add(LootItem.lootTableItem(self)))

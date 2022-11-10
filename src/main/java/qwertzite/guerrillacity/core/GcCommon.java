@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.construction.GcConstructionModule;
 
-public class GcCreativeTab {
+public class GcCommon {
 	
 	public static final CreativeModeTab GC_CREATIVE_TAB = new CreativeModeTab(GuerrillaCityCore.MODID) {
 		@Override
@@ -16,4 +16,11 @@ public class GcCreativeTab {
 			return new ItemStack(GcConstructionModule.GREEN_GABION.get());
 		}
 	};
+	
+	public static void onPreInit() {
+		
+		
+		
+	}
+	
 }
