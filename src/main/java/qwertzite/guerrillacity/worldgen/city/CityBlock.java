@@ -151,6 +151,7 @@ public class CityBlock {
 			var buildingsets = BuildingLoader.getApplicableBuildingSets(width, length);
 			var arrangement = buildingsets.stream()
 					.map(bs -> bs.computeBuildingArrangement(width, arr -> computeScoreForFrontOnly(arr, front, length), rand))
+					.filter(e -> e != null)
 					.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA())); // bs -> bs score -> arr
 			if (arrangement.isPresent()) {
 				var selectedArr = arrangement.get().getB();
@@ -167,6 +168,7 @@ public class CityBlock {
 						BuildingLoader.getApplicableBuildingSets(blockWidth, blockLength)
 						.stream()
 						.map(bs -> bs.computeBuildingArrangement(blockWidth, arr -> computeScoreForFrontOnly(arr, front, arr.getMaxLength()), rand))
+						.filter(e -> e != null)
 						.toList(), e -> e.getDoubleA(), rand, 8)
 				.stream().map(e -> e.getB()).toList();
 		{ // front and back
@@ -183,8 +185,11 @@ public class CityBlock {
 								arrScore -= arr.getNegativeSideDecraction(posTotalOpening) * this.getRoadCoef(back.getCounterClockWise());
 								arrScore -= frontArrangement.getPositiveSideDecraction(posTotalOpening) * this.getRoadCoef(front.getClockWise());
 								arrScore -= frontArrangement.getNegativeSideDecraction(negTotalOpening) * this.getRoadCoef(front.getCounterClockWise());
+								arrScore -= (blockLength - frontArrangement.getMaxLength() - arr.getMaxLength())
+										* (2*posTotalOpening * this.getRoadCoef(front.getClockWise()) + 2*negTotalOpening * this.getRoadCoef(front.getCounterClockWise()));
 								return arrScore;
 						}, rand))
+						.filter(e -> e != null)
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
@@ -207,10 +212,14 @@ public class CityBlock {
 							arrScore -= frontArrangement.getPositiveSideDecraction(frontArrangement.getMaxLength() - frontArrangement.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
 							arrScore -= frontArrangement.getNegativeSideDecraction(frontArrangement.getMaxLength() - frontArrangement.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise());
 							arrScore -= side1 == front.getCounterClockWise() ?
-									arr.getNegativeSideDecraction(length - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()):
-									arr.getPositiveSideDecraction(length - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
+									arr.getNegativeSideDecraction(length - arr.getNegativeSideLength()) * this.getRoadCoef(back):
+									arr.getPositiveSideDecraction(length - arr.getPositiveSideLength()) * this.getRoadCoef(back);
+							arrScore -= 2 * (side1 == front.getCounterClockWise() ?
+									length - arr.getNegativeSideLength():
+									length - arr.getPositiveSideLength()) * (blockWidth - arr.getMaxLength()) * this.getRoadCoef(back);
 							return arrScore;
 						}, rand))
+						.filter(e -> e != null)
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
@@ -239,7 +248,9 @@ public class CityBlock {
 										arr.getNegativeSideDecraction(arr.getMaxLength() - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()) :
 										arr.getPositiveSideDecraction(arr.getMaxLength() - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
 								return arrScore;
-							}, rand)).toList(), e -> e.getDoubleA(), rand, 8);
+							}, rand))
+							.filter(e -> e != null)
+							.toList(), e -> e.getDoubleA(), rand, 8);
 					return arrangement.stream().map(arr -> new Tuple<>(frontArr, arr.getB()));
 				}).toList();
 		{	// front side back
@@ -270,8 +281,10 @@ public class CityBlock {
 							arrScore -= (isSideRight ?
 									frontArr.getPositiveSideDecraction(opening):
 									frontArr.getNegativeSideDecraction(opening)) * this.getRoadCoef(side2);
+							arrScore -= 2 * opening * (blockLength - frontArr.getMaxLength() - arr.getMaxLength()) * this.getRoadCoef(side2);
 							return arrScore;
 						}, rand))
+						.filter(e -> e != null)
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
@@ -308,8 +321,10 @@ public class CityBlock {
 							arrScore -= (isSideRight ?
 									sideArr.getNegativeSideDecraction(opening, depthLimit) + arr.getPositiveSideDecraction(opening, depthLimit):
 									sideArr.getPositiveSideDecraction(opening, depthLimit) + arr.getNegativeSideDecraction(opening, depthLimit)) * this.getRoadCoef(back) * 2;
+							arrScore -= 2 * Math.min(opening, depthLimit) * (blockWidth - sideArr.getMaxLength() - arr.getMaxLength()) * this.getRoadCoef(back);
 							return arrScore;
 						}, rand))
+						.filter(e -> e != null)
 						.max((e1, e2) -> Double.compare(e1.getDoubleA(), e2.getDoubleA()));
 				if (arrangement.isPresent()) {
 					if (bestScore <= arrangement.get().getDoubleA()) {
@@ -355,61 +370,6 @@ public class CityBlock {
 		default -> null;
 		};
 	}
-	
-//	/**
-//	 * 正面のみに建物を配置する場合
-//	 * @return
-//	 */
-//	private double roadSetFrontOnly(Direction dir, Random rand) {
-//		
-//		CityGenResult result = new CityGenResult();
-//		
-//		int width = getAreaWidthForDir(dir);
-//		int length = getAreaLengthForDir(dir);
-//		BuildingArrangement arrangement = BuildingLoader.getBestArrangement(width, length, rand);
-//		if (arrangement == null) return result;
-////		BuildingArrangement arrangement = BuildingLoader.getBuildingArrangement(width, length, rand);
-////		if (arrangement == null) return result;
-////		
-////		this.arrangeBuildings(result, arrangement, dir, rand);
-////		result.addScore(arrangement.getScore(length) * CityConst.getRoadWidthForLevel(this.roadLevel.get(dir)));
-//		return result;
-//	}
-	
-//	private CityGenResult roadSetFrontBack(final Direction frontDir, final Random rand) {
-//		if (this.roadLevel.get(frontDir.getOpposite()) >= 100) return CityGenResult.EMPTY;
-//		
-//		final int width = getAreaWidthForDir(frontDir);
-//		final int length = getAreaLengthForDir(frontDir);
-//		if(length <= CityConst.MIN_BUILDING_SIZE*2+1) return CityGenResult.EMPTY;
-//		final double fcoef = CityConst.getRoadWidthForLevel(this.roadLevel.get(frontDir));
-//		final double bcoef = CityConst.getRoadWidthForLevel(this.roadLevel.get(frontDir.getOpposite()));
-//		
-//		CityGenResult result = CityGenResult.EMPTY;
-////		double maxScore = 0.0d;
-////		for (int i = 0; i < 8; i++) {
-////			final int flen = rand.nextInt(length - CityConst.MIN_BUILDING_SIZE*2 - 1) + CityConst.MIN_BUILDING_SIZE;
-////			BuildingArrangement front = BuildingLoader.getBuildingArrangement(width, flen, rand);
-////			if (front == null) continue;
-////			final int backLength = length - front.getMaxLength() - 1;
-////			final BuildingArrangement back = BuildingLoader.getBuildingArrangement(width, backLength, rand);
-////			if (back == null) continue;
-////			final double score = front.getScore(flen) * fcoef + back.getScore(backLength) * bcoef;
-////			if (score > maxScore || (score == maxScore && rand.nextBoolean())) {
-////				maxScore = score;
-////				result = new CityGenResult();
-////				arrangeBuildings(result, front, frontDir, rand);
-////				arrangeBuildings(result, back, frontDir.getOpposite(), rand);
-////				result.addScore(score);
-////			}
-////		}
-//		
-//		return result;
-//	}
-	
-//	private CityGenResult roadSetSides(final Direction[] dirPriprity, final Random rand) {
-//		
-//	}
 	
 	private int getAreaWidthForDir(Direction dir) {
 		return dir.getAxis() == Axis.X ? this.blockShape.getYSpan() : this.blockShape.getXSpan();

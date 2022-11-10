@@ -73,6 +73,7 @@ public class GcUtil {
 	 */
 	public static <T> T selectWeightedRandom(List<T> list, ToDoubleFunction<T> weight, Random rand) {
 		final int size = list.size();
+		if (list.size() == 0.0d) return null;
 		double sum = 0.0d;
 		double[] scoreList = new double[size];
 		for (int i = 0; i < size; i++) {

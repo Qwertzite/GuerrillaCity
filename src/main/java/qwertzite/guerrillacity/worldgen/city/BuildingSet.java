@@ -73,6 +73,7 @@ public class BuildingSet {
 			if (arrScore > 0) weightedArrangements.add(new DoubleObjTuple<BuildingArrangement>(arrScore, arr));
 		}
 		var selectedArr = GcUtil.selectWeightedRandom(weightedArrangements, e -> e.getDoubleA(), rand);
+		if (selectedArr == null) return null;
 		return new DoubleObjTuple<>(bestArrScore, selectedArr.getB());
 	
 	}
