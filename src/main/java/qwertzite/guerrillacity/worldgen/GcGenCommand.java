@@ -55,7 +55,7 @@ public class GcGenCommand {
 				boolean valid = CityStructureProvider.checkChunkApplicaleBiome(ctx.getSource().getLevel(), cp);
 				ctx.getSource().sendSuccess(Component.literal("%s biome within chunk=%s".formatted(valid ? "Valid" : "Invalid", cp)), true);
 				Holder<Biome> biome = CityStructureProvider.getBiomeAt(ctx.getSource().getLevel(), p.getX(), p.getY(), p.getZ());
-				ctx.getSource().sendSuccess(Component.literal("Biome at pos=%s: %s".formatted(p, biome)), true);
+				if (biome instanceof Holder.Reference<Biome> ref) ctx.getSource().sendSuccess(Component.literal("Biome at pos=%s: %s".formatted(p, ref.key())), true);
 				return Command.SINGLE_SUCCESS;
 			}).setPermissionLevel(2).addOption(pos)
 			.setUsageString("Checks biome in the chunk which includes the given position.");

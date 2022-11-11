@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.ChunkPos;
@@ -91,9 +90,6 @@ public class CityStructureProvider {
 	}
 	
 	public static Holder<Biome> getBiomeAt(LevelAccessor source, int x, int y, int z) {
-		Holder<Biome> biome = source.getBiome(new BlockPos(x, y, z));
-		Holder<Biome> noise = source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
-		if (biome.get() != noise.get()) System.out.println("not equal! " + biome + " " + noise);
 		return source.getBiome(new BlockPos(x, y, z));
 	}
 	

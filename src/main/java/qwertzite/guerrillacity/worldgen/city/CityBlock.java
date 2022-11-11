@@ -419,7 +419,8 @@ public class CityBlock {
 				BlockPos pos = new BlockPos(arr.relativePos().getX(), this.groundHeight, arr.relativePos().getY());
 				for (var entry : arr.arrangement.getPositions()) {
 					BuildingType type = entry.getB();
-					result.addBuilding(type.getBuildingInstance(pos.relative(side, entry.getIntA()), front, rand.nextLong()));
+					CityElement element = type.getBuildingInstance(pos.relative(side, entry.getIntA()), front, rand.nextLong());
+					if (this.forbiddenArea.stream().allMatch(rect -> !rect.intersects(element.getCircumBox()))) result.addBuilding(element);
 				}
 			}
 			return result;
