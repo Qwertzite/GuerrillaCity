@@ -63,27 +63,26 @@ public class CityWard {
 			roadMap.put(Direction.WEST, 100);
 			roadMap.put(Direction.NORTH, 100);
 			roadMap.put(Direction.SOUTH, 100);
-			
+			long time = System.currentTimeMillis();
 			CityBlock cityBlock = new CityBlock(wardSeed, 0,
 					new Rectangle(new Vec2i(offset.getX() + 1, offset.getZ() + 1), new Vec2i(CityConst.WARD_SIZE_BLOCKS - 2, CityConst.WARD_SIZE_BLOCKS - 2)),
 					validArea, forbiddenArea, this.offset.getY(), roadMap);
 			var fjp = new ForkJoinPool();
 			cityBlock.init(fjp);
 			this.result = cityBlock.postInit(fjp);
-			ModLog.info("Initialied city ward at " + this.offset);
+			ModLog.info("Initialied city ward at " + this.offset + ", took " + (System.currentTimeMillis() - time) + " ms.");
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("Initalised city ward" + "\n");
+			sb.append("Position: " + this.offset + "\n");
+			sb.append("Buildings: " + this.result.getBuildings().size() + "\n");
+			sb.append("Road count: " + this.result.getRoadCount() + "\n");
+			sb.append("Road length: " + this.result.getRoadElements().size()*4 + "\n");
+			ModLog.info(sb.toString());
 		} else {
 			this.result = CityGenResult.EMPTY;
 			ModLog.info("Initialised city ward with empty result. pos=" + this.offset);
 		}
-		
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("Initalised city ward" + "\n");
-		sb.append("Position: " + this.offset + "\n");
-		sb.append("Buildings: " + this.result.getBuildings().size() + "\n");
-		sb.append("Road count: " + this.result.getRoadCount() + "\n");
-		sb.append("Road length: " + this.result.getRoadElements().size()*4 + "\n");
-		ModLog.info(sb.toString());
 	}
 	
 	/**

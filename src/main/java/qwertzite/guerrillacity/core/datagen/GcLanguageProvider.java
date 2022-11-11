@@ -24,7 +24,6 @@ public class GcLanguageProvider extends LanguageProvider {
 		for (var register : ItemRegister.getEntries()) {
 			if (register.getLocalName(this.locale) != null) this.addItem(register.getRegistryObject(), register.getLocalName(this.locale));
 		}
-		
 	}
 
 	@Override

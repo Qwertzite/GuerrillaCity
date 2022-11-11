@@ -9,6 +9,7 @@ import net.minecraft.world.item.Tiers;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
 import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RecipeRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
@@ -23,17 +24,23 @@ public class GcCombatModule extends GcModuleBase {
 	public static final ResourceKey<Item> KEY_COMBAT_SHOVEL_NETHERITE = ItemRegister.registryKey("netherite_combat_shovel");
 	
 	public static final RegistryObject<Item> COMBAT_SHOVEL_WOOD = ItemRegister.$(KEY_COMBAT_SHOVEL_WOOD,
-			() -> new CombatShovelItem(Tiers.WOOD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.WOOD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Wooden Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "木の戦闘円匙").register();
 	public static final RegistryObject<Item> COMBAT_SHOVEL_STONE = ItemRegister.$(KEY_COMBAT_SHOVEL_STONE,
-			() -> new CombatShovelItem(Tiers.STONE, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.STONE, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Stone Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "石の戦闘円匙").register();
 	public static final RegistryObject<Item> COMBAT_SHOVEL_GOLD = ItemRegister.$(KEY_COMBAT_SHOVEL_GOLD,
-			() -> new CombatShovelItem(Tiers.GOLD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.GOLD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Golden Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "金の戦闘円匙").register();
 	public static final RegistryObject<Item> COMBAT_SHOVEL_IRON = ItemRegister.$(KEY_COMBAT_SHOVEL_IRON,
-			() -> new CombatShovelItem(Tiers.IRON, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.IRON, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Iron Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "鉄の戦闘円匙").register();
 	public static final RegistryObject<Item> COMBAT_SHOVEL_DIAMOND = ItemRegister.$(KEY_COMBAT_SHOVEL_DIAMOND,
-			() -> new CombatShovelItem(Tiers.DIAMOND, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.DIAMOND, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Diamond Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "ダイヤモンドの戦闘円匙").register();
 	public static final RegistryObject<Item> COMBAT_SHOVEL_NETHERITE = ItemRegister.$(KEY_COMBAT_SHOVEL_NETHERITE,
-			() -> new CombatShovelItem(Tiers.NETHERITE, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			() -> new CombatShovelItem(Tiers.NETHERITE, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Netherite Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "ネザライトの戦闘円匙").register();
 	
 	static {
 		combatShovelRecipe("wooden", COMBAT_SHOVEL_WOOD, ItemTags.PLANKS);

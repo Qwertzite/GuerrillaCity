@@ -45,24 +45,27 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final ResourceKey<Block> KEY_WATER_BOUND_GRAVEL = BlockRegister.registryKey("water_bound_gravel");
 	
 	public static final RegistryObject<Item> WHITE_EMPTY_GABION = 
-			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("White Gabion").setLocalisedName(GcLangLocale.JP_JP, "白色の土嚢").register();
 	public static final RegistryObject<Item> GREEN_EMPTY_GABION = 
-			ItemRegister.$(KEY_GREEN_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_GREEN_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Green Gabion").setLocalisedName(GcLangLocale.JP_JP, "緑色の土嚢").register();
 	public static final RegistryObject<Item> GRAY_EMPTY_GABION = 
-			ItemRegister.$(KEY_GRAY_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB))).register();
+			ItemRegister.$(KEY_GRAY_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("Gray Gabion").setLocalisedName(GcLangLocale.JP_JP, "灰色の土嚢").register();
 	
 	public static final RegistryObject<Block> WHITE_GABION = BlockRegister.$(KEY_WHITE_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_white_top", "gabion_white", "gabion_white"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
-			.setLocalisedNameEn("White Gabion").setLocalisedName(GcLangLocale.JP_JP, "白い土嚢")
+			.setLocalisedNameEn("White Gabion").setLocalisedName(GcLangLocale.JP_JP, "白色の土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> GREEN_GABION = BlockRegister.$(KEY_GREEN_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_green_top", "gabion_green", "gabion_green"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
-			.setLocalisedNameEn("Green Gabion").setLocalisedName(GcLangLocale.JP_JP, "緑の土嚢")
+			.setLocalisedNameEn("Green Gabion").setLocalisedName(GcLangLocale.JP_JP, "緑色の土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> GRAY_GABION = BlockRegister.$(KEY_GRAY_GABION,
