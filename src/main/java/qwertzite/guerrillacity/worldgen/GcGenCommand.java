@@ -9,6 +9,7 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.command.CommandOption;
 import qwertzite.guerrillacity.core.init.CommandRegister;
@@ -20,23 +21,40 @@ import qwertzite.guerrillacity.worldgen.city.WardPos;
 public class GcGenCommand {
 	
 	public static void registerCommand() {
-		registerGenCommand();
-		registerClearWardCacheCommand();
-	}
-	
-	private static void registerGenCommand() {
-		CommandOption<Long> seed = CommandOption.longArg("seed")
-				.setDefaultValue(ctx -> 0L)
-				.setDescription("Seed to be used to generate a city.");
-		CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
-				.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
-				.setDescription("Position of city to be generated.");
-		
-		CommandRegister.$("gen", "ward", ctx -> {
-			generate(pos.getValue(), ctx.getSource(), seed.getValue());
-			return Command.SINGLE_SUCCESS;
-		}).setPermissionLevel(2).addOption(seed).addOption(pos)
-		.setUsageString("Generate city.");
+		{
+			CommandOption<Long> seed = CommandOption.longArg("seed")
+					.setDefaultValue(ctx -> 0L)
+					.setDescription("Seed to be used to generate a city.");
+			CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
+					.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
+					.setDescription("Position of city to be generated.");
+			
+			CommandRegister.$("gen", "ward", ctx -> {
+				generate(pos.getValue(), ctx.getSource(), seed.getValue());
+				return Command.SINGLE_SUCCESS;
+			}).setPermissionLevel(2).addOption(seed).addOption(pos)
+			.setUsageString("Generate city.");
+		}
+		{
+			CommandRegister.$("gen", "clear_cache", ctx -> {
+				CityStructureProvider.clearCache();
+				ctx.getSource().sendSuccess(Component.literal("Cleared city gen cache."), true);
+				return Command.SINGLE_SUCCESS;
+			}).setPermissionLevel(2)
+			.setUsageString("Clears city generation related caches.");
+		}
+		{
+			CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
+								.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
+								.setDescription("Position to check.");
+			CommandRegister.$("gen", "check_biome", ctx -> {
+				ChunkPos cp = new ChunkPos(pos.getValue());
+				boolean valid = CityStructureProvider.checkChunkApplicaleBiome(ctx.getSource().getLevel(), cp);
+				ctx.getSource().sendSuccess(Component.literal("%s biome within chunk=%s".formatted(valid ? "Valid" : "Invalid", cp)), true);
+				return Command.SINGLE_SUCCESS;
+			}).setPermissionLevel(2).addOption(pos)
+			.setUsageString("Checks biome in the chunk which includes the given position.");
+		}
 	}
 	
 	private static void generate(BlockPos pos, CommandSourceStack source, long seed) {
@@ -61,14 +79,5 @@ public class GcGenCommand {
 			throw e;
 		}
 		System.out.println("generated city ward at %s".formatted(pos));
-	}
-	
-	private static void registerClearWardCacheCommand() {
-		CommandRegister.$("gen", "clear_cache", ctx -> {
-			CityStructureProvider.clearCache();
-			ctx.getSource().sendSuccess(Component.literal("Cleared city gen cache."), true);
-			return Command.SINGLE_SUCCESS;
-		}).setPermissionLevel(2)
-		.setUsageString("Clears city generation related caches.");
 	}
 }

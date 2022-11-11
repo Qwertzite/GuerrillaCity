@@ -83,9 +83,8 @@ public class CityStructure extends Structure {
 		public void postProcess(WorldGenLevel genLevel, StructureManager structureManager, ChunkGenerator generator,
 				RandomSource rand, BoundingBox bb, ChunkPos chunkPos, BlockPos blockPos) {
 			
-			@SuppressWarnings("deprecation")
 			Map<BlockPos, BlockState> statemap = CityStructureProvider.getBlockStatesForChunk(
-					chunkPos, genLevel.getSeed(), genLevel, BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains); // 本当はstructure側からbiomeの情報を取りたいところ...
+					chunkPos, genLevel.getSeed(), genLevel);
 			
 			for (var e : statemap.entrySet()) {
 				genLevel.setBlock(e.getKey(), e.getValue(), Block.UPDATE_CLIENTS);

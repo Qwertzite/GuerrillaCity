@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import qwertzite.guerrillacity.core.util.GcConsts;
 import qwertzite.guerrillacity.core.util.PosUtil;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
+import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 
 /**
  * Provides each chunk with BlockPos and BlockState by creating according wards.
@@ -27,7 +29,7 @@ public class CityStructureProvider {
 	private static final Map<WardPos, CityWard> CACHE = new ConcurrentHashMap<>();
 	private static long seed;
 	
-	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor levelAccessor, Predicate<Holder<Biome>> validBiome) {
+	public static Map<BlockPos, BlockState> getBlockStatesForChunk(ChunkPos chunkPos, long seed, LevelAccessor levelAccessor) {
 		WardPos wardPos = WardPos.of(chunkPos);
 		CityWard cityWard;
 		synchronized (CACHE) {
@@ -42,7 +44,7 @@ public class CityStructureProvider {
 				cityWard = CACHE.get(wardPos);
 			}
 		}
-		CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor, validBiome);
+		CityStructureProvider.initialiseCityWard(cityWard, wardPos, levelAccessor);
 		
 		var chunkBB = new Rectangle(
 				chunkPos.getMinBlockX(), chunkPos.getMinBlockZ(),
@@ -51,11 +53,11 @@ public class CityStructureProvider {
 		return cityWard.computeBlockStateForBoudingBox(levelAccessor, chunkBB);
 	}
 	
-	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource, Predicate<Holder<Biome>> validBiome) {
+	private static void initialiseCityWard(CityWard cityWard, WardPos wardPos, LevelAccessor biomeSource) {
 		synchronized (cityWard) {
 			if (!cityWard.isInitialised()) {
 				Map<Boolean, Set<Rectangle>> groups = wardPos.getChunksWithin().collect(Collectors.partitioningBy(
-						cp -> checkChunkApplicaleBiome(biomeSource, cp, validBiome),
+						cp -> checkChunkApplicaleBiome(biomeSource, cp),
 						Collectors.mapping(chunk -> PosUtil.getChunkBoundingRectangle(chunk), Collectors.toSet())));
 				
 				cityWard.beginInitialisation(groups.get(true), groups.get(false));
@@ -70,7 +72,9 @@ public class CityStructureProvider {
 	 * @param validBiome
 	 * @return
 	 */
-	private static boolean checkChunkApplicaleBiome(LevelAccessor source, ChunkPos chunkPos, Predicate<Holder<Biome>> validBiome) {
+	public static boolean checkChunkApplicaleBiome(LevelAccessor source, ChunkPos chunkPos) {
+		@SuppressWarnings("deprecation")
+		Predicate<Holder<Biome>> validBiome = BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains;
 		int cx = chunkPos.getMinBlockX();
 		int cy = GcConsts.GROUND_HEIGHT;
 		int cz = chunkPos.getMinBlockZ();
