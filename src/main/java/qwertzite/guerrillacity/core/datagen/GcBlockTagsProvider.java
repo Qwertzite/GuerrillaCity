@@ -1,7 +1,5 @@
 package qwertzite.guerrillacity.core.datagen;
 
-import java.util.Set;
-
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.data.DataGenerator;
@@ -14,16 +12,13 @@ import qwertzite.guerrillacity.core.init.BlockRegister;
 
 public class GcBlockTagsProvider extends BlockTagsProvider {
 
-	private Set<BlockRegister> entries;
-	
-	public GcBlockTagsProvider(Set<BlockRegister> entries, DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper) {
+	public GcBlockTagsProvider(DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper) {
 		super(pGenerator, GuerrillaCityCore.MODID, existingFileHelper);
-		this.entries = entries;
 	}
 	
 	@Override
 	protected void addTags() {
-		for (BlockRegister register : entries) {
+		for (BlockRegister register : BlockRegister.getEntries()) {
 			Block block = register.getRegistryObject().get();
 			for (TagKey<Block> key : register.getTagsToAdd()) {
 				tag(key).add(block);

@@ -23,6 +23,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.datagen.ModelCubeAll;
 import qwertzite.guerrillacity.core.datagen.ModelCubeBottomTop;
 import qwertzite.guerrillacity.core.init.BlockRegister;
@@ -54,24 +55,28 @@ public class GcConstructionModule extends GcModuleBase {
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_white_top", "gabion_white", "gabion_white"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
+			.setLocalisedNameEn("White Gabion").setLocalisedName(GcLangLocale.JP_JP, "白い土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> GREEN_GABION = BlockRegister.$(KEY_GREEN_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_green_top", "gabion_green", "gabion_green"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
+			.setLocalisedNameEn("Green Gabion").setLocalisedName(GcLangLocale.JP_JP, "緑の土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> GRAY_GABION = BlockRegister.$(KEY_GRAY_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.GRAVEL)))
 			.setModel(new ModelCubeBottomTop("gabion_gray_top", "gabion_gray", "gabion_gray"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
+			.setLocalisedNameEn("Gray Gabion").setLocalisedName(GcLangLocale.JP_JP, "灰色の土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> SAND_GABION = BlockRegister.$(KEY_SAND_GABION,
 			() -> new Block(BlockBehaviour.Properties.of(Material.DIRT).strength(0.25f, 15.0f).sound(SoundType.SAND)))
 			.setModel(new ModelCubeBottomTop("gabion_sand_top", "gabion_sand", "gabion_sand"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
+			.setLocalisedNameEn("Gabion filled with Sand").setLocalisedName(GcLangLocale.JP_JP, "砂入りの土嚢")
 			.register();
 	
 	public static final RegistryObject<Block> TARMAC = BlockRegister.$(KEY_TARMAC,
@@ -79,6 +84,7 @@ public class GcConstructionModule extends GcModuleBase {
 			.setModel(new ModelCubeBottomTop("block_tarmac", "block_tarmac_side", "minecraft:stone"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.addToTag(BlockTags.MINEABLE_WITH_PICKAXE)
+			.setLocalisedNameEn("Tarmac").setLocalisedName(GcLangLocale.JP_JP, "アスファルト")
 			.register();
 	
 	private static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
@@ -91,6 +97,7 @@ public class GcConstructionModule extends GcModuleBase {
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).add(LootItem.lootTableItem(self)))
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(Blocks.GRAVEL)))
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(LootItemRandomChanceCondition.randomChance(0.25F)).add(LootItem.lootTableItem(Items.CLAY_BALL))))
+			.setLocalisedNameEn("Water-bound Gravel").setLocalisedName(GcLangLocale.JP_JP, "水締めマカダム")
 			.register();
 	
 	static {

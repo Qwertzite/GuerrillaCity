@@ -1,12 +1,13 @@
 package qwertzite.guerrillacity.core.init;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -16,14 +17,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
-import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
-import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
+import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.datagen.GcLootTblBlockDrop;
 import qwertzite.guerrillacity.core.datagen.ModelBase;
 import qwertzite.guerrillacity.core.datagen.ModelBlockItem;
@@ -34,24 +32,20 @@ public class BlockRegister {
 	private static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(Registry.BLOCK_REGISTRY, GuerrillaCityCore.MODID);
 	public static void initialise(IEventBus bus) { REGISTRY.register(bus); }
 	
+	public static Set<BlockRegister> getEntries() {
+		return ENTRY;
+	}
+	
 	// ==== util ====
 	
 	public static ResourceKey<Block> registryKey(String name) {
 		return ResourceKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(GuerrillaCityCore.MODID, name));
 	}
 	
-	// ==== providers ====
-	
-	public static BlockStateProvider getBlockStateProvider(DataGenerator gen, ExistingFileHelper fileHelper) {
-		return new GcBlockStateProvider(ENTRY, gen, fileHelper);
-	}
+	// ==== provider ====
 	
 	public static BlockLoot getBlockDropProvider() {
 		return new GcLootTblBlockDrop(ENTRY);
-	}
-	
-	public static GcBlockTagsProvider getBlockTagsProvider(DataGenerator gen, ExistingFileHelper fileHelper) {
-		return new GcBlockTagsProvider(ENTRY, gen, fileHelper);
 	}
 	
 	// ==== main ====
@@ -67,6 +61,7 @@ public class BlockRegister {
 	private CreativeModeTab tab;
 	private Function<Block, LootTable.Builder> customDrop;
 	private Set<TagKey<Block>> tagsToAddThisBlock = new HashSet<>();
+	private Map<GcLangLocale, String> localName = new HashMap<>();
 	
 	private RegistryObject<Block> regObj;
 	
@@ -95,6 +90,17 @@ public class BlockRegister {
 		return this;
 	}
 	
+	public BlockRegister setLocalisedNameEn(String name) {
+		this.localName.put(GcLangLocale.EN_GB, name);
+		this.localName.put(GcLangLocale.EN_US, name);
+		return this;
+	}
+	
+	public BlockRegister setLocalisedName(GcLangLocale locale, String name) {
+		this.localName.put(locale, name);
+		return this;
+	}
+	
 	public RegistryObject<Block> register() {
 		ENTRY.add(this);
 		this.regObj = REGISTRY.register(this.registryKey.location().getPath(), this.block);
@@ -110,4 +116,5 @@ public class BlockRegister {
 	public boolean hasCustomDrop() { return this.customDrop != null; }
 	public LootTable.Builder getCustomDrop() { return this.customDrop.apply(this.regObj.get()); }
 	public Set<TagKey<Block>> getTagsToAdd() { return this.tagsToAddThisBlock; }
+	public String getLocalName(GcLangLocale locale) { return this.localName.getOrDefault(locale, null); }
 }

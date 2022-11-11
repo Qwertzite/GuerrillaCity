@@ -17,6 +17,10 @@ import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
+import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
+import qwertzite.guerrillacity.core.datagen.GcLangLocale;
+import qwertzite.guerrillacity.core.datagen.GcLanguageProvider;
 import qwertzite.guerrillacity.core.datagen.GcLootTableProvider;
 import qwertzite.guerrillacity.core.datagen.GcRecipeProvider;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
@@ -86,10 +90,13 @@ public class GuerrillaCityCore {
 		var existingFileHelper = event.getExistingFileHelper();
 		generator.addProvider(true, new GcBiomeTagsProvider(generator, existingFileHelper));
 		generator.addProvider(true, ItemRegister.getModelProvider(generator, existingFileHelper));
-		generator.addProvider(true, BlockRegister.getBlockStateProvider(generator, existingFileHelper));
+		generator.addProvider(true, new GcBlockStateProvider(generator, existingFileHelper));
 		generator.addProvider(true, new GcLootTableProvider(generator));
 		generator.addProvider(true, new GcRecipeProvider(generator));
-		generator.addProvider(true, BlockRegister.getBlockTagsProvider(generator, existingFileHelper));
+		generator.addProvider(true, new GcBlockTagsProvider(generator, existingFileHelper));
+		for (GcLangLocale locale : GcLangLocale.values()) {
+			generator.addProvider(true, new GcLanguageProvider(generator, locale));
+		}
 	}
 	
 	public void onFmlCommonRegistryEvent(FMLCommonSetupEvent event) {

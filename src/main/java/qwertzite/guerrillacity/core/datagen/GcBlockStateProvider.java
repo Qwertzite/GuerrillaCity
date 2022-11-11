@@ -1,7 +1,5 @@
 package qwertzite.guerrillacity.core.datagen;
 
-import java.util.Set;
-
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -13,16 +11,13 @@ import qwertzite.guerrillacity.core.init.BlockRegister;
 
 public class GcBlockStateProvider extends BlockStateProvider {
 
-	private Set<BlockRegister> entries;
-	
-	public GcBlockStateProvider(Set<BlockRegister> entries, DataGenerator gen, ExistingFileHelper exFileHelper) {
+	public GcBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
 		super(gen, GuerrillaCityCore.MODID, exFileHelper);
-		this.entries = entries;
 	}
 
 	@Override
 	protected void registerStatesAndModels() {
-		for (BlockRegister register : entries) {
+		for (BlockRegister register : BlockRegister.getEntries()) {
 			Block block = register.getRegistryObject().get();
 			String name = register.getRegistrykey().location().getPath();
 			ModelFile model;
