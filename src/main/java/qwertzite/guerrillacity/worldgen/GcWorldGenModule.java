@@ -47,7 +47,7 @@ public class GcWorldGenModule extends GcModuleBase {
 		CITY_BIOME = BiomeRegister.register(KEY_CITY_BIOME, () -> CityBiomes.plains(false));
 		SNOWY_CITY_BIOME = BiomeRegister.register(KEY_SNOWY_CITY_BIOME, () -> CityBiomes.plains(true));
 		
-		RegionRegister.register(new CityRegion(REGION_CITY, 5));
+		RegionRegister.register(new CityRegion(REGION_CITY, 5)); // XXX: use config value.
 		SurfaceRuleRegister.register(RuleCategory.OVERWORLD, CitySurfaceRules.makeRules());
 		
 		DeferredRegister<StructurePlacementType<?>> STRUCTURE_PLACEMENT_REGISTER = DeferredRegister.create(Registry.STRUCTURE_PLACEMENT_TYPE_REGISTRY, GuerrillaCityCore.MODID);
