@@ -15,7 +15,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import qwertzite.guerrillacity.core.util.GcConsts;
 import qwertzite.guerrillacity.core.util.PosUtil;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
@@ -75,25 +74,27 @@ public class CityStructureProvider {
 	public static boolean checkChunkApplicaleBiome(LevelAccessor source, ChunkPos chunkPos) {
 		@SuppressWarnings("deprecation")
 		Predicate<Holder<Biome>> validBiome = BuiltinRegistries.BIOME.getOrCreateTag(GcWorldGenModule.TAG_IS_CITY)::contains;
+		
 		int cx = chunkPos.getMinBlockX();
-		int cy = GcConsts.GROUND_HEIGHT;
+		int cy = source.getMinBuildHeight();
+		int my = source.getMaxBuildHeight();
 		int cz = chunkPos.getMinBlockZ();
-		for (int y = 0; y < GcConsts.MAX_BUILDING_HEIGHT; y++) { // outer section
-			for (int w = 0; w < 15; w++) {
-				if (!validBiome.test(source.getNoiseBiome(QuartPos.fromBlock(cx     +w), QuartPos.fromBlock(cy + y), QuartPos.fromBlock(cz       )))) return false;
-				if (!validBiome.test(source.getNoiseBiome(QuartPos.fromBlock(cx +15   ), QuartPos.fromBlock(cy + y), QuartPos.fromBlock(cz     +w)))) return false;
-				if (!validBiome.test(source.getNoiseBiome(QuartPos.fromBlock(cx +15 -w), QuartPos.fromBlock(cy + y), QuartPos.fromBlock(cz +15   )))) return false;
-				if (!validBiome.test(source.getNoiseBiome(QuartPos.fromBlock(cx       ), QuartPos.fromBlock(cy + y), QuartPos.fromBlock(cz +15 -w)))) return false;
-			}
-		}
-		for (int x = 4; x < 16; x += 4) {
-			for (int y = 0; y < GcConsts.MAX_BUILDING_HEIGHT; y += 4) {
-				for (int z = 4; z < 16; z += 4) {
-					if (!validBiome.test(source.getNoiseBiome(QuartPos.fromBlock(cx + x), QuartPos.fromBlock(cy + y), QuartPos.fromBlock(cz + z)))) return false;
+		
+		for (int x = 0; x < 16; x += 4) {
+			for (int y = cy; y < my; y += 4) {
+				for (int z = 0; z < 16; z += 4) {
+					if (!validBiome.test(getBiomeAt(source, cx+x, y, cz+z))) return false;
 				}
 			}
 		}
 		return true;
+	}
+	
+	public static Holder<Biome> getBiomeAt(LevelAccessor source, int x, int y, int z) {
+		Holder<Biome> biome = source.getBiome(new BlockPos(x, y, z));
+		Holder<Biome> noise = source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
+		if (biome.get() != noise.get()) System.out.println("not equal! " + biome + " " + noise);
+		return source.getBiome(new BlockPos(x, y, z));
 	}
 	
 	public static void clearCache() {

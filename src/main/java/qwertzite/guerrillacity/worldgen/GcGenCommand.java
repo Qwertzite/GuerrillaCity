@@ -7,9 +7,11 @@ import com.mojang.brigadier.Command;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.command.CommandOption;
 import qwertzite.guerrillacity.core.init.CommandRegister;
@@ -48,9 +50,12 @@ public class GcGenCommand {
 								.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
 								.setDescription("Position to check.");
 			CommandRegister.$("gen", "check_biome", ctx -> {
-				ChunkPos cp = new ChunkPos(pos.getValue());
+				BlockPos p = pos.getValue();
+				ChunkPos cp = new ChunkPos(p);
 				boolean valid = CityStructureProvider.checkChunkApplicaleBiome(ctx.getSource().getLevel(), cp);
 				ctx.getSource().sendSuccess(Component.literal("%s biome within chunk=%s".formatted(valid ? "Valid" : "Invalid", cp)), true);
+				Holder<Biome> biome = CityStructureProvider.getBiomeAt(ctx.getSource().getLevel(), p.getX(), p.getY(), p.getZ());
+				ctx.getSource().sendSuccess(Component.literal("Biome at pos=%s: %s".formatted(p, biome)), true);
 				return Command.SINGLE_SUCCESS;
 			}).setPermissionLevel(2).addOption(pos)
 			.setUsageString("Checks biome in the chunk which includes the given position.");
