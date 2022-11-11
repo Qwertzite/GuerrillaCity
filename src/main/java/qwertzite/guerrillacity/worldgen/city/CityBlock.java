@@ -1,5 +1,6 @@
 package qwertzite.guerrillacity.worldgen.city;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -171,7 +172,7 @@ public class CityBlock {
 						.filter(e -> e != null)
 						.toList(), e -> e.getDoubleA(), rand, 8)
 				.stream().map(e -> e.getB()).toList();
-		{ // front and back
+		if (roadLevel.get(back) < 100) { // front and back
 			int width = blockWidth;
 			for (var frontArrangement : fronts) {
 				int length = blockLength - frontArrangement.getMaxLength() - 1;
@@ -201,7 +202,7 @@ public class CityBlock {
 				}
 			}
 		}
-		{ // front and side
+		if (roadLevel.get(side1) < 100) { // front and side
 			for (var frontArrangement : fronts) {
 				int width = blockLength - frontArrangement.getMaxLength() - 1;
 				int length = blockWidth;
@@ -233,27 +234,30 @@ public class CityBlock {
 			}
 		}
 		// Tuple<front, side>
-		List<Tuple<BuildingArrangement, BuildingArrangement>> frontSideTuple = fronts.stream()
-				.flatMap(frontArr -> {
-					final int width = blockLength - frontArr.getMaxLength() - 1;
-					final int length = blockWidth;
-					final double baseScore = frontArr.getBaseScore() * this.getRoadCoef(front); // - this.blockShape.getXSpan() * this.blockShape.getYSpan();
-					var arrangement = GcUtil.selectWeightedMultipleRandom(
-							BuildingLoader.getApplicableBuildingSets(width, length).stream()
-							.map(bs -> bs.computeBuildingArrangement(width, arr -> {
-								double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side1);
-								arrScore -= frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise());
-								arrScore -= frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
-								arrScore -= side1 == front.getCounterClockWise() ?
-										arr.getNegativeSideDecraction(arr.getMaxLength() - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()) :
-										arr.getPositiveSideDecraction(arr.getMaxLength() - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
-								return arrScore;
-							}, rand))
-							.filter(e -> e != null)
-							.toList(), e -> e.getDoubleA(), rand, 8);
-					return arrangement.stream().map(arr -> new Tuple<>(frontArr, arr.getB()));
-				}).toList();
-		{	// front side back
+		List<Tuple<BuildingArrangement, BuildingArrangement>> frontSideTuple = Collections.emptyList();
+		if (roadLevel.get(side1) < 100) {
+			frontSideTuple = fronts.stream()
+					.flatMap(frontArr -> {
+						final int width = blockLength - frontArr.getMaxLength() - 1;
+						final int length = blockWidth;
+						final double baseScore = frontArr.getBaseScore() * this.getRoadCoef(front); // - this.blockShape.getXSpan() * this.blockShape.getYSpan();
+						var arrangement = GcUtil.selectWeightedMultipleRandom(
+								BuildingLoader.getApplicableBuildingSets(width, length).stream()
+								.map(bs -> bs.computeBuildingArrangement(width, arr -> {
+									double arrScore = baseScore + arr.getBaseScore() * this.getRoadCoef(side1);
+									arrScore -= frontArr.getNegativeSideDecraction(frontArr.getMaxLength() - frontArr.getNegativeSideLength() + 1) * this.getRoadCoef(front.getCounterClockWise());
+									arrScore -= frontArr.getPositiveSideDecraction(frontArr.getMaxLength() - frontArr.getPositiveSideLength() + 1) * this.getRoadCoef(front.getClockWise());
+									arrScore -= side1 == front.getCounterClockWise() ?
+											arr.getNegativeSideDecraction(arr.getMaxLength() - arr.getNegativeSideLength()) * this.getRoadCoef(side1.getCounterClockWise()) :
+												arr.getPositiveSideDecraction(arr.getMaxLength() - arr.getPositiveSideLength()) * this.getRoadCoef(side1.getClockWise());
+									return arrScore;
+								}, rand))
+								.filter(e -> e != null)
+								.toList(), e -> e.getDoubleA(), rand, 8);
+						return arrangement.stream().map(arr -> new Tuple<>(frontArr, arr.getB()));
+					}).toList();
+		}
+		if (frontSideTuple.size() > 0 && this.roadLevel.get(back) < 100) {	// front side back
 			for (var frontSideArrangement : frontSideTuple) {
 				var frontArr = frontSideArrangement.getA();
 				var sideArr = frontSideArrangement.getB();
@@ -299,7 +303,7 @@ public class CityBlock {
 				}
 			}
 		}
-		{	// front side side
+		if (frontSideTuple.size() > 0 && this.roadLevel.get(side2) < 100) {	// front side side
 			for (var frontSideArrangement : frontSideTuple) {
 				var frontArr = frontSideArrangement.getA();
 				var sideArr = frontSideArrangement.getB();
