@@ -6,6 +6,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
 import qwertzite.guerrillacity.core.GcCommon;
@@ -79,4 +80,5 @@ public class GcCombatModule extends GcModuleBase {
 		.putItemDefinition('s', Items.STICK);
 	}
 	
+	public void init(IEventBus bus) {}
 }

@@ -21,6 +21,7 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.core.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
@@ -148,4 +149,6 @@ public class GcConstructionModule extends GcModuleBase {
 		.addIngredient(empty)
 		.addIngredient(filler);
 	}
+	
+	public void init(IEventBus bus) {}
 }

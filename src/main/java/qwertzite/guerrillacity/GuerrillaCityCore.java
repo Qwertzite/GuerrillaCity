@@ -11,6 +11,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import qwertzite.guerrillacity.combat.GcCombatModule;
@@ -58,31 +59,39 @@ public class GuerrillaCityCore {
 				() -> BootstrapClientSide::new,
 				() -> BootstrapServerSide::new);
 		
-		ModLoadingContext.get().registerConfig(Type.COMMON, ConfigRegister.getConfig());
+		this.registerModModule(new GcWorldGenModule());
+		this.registerModModule(new GcConstructionModule());
+		this.registerModModule(new GcCombatModule());
+		// ...
+		
+		for (var module : this.modules) module.preInit();
 		this.init();
 	}
 	
 	private void init() {
-		GcCommon.onPreInit();
+		ModLoadingContext.get().registerConfig(Type.COMMON, ConfigRegister.getConfig());
 		
-		BuildingLoader.loadResources();
+		GcCommon.onPreInit();
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		bus.addListener(this::onFmlCommonRegistryEvent);
 		bus.register(this);
 		bus.addListener(this::onResourceGeneration);
+		bus.addListener((ModConfigEvent.Loading event) -> this.postInit());
 		
 		BiomeRegister.initialise(bus);
 		ItemRegister.initialise(bus);
 		BlockRegister.initialise(bus);
 		
-		this.registerModModule(new GcWorldGenModule(bus));
-		this.registerModModule(new GcConstructionModule());
-		this.registerModModule(new GcCombatModule());
-		
-		// ...
-		
 		MinecraftForge.EVENT_BUS.addListener(this::onServerStarting);
+		
+		for (var module : this.modules) module.init(bus);
+		
+		BuildingLoader.loadResources();
+	}
+	
+	private void postInit() {
+		for (var module : this.modules) module.postInit();
 	}
 	
 	private void registerModModule(GcModuleBase module) {
