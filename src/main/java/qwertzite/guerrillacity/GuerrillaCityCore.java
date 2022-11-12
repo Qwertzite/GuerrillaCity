@@ -8,7 +8,9 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import qwertzite.guerrillacity.combat.GcCombatModule;
@@ -26,6 +28,7 @@ import qwertzite.guerrillacity.core.datagen.GcRecipeProvider;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.CommandRegister;
+import qwertzite.guerrillacity.core.init.ConfigRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
@@ -55,6 +58,7 @@ public class GuerrillaCityCore {
 				() -> BootstrapClientSide::new,
 				() -> BootstrapServerSide::new);
 		
+		ModLoadingContext.get().registerConfig(Type.COMMON, ConfigRegister.getConfig());
 		this.init();
 	}
 	

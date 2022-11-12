@@ -17,6 +17,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
+import qwertzite.guerrillacity.core.init.ConfigRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
@@ -43,11 +44,13 @@ public class GcWorldGenModule extends GcModuleBase {
 	
 	public static final TagKey<Biome> TAG_IS_CITY = TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(GuerrillaCityCore.MODID, "is_city"));
 	
+	public static ConfigRegister<Integer> CITY_REGION_WEIGHT = ConfigRegister.intConfig("gen", "region_weight", 4, 1, Integer.MAX_VALUE, "The amount of city region.\nThe larger the more city region.");
+	
 	public GcWorldGenModule(IEventBus bus) {
 		CITY_BIOME = BiomeRegister.register(KEY_CITY_BIOME, () -> CityBiomes.plains(false));
 		SNOWY_CITY_BIOME = BiomeRegister.register(KEY_SNOWY_CITY_BIOME, () -> CityBiomes.plains(true));
 		
-		RegionRegister.register(new CityRegion(REGION_CITY, 5)); // XXX: use config value.
+		RegionRegister.register(new CityRegion(REGION_CITY, CITY_REGION_WEIGHT.getValue()));
 		SurfaceRuleRegister.register(RuleCategory.OVERWORLD, CitySurfaceRules.makeRules());
 		
 		DeferredRegister<StructurePlacementType<?>> STRUCTURE_PLACEMENT_REGISTER = DeferredRegister.create(Registry.STRUCTURE_PLACEMENT_TYPE_REGISTRY, GuerrillaCityCore.MODID);
