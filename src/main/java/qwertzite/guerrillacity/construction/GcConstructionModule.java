@@ -44,6 +44,7 @@ public class GcConstructionModule extends GcModuleBase {
 	public static final ResourceKey<Block> KEY_SAND_GABION = BlockRegister.registryKey("gabion_sand");
 	public static final ResourceKey<Block> KEY_TARMAC = BlockRegister.registryKey("tarmac");
 	public static final ResourceKey<Block> KEY_WATER_BOUND_GRAVEL = BlockRegister.registryKey("water_bound_gravel");
+	public static final ResourceKey<Block> KEY_REINFORCED_CONCRETE = BlockRegister.registryKey("reinforced_concrete");
 	
 	public static final RegistryObject<Item> WHITE_EMPTY_GABION = 
 			ItemRegister.$(KEY_WHITE_EMPTY_GABION, () -> new Item(new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
@@ -102,6 +103,14 @@ public class GcConstructionModule extends GcModuleBase {
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(Blocks.GRAVEL)))
 					.withPool(LootPool.lootPool().when(HAS_SILK_TOUCH.invert()).when(LootItemRandomChanceCondition.randomChance(0.25F)).add(LootItem.lootTableItem(Items.CLAY_BALL))))
 			.setLocalisedNameEn("Water-bound Gravel").setLocalisedName(GcLangLocale.JP_JP, "水締めマカダム")
+			.register();
+	
+	public static final RegistryObject<Block> REINFORCED_CONCRETE = BlockRegister.$(KEY_REINFORCED_CONCRETE,
+			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(1.5f, 4.0f).sound(SoundType.STONE)))
+			.setModel(new ModelCubeAll("reinforced_concrete"))
+			.setTab(GcCommon.GC_CREATIVE_TAB)
+			.addToTag(BlockTags.MINEABLE_WITH_PICKAXE)
+			.setLocalisedNameEn("Reinforced Concrete").setLocalisedName(GcLangLocale.JP_JP, "鉄筋コンクリート")
 			.register();
 	
 	static {

@@ -43,7 +43,7 @@ public class BuildingType {
 		int zSize =    dir.getStepX() * wid - dir.getStepZ() * len;
 		
 		Rectangle bb = Rectangle.area(pos.getX(), pos.getZ(), pos.getX() + xSize, pos.getZ() + zSize);
-		return new DummyBuilding(bb, pos.getY(), blockState, pos, dir);
+		return new DummyBuilding(bb, pos.getY(), blockState, pos, dir, seed);
 	}
 	
 	public static record MarginSettings(int negveSideMinMargin, int negveSideMaxMargin, int posveSideMinMargin, int posveSideMaxMargin) {
