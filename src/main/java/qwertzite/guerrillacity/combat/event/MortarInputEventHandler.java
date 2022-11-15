@@ -8,9 +8,11 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
+import qwertzite.guerrillacity.combat.network.Mortar120mmCtrlPacket;
 import qwertzite.guerrillacity.core.common.GcKeyBindings;
+import qwertzite.guerrillacity.core.network.GcNetwork;
 
-public class CombatInputEventHandler {
+public class MortarInputEventHandler {
 
 	@SubscribeEvent
 	public void onClientTick(ClientTickEvent event) {
@@ -28,15 +30,9 @@ public class CombatInputEventHandler {
 				Entity e = ((EntityHitResult) mc.hitResult).getEntity();
 				if (e instanceof Mortar120mmEntity mortar) {
 					mortar.processInput(elev, yaw, mc.options.keyShift.isDown());
-					System.out.println("Handled! %d %d %s".formatted(elev, yaw, mc.options.keyShift.isDown()));
-//					PacketDispatcher.packet(new PacketMortar120M120Ctrl(e.getEntityId(), elev, yaw, mc.gameSettings.keyBindSneak.isKeyDown())).sendToServer();;
-					// TODO: send packet to server
+					GcNetwork.sendToServer(new Mortar120mmCtrlPacket(e.getId(), elev, yaw, mc.options.keyShift.isDown()));
 				}
 			}
-			
-
 		}
-		
 	}
-	
 }

@@ -6,7 +6,6 @@ public abstract class GcModuleBase {
 	
 	public GcModuleBase() {}
 	
-	public void preInit() {}
 	public abstract void init(IEventBus bus);
 	public void postInit() {}
 }

@@ -65,7 +65,7 @@ public class Mortar120mmEntity extends Entity {
 	
 	@Override
 	protected void defineSynchedData() {
-		this.entityData.define(ELEVATION, (ELEVATION_MAX + ELEVATION_MIN)/2); // TODO: make this to elev_max
+		this.entityData.define(ELEVATION, ELEVATION_MAX);
 		this.entityData.define(BASE_YAW, Integer.valueOf(0));
 		this.entityData.define(FINE_YAW, Integer.valueOf(0));
 		this.entityData.define(FIRING_STATUS, Integer.valueOf(0));

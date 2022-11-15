@@ -12,10 +12,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
-import qwertzite.guerrillacity.combat.event.CombatInputEventHandler;
+import qwertzite.guerrillacity.combat.event.MortarInputEventHandler;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
 import qwertzite.guerrillacity.combat.item.Mortar120mmItem;
 import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
+import qwertzite.guerrillacity.combat.network.Mortar120mmCtrlPacket;
 import qwertzite.guerrillacity.combat.renderer.Mortar120mmRenderer;
 import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
@@ -23,6 +24,7 @@ import qwertzite.guerrillacity.core.init.EntityRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RecipeRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
+import qwertzite.guerrillacity.core.network.GcNetwork;
 
 public class GcCombatModule extends GcModuleBase {
 	
@@ -109,7 +111,8 @@ public class GcCombatModule extends GcModuleBase {
 	}
 	
 	public GcCombatModule() {
-		MinecraftForge.EVENT_BUS.register(new CombatInputEventHandler());
+		MinecraftForge.EVENT_BUS.register(new MortarInputEventHandler());
+		GcNetwork.registerpacket(Mortar120mmCtrlPacket.class);
 	}
 	
 	public void init(IEventBus bus) {}
