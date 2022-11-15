@@ -3,14 +3,23 @@ package qwertzite.guerrillacity.combat;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
+import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
+import qwertzite.guerrillacity.combat.event.CombatInputEventHandler;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
-import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.combat.item.Mortar120mmItem;
+import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
+import qwertzite.guerrillacity.combat.renderer.Mortar120mmRenderer;
+import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
+import qwertzite.guerrillacity.core.init.EntityRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.RecipeRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
@@ -23,6 +32,10 @@ public class GcCombatModule extends GcModuleBase {
 	public static final ResourceKey<Item> KEY_COMBAT_SHOVEL_IRON = ItemRegister.registryKey("iron_combat_shovel");
 	public static final ResourceKey<Item> KEY_COMBAT_SHOVEL_DIAMOND = ItemRegister.registryKey("diamond_combat_shovel");
 	public static final ResourceKey<Item> KEY_COMBAT_SHOVEL_NETHERITE = ItemRegister.registryKey("netherite_combat_shovel");
+	
+	public static final ResourceKey<Item> KEY_MORTAR_120MM = ItemRegister.registryKey("mortar_120mm"); // M120
+	public static final ResourceKey<Item> KEY_MORTAR_SHELL_120MM_HE = ItemRegister.registryKey("mortar_shell_120mm_he"); // M933
+	public static final ResourceKey<EntityType<?>> KEY_MORTAR_120MM_ENTITY = EntityRegister.registryKey("mortar_120mm");
 	
 	public static final RegistryObject<Item> COMBAT_SHOVEL_WOOD = ItemRegister.$(KEY_COMBAT_SHOVEL_WOOD,
 			() -> new CombatShovelItem(Tiers.WOOD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
@@ -43,6 +56,19 @@ public class GcCombatModule extends GcModuleBase {
 			() -> new CombatShovelItem(Tiers.NETHERITE, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
 			.setLocalisedNameEn("Netherite Combat Shovel").setLocalisedName(GcLangLocale.JP_JP, "ネザライトの戦闘円匙").register();
 	
+	public static final RegistryObject<Item> MORTAR_120MM = ItemRegister.$(KEY_MORTAR_120MM, 
+			() -> new Mortar120mmItem(new Item.Properties().stacksTo(1).tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("120mm Mortar").setLocalisedName(GcLangLocale.JP_JP, "120mm 迫撃砲").register();
+	public static final RegistryObject<Item> MORTAR_SHELL_120MM_HE = ItemRegister.$(KEY_MORTAR_SHELL_120MM_HE,
+			() -> new Item(new Item.Properties().stacksTo(4).tab(GcCommon.GC_CREATIVE_TAB)))
+			.setLocalisedNameEn("120mm HE Mortar Shell").setLocalisedName(GcLangLocale.JP_JP, "120mm 迫撃砲 HE弾").register();
+	
+	public static final RegistryObject<EntityType<Mortar120mmEntity>> MORTAR_120MM_ENTITY = EntityRegister.$(KEY_MORTAR_120MM_ENTITY,
+			() -> EntityType.Builder.<Mortar120mmEntity>of(Mortar120mmEntity::new, MobCategory.MISC).sized(1.0f, 1.4f).clientTrackingRange(8).build(KEY_MORTAR_120MM_ENTITY.toString()),
+			m -> new Mortar120mmRenderer(m))
+			.addModelLayer(Mortar120mmModel.MORTAR_MODEL, Mortar120mmModel::create)
+			.build();
+	
 	static {
 		combatShovelRecipe("wooden", COMBAT_SHOVEL_WOOD, ItemTags.PLANKS);
 		combatShovelRecipe("stone", COMBAT_SHOVEL_STONE, ItemTags.STONE_TOOL_MATERIALS);
@@ -54,6 +80,8 @@ public class GcCombatModule extends GcModuleBase {
 		.setGroup("combat_shovel")
 		.setBaseItem(COMBAT_SHOVEL_DIAMOND)
 		.setMaterial(Items.NETHERITE_INGOT);
+		
+		// TODO: shell recipe, mortar recipe
 	}
 	
 	private static void combatShovelRecipe(String name, RegistryObject<Item> shovel, Item item) {
@@ -78,6 +106,10 @@ public class GcCombatModule extends GcModuleBase {
 				" s ")
 		.putItemDefinition('E', item)
 		.putItemDefinition('s', Items.STICK);
+	}
+	
+	public GcCombatModule() {
+		MinecraftForge.EVENT_BUS.register(new CombatInputEventHandler());
 	}
 	
 	public void init(IEventBus bus) {}

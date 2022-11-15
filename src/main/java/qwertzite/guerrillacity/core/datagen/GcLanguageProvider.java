@@ -5,6 +5,7 @@ import net.minecraftforge.common.data.LanguageProvider;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
+import qwertzite.guerrillacity.core.init.KeyBindingRegister;
 
 public class GcLanguageProvider extends LanguageProvider {
 	
@@ -23,6 +24,13 @@ public class GcLanguageProvider extends LanguageProvider {
 		}
 		for (var register : ItemRegister.getEntries()) {
 			if (register.getLocalName(this.locale) != null) this.addItem(register.getRegistryObject(), register.getLocalName(this.locale));
+		}
+		
+		{
+			if (KeyBindingRegister.LOCAL_CATEGORY_NAME.containsKey(this.locale)) this.add(KeyBindingRegister.CATEGORY_KEY, KeyBindingRegister.LOCAL_CATEGORY_NAME.get(this.locale));
+		}
+		for (var register : KeyBindingRegister.ENTRY) {
+			if (register.getLocalName(this.locale) != null) this.add(register.getRegistrykey(), register.getLocalName(this.locale));
 		}
 	}
 

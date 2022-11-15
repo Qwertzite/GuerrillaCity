@@ -123,7 +123,7 @@ public class CommandRegister {
 	}
 	
 	private void build(ModuleCache cache) {
-		ModLog.info("Added command {}.{}.{}", "gc", this.moduleName, this.name);
+		ModLog.info("Added command %s.%s.%s", "gc", this.moduleName, this.name);
 		
 		Command<CommandSourceStack> command = this::executeCommand;
 		

@@ -1,4 +1,4 @@
-package qwertzite.guerrillacity.core;
+package qwertzite.guerrillacity.core.common;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -17,10 +17,5 @@ public class GcCommon {
 		}
 	};
 	
-	public static void onPreInit() {
-		
-		
-		
-	}
-	
+
 }

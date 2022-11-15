@@ -39,19 +39,24 @@ public class DummyBuilding extends CityElement {
 	@Override
 	public void generate(CityGenContext context) {
 		Rectangle bb = this.getCircumBox();
-		for (int x = bb.getMinX(); x <= bb.getMaxX(); x++) {
-			for (int z = bb.getMinY(); z <= bb.getMaxY(); z++) {
-				for (int y = this.y-1; y <= this.y; y++) {
-					context.setBlockState(new BlockPos(x, y, z), this.state);
-				}
-			}
-		}
+//		for (int x = bb.getMinX(); x <= bb.getMaxX(); x++) {
+//			for (int z = bb.getMinY(); z <= bb.getMaxY(); z++) {
+//				for (int y = this.y-1; y <= this.y; y++) {
+//					context.setBlockState(new BlockPos(x, y, z), this.state);
+//				}
+//			}
+//		}
 		BlockState state = Blocks.REDSTONE_BLOCK.defaultBlockState();
 		BlockState concrete = GcConstructionModule.REINFORCED_CONCRETE.get().defaultBlockState();
 		context.setBlockState(new BlockPos(bb.getMinX(), this.y+1, bb.getMinY()), concrete);
 		context.pushMatrix();
 		context.translate(bb.getMinX(), this.y, bb.getMinY());
 		context.setBlockState(new BlockPos(bb.getMinX(), 2, bb.getMinY()), state);
+		for (int x = 0; x < bb.getXSpan(); x++) {
+			for (int z = 0; z < bb.getYSpan(); z++) {
+				context.setBlockState(new BlockPos(x, -1, z), concrete);
+			}
+		}
 		for (int s = 0; s < this.stories; s++) {
 			for (int y = 0; y < 4; y++) {
 				for (int x = 0; x < bb.getXSpan()-2; x += 2) {

@@ -23,7 +23,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
-import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.datagen.ModelCubeAll;
 import qwertzite.guerrillacity.core.datagen.ModelCubeBottomTop;
@@ -106,7 +106,7 @@ public class GcConstructionModule extends GcModuleBase {
 			.register();
 	
 	public static final RegistryObject<Block> REINFORCED_CONCRETE = BlockRegister.$(KEY_REINFORCED_CONCRETE,
-			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(1.5f, 4.0f).sound(SoundType.STONE)))
+			() -> new Block(BlockBehaviour.Properties.of(Material.STONE).strength(2.0f, 6.0f).sound(SoundType.STONE)))
 			.setModel(new ModelCubeAll("reinforced_concrete"))
 			.setTab(GcCommon.GC_CREATIVE_TAB)
 			.addToTag(BlockTags.MINEABLE_WITH_PICKAXE)

@@ -3,10 +3,13 @@ package qwertzite.guerrillacity;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +22,8 @@ import qwertzite.guerrillacity.construction.GcConstructionModule;
 import qwertzite.guerrillacity.core.BootstrapClientSide;
 import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
-import qwertzite.guerrillacity.core.GcCommon;
+import qwertzite.guerrillacity.core.common.GcCommon;
+import qwertzite.guerrillacity.core.common.GcKeyBindings;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
 import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
@@ -30,7 +34,9 @@ import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.CommandRegister;
 import qwertzite.guerrillacity.core.init.ConfigRegister;
+import qwertzite.guerrillacity.core.init.EntityRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
+import qwertzite.guerrillacity.core.init.KeyBindingRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
@@ -59,6 +65,8 @@ public class GuerrillaCityCore {
 				() -> BootstrapClientSide::new,
 				() -> BootstrapServerSide::new);
 		
+		new GcCommon();
+		new GcKeyBindings();
 		this.registerModModule(new GcWorldGenModule());
 		this.registerModModule(new GcConstructionModule());
 		this.registerModModule(new GcCombatModule());
@@ -71,8 +79,6 @@ public class GuerrillaCityCore {
 	private void init() {
 		ModLoadingContext.get().registerConfig(Type.COMMON, ConfigRegister.getConfig());
 		
-		GcCommon.onPreInit();
-		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		bus.addListener(this::onFmlCommonRegistryEvent);
 		bus.register(this);
@@ -82,6 +88,7 @@ public class GuerrillaCityCore {
 		BiomeRegister.initialise(bus);
 		ItemRegister.initialise(bus);
 		BlockRegister.initialise(bus);
+		EntityRegister.initialise(bus);
 		
 		MinecraftForge.EVENT_BUS.addListener(this::onServerStarting);
 		
@@ -122,5 +129,23 @@ public class GuerrillaCityCore {
 	public void onServerStarting(ServerStartingEvent event) {
 		CommandRegister.onServerStarting(event);
 	}
-
+	
+	@SubscribeEvent
+	public void onRendererRegisterEvent(EntityRenderersEvent.RegisterRenderers event) {
+		EntityRegister.registerRenderer(event);
+	}
+	
+	@SubscribeEvent
+	public void onLayerRegisterEvent(EntityRenderersEvent.RegisterLayerDefinitions event) {
+		EntityRegister.registerLayer(event);
+	}
+	
+//	@OnlyIn(Dist.CLIENT)
+	@SubscribeEvent
+	public void registerBindings(RegisterKeyMappingsEvent event) {
+		System.out.println("register binding " + KeyBindingRegister.ENTRY.size());// DEBUG
+		for (var register : KeyBindingRegister.ENTRY) {
+			event.register(register.getMapping());
+		}
+	}
 }
