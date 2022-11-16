@@ -68,7 +68,6 @@ public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity> {
 	}
 	
 	private ModelPart root;
-	private ModelPart basePlate;
 	private ModelPart breechCap;
 	private ModelPart traverseGear;
 	private ModelPart bipodJoint;
@@ -77,7 +76,6 @@ public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity> {
 	public Mortar120mmModel(ModelPart root) {
 		this.root = root;
 		// base plate
-		this.basePlate = root.getChild("base_plate");
 		// barrel assembly
 		this.breechCap = root.getChild("breech_cap");
 		this.traverseGear = root.getChild("traverse_gear");

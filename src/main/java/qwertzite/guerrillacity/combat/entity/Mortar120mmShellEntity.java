@@ -88,7 +88,6 @@ public class Mortar120mmShellEntity extends Projectile {
 				.scale(velocity);
 		this.setDeltaMovement(vec3);
 		this.setupRotation();
-		System.out.println("" + this.xRotO + " " + this.yRotO);
 	}
 
 	@Override
@@ -111,15 +110,6 @@ public class Mortar120mmShellEntity extends Projectile {
 		if (entityhitresult != null) {
 			hitresult = entityhitresult;
 		}
-		
-//        if (hitresult != null && hitresult.getType() == HitResult.Type.ENTITY) {
-//            Entity entity = ((EntityHitResult)hitresult).getEntity();
-//            Entity entity1 = this.getOwner();
-//            if (entity instanceof Player && entity1 instanceof Player && !((Player)entity1).canHarmPlayer((Player)entity)) {
-//               hitresult = null;
-//               entityhitresult = null;
-//            } TODO: exclude fired mortar
-//         }
 		
 		if (hitresult != null && hitresult.getType() != HitResult.Type.MISS && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, hitresult)) {
 			this.onHit(hitresult);
@@ -185,7 +175,7 @@ public class Mortar120mmShellEntity extends Projectile {
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compound) {
-		this.readAdditionalSaveData(compound);
+		super.readAdditionalSaveData(compound);
 	}
 	
 	/**

@@ -27,7 +27,7 @@ import qwertzite.guerrillacity.combat.GcCombatModule;
 import qwertzite.guerrillacity.core.util.math.GcMath;
 
 public class Mortar120mmEntity extends Entity {
-	private static final float GRAVITY = 9.8f *0.1f / (5*5);
+	public static final float GRAVITY = 9.8f *0.1f / (5*5);
 
 	public static final int ELEVATION_MIN = 710;
 	public static final int ELEVATION_MAX = 1450;
@@ -45,7 +45,7 @@ public class Mortar120mmEntity extends Entity {
 	private static final EntityDataAccessor<Integer> FIRING_STATUS = SynchedEntityData.defineId(Mortar120mmEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> DAMAGE = SynchedEntityData.defineId(Mortar120mmEntity.class, EntityDataSerializers.FLOAT);
 	
-	private ItemStack nextShell;
+//	private ItemStack nextShell;
 	private int elevMovement;
 	private int yawMovement;
 	private boolean coarseMovement;
@@ -178,20 +178,19 @@ public class Mortar120mmEntity extends Entity {
 					float elevation = this.getElevation() / 1000.0f;
 					int yawMil = this.getBaseYaw() + this.getFineYaw();
 					float yaw = yawMil / 1000.0f;
-					float fpx = 53.0f/16.0f * Mth.cos(elevation);
-					float fpy = 4.0f/16.0f + 53.0f/16.0f * Mth.sin(elevation);
+					float fpx = 53.0f/32.0f * Mth.cos(elevation);
+					float fpy = 4.0f/32.0f + 53.0f/32.0f * Mth.sin(elevation);
 					float fpz = fpx * Mth.cos(yaw);
 					fpx =  -fpx * Mth.sin(yaw);
 					fpx += this.xo;
 					fpy += this.yo;
 					fpz += this.zo;
-					System.out.println("yaw=" + (yaw * GcMath.RAD2DEG));
 					Mortar120mmShellEntity entity = new Mortar120mmShellEntity(GcCombatModule.MORTAR_120MM_SHELL_ENTITY.get(), fpx, fpy, fpz, this.getLevel());
 					entity.shoot(this, this.getElevation(), yawMil, 0);
 					this.level.addFreshEntity(entity);
 //					AcExplosions.dummyExplosion(this.getEntityWorld(), this, fpx, fpy, fpz, 1.0f, true); TODO: fire sequence
 				}
-				this.nextShell = ItemStack.EMPTY;
+//				this.nextShell = ItemStack.EMPTY;
 			}
 			step--;
 			this.setFiringStatus(step);
@@ -266,7 +265,7 @@ public class Mortar120mmEntity extends Entity {
 			if (!this.level.isClientSide) {
 				this.setFiringStatus(FIRING_INTERVAL);
 			}
-			this.nextShell = stack.copy();
+//			this.nextShell = stack.copy();
 			player.awardStat(Stats.ITEM_USED.get(item));
 			return InteractionResult.CONSUME;
 		}

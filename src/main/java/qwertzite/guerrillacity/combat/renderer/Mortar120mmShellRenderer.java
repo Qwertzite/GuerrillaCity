@@ -32,7 +32,7 @@ public class Mortar120mmShellRenderer extends EntityRenderer<Mortar120mmShellEnt
 		stack.pushPose();
 		stack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(partialTicks, entity.yRotO, entity.getYRot())));
 		stack.mulPose(Vector3f.XP.rotationDegrees(-Mth.lerp(partialTicks, entity.xRotO, entity.getXRot())));
-		
+		stack.scale(0.5f, 0.5f, 0.5f);
 		
 		VertexConsumer vertexconsumer = buffers.getBuffer(this.model.renderType(this.getTextureLocation(entity)));
 		this.model.renderToBuffer(stack, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

@@ -12,9 +12,11 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
+import qwertzite.guerrillacity.combat.entity.Mortar120mmShellEntity;
 import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
 import qwertzite.guerrillacity.combat.model.Mortar120mmShellModel;
 import qwertzite.guerrillacity.core.util.math.GcMath;
@@ -23,7 +25,7 @@ import qwertzite.guerrillacity.core.util.math.GcMath;
 public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 	
 	private static final ResourceLocation TEXTURE = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_120mm.png");
-	private static final ResourceLocation SHELL = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_shell_120mm.png");
+	private static final ResourceLocation SHELL = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_shell_120mm_he.png");
 	protected Mortar120mmModel model;
 	protected Mortar120mmShellModel shell;
 	
@@ -40,29 +42,30 @@ public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 	public void render(Mortar120mmEntity entity, float entityYaw, float partialTicks, PoseStack stack, MultiBufferSource buffers, int light) {
 		stack.pushPose();
 		stack.mulPose(Vector3f.YP.rotationDegrees(-entity.getBaseYaw() / 1000.0f * GcMath.RAD2DEG));
+		stack.scale(0.5f, 0.5f, 0.5f);
 		
 		this.model.setupAnim(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-		
 		VertexConsumer vertexconsumer = buffers.getBuffer(this.model.renderType(this.getTextureLocation(entity)));
 		this.model.renderToBuffer(stack, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-
-//		float status = entity.getFiringStatus(); // TODO render shell
-//		if (status != 0) {
-//			status = Mortar120mmEntity.FIRING_INTERVAL - status - partialTicks;
-//			status = status * (status + 1) / 2;
-//			if (status * Mortar120mmEntity.GRAVITY < 36 / 32.0f)
-//			{
-//				float elevation = entity.getElevation();
-//				float barrelPos = (20.0f + 53.0f) / 32.0f - status * Entity120mmMortarShellM933HE.GRAVITY;
-//				float hor = barrelPos * Mth.cos(elevation / 1000.0f);
-//				float ver = 4.0f/32.0f + barrelPos * Mth.sin(elevation / 1000.0f);
-//				this.setupRotation(entity, entity.getFineYaw() / 1000.0f * GcMath.RAD2DEG, partialTicks);
-//				GlStateManager.translate(0.0f, ver, hor);
-//				
-//				this.bindTexture(SHELL);
-//				this.shell.render(entity, 0.0f, 0.0f, 0.0f, 0.0f, -elevation / 1000.0f * GcMath.RAD2DEG, 1.0f / 40);
-//			}
-//		}
+		
+		float status = entity.getFiringStatus(); // TODO render shell
+		if (status != 0) {
+			status = Mortar120mmEntity.FIRING_INTERVAL - status + partialTicks;
+			status = status * (status + 1) / 2;
+			if (status * Mortar120mmEntity.GRAVITY < 36 / 16.0f) {
+				float elevation = entity.getElevation();
+				float barrelPos = (20.0f + 53.0f) / 16.0f - status * Mortar120mmShellEntity.GRAVITY;
+				float hor = barrelPos * Mth.cos(elevation / 1000.0f);
+				float ver = 4.0f/16.0f + barrelPos * Mth.sin(elevation / 1000.0f);
+				stack.mulPose(Vector3f.YP.rotationDegrees(-entity.getFineYaw() / 1000.0f * GcMath.RAD2DEG));
+				stack.translate(0.0d, ver, hor);
+				stack.mulPose(Vector3f.XP.rotationDegrees(-elevation / 1000.0f * GcMath.RAD2DEG));
+				stack.scale(16/20.0f, 16/20.0f, 16/20.0f);
+				
+				VertexConsumer shellVetexConsumer = buffers.getBuffer(this.shell.renderType(SHELL));
+				this.shell.renderToBuffer(stack, shellVetexConsumer, light, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+			}
+		}
 		
 		stack.popPose();
 		
