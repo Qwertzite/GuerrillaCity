@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,7 +30,7 @@ public class Mortar120mmEntity extends Entity {
 	private static final float GRAVITY = 9.8f *0.1f / (5*5);
 
 	public static final int ELEVATION_MIN = 710;
-	public static final int ELEVATION_MAX = 1510;
+	public static final int ELEVATION_MAX = 1450;
 	public static final int ELEVATION_STP = 5;
 	public static final int AZIMUTH_RANGE = 145;
 	public static final int AZIMUTH_COARSE = 50;
@@ -174,20 +175,21 @@ public class Mortar120mmEntity extends Entity {
 		if (step > 0) {
 			if (step == 3) {
 				if (!this.getLevel().isClientSide()) {
-//					float elevation = this.getElevation() / 1000.0f;
-//					int yawMil = this.getBaseYaw() + this.getFineYaw();
-//					float yaw = yawMil / 1000.0f;
-//					float fpx = 53.0f/32.0f * Mth.cos(elevation);
-//					float fpy = 4.0f/32.0f + 53.0f/32.0f * Mth.sin(elevation);
-//					float fpz = fpx * Mth.cos(yaw);
-//					fpx =  -fpx * Mth.sin(yaw);
-//					fpx += this.posX;
-//					fpy += this.posY;
-//					fpz += this.posZ;
-//					Entity120mmMortarShellM933HE entity = new Entity120mmMortarShellM933HE(this.getEntityWorld(), fpx, fpy, fpz);
-//					entity.shoot(this, -this.getElevation(), yawMil, this.nextShell.getMetadata());
-//					this.getLevel().spawnEntity(entity);
-//					AcExplosions.dummyExplosion(this.getEntityWorld(), this, fpx, fpy, fpz, 1.0f, true);
+					float elevation = this.getElevation() / 1000.0f;
+					int yawMil = this.getBaseYaw() + this.getFineYaw();
+					float yaw = yawMil / 1000.0f;
+					float fpx = 53.0f/16.0f * Mth.cos(elevation);
+					float fpy = 4.0f/16.0f + 53.0f/16.0f * Mth.sin(elevation);
+					float fpz = fpx * Mth.cos(yaw);
+					fpx =  -fpx * Mth.sin(yaw);
+					fpx += this.xo;
+					fpy += this.yo;
+					fpz += this.zo;
+					System.out.println("yaw=" + (yaw * GcMath.RAD2DEG));
+					Mortar120mmShellEntity entity = new Mortar120mmShellEntity(GcCombatModule.MORTAR_120MM_SHELL_ENTITY.get(), fpx, fpy, fpz, this.getLevel());
+					entity.shoot(this, this.getElevation(), yawMil, 0);
+					this.level.addFreshEntity(entity);
+//					AcExplosions.dummyExplosion(this.getEntityWorld(), this, fpx, fpy, fpz, 1.0f, true); TODO: fire sequence
 				}
 				this.nextShell = ItemStack.EMPTY;
 			}

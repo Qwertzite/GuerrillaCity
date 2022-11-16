@@ -16,19 +16,21 @@ import net.minecraft.world.phys.Vec3;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
 import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
+import qwertzite.guerrillacity.combat.model.Mortar120mmShellModel;
 import qwertzite.guerrillacity.core.util.math.GcMath;
 
 
 public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 	
 	private static final ResourceLocation TEXTURE = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_120mm.png");
-//	private static final ResourceLocation SHELL = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_shell_120mm.png");
+	private static final ResourceLocation SHELL = new ResourceLocation(GuerrillaCityCore.MODID, "textures/entity/mortar_shell_120mm.png");
 	protected Mortar120mmModel model;
-//	protected MortarShell120mmHEModel shell = new MortarShell120mmHEModel();
+	protected Mortar120mmShellModel shell;
 	
 	public Mortar120mmRenderer(Context context) {
 		super(context);
 		this.model = new Mortar120mmModel(context.bakeLayer(Mortar120mmModel.MORTAR_MODEL));
+		this.shell = new Mortar120mmShellModel(context.bakeLayer(Mortar120mmShellModel.SHELL_MODEL));
 	}
 	
 	/**
@@ -37,14 +39,14 @@ public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 	@Override
 	public void render(Mortar120mmEntity entity, float entityYaw, float partialTicks, PoseStack stack, MultiBufferSource buffers, int light) {
 		stack.pushPose();
-		stack.mulPose(Vector3f.YP.rotationDegrees(180.0F - entity.getBaseYaw() / 1000.0f * GcMath.RAD2DEG));
+		stack.mulPose(Vector3f.YP.rotationDegrees(-entity.getBaseYaw() / 1000.0f * GcMath.RAD2DEG));
 		
 		this.model.setupAnim(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		
 		VertexConsumer vertexconsumer = buffers.getBuffer(this.model.renderType(this.getTextureLocation(entity)));
 		this.model.renderToBuffer(stack, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 
-//		float status = entity.getFiringStatus();
+//		float status = entity.getFiringStatus(); // TODO render shell
 //		if (status != 0) {
 //			status = Mortar120mmEntity.FIRING_INTERVAL - status - partialTicks;
 //			status = status * (status + 1) / 2;
@@ -64,7 +66,7 @@ public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 		
 		stack.popPose();
 		
-//		if (Minecraft.getInstance().objectMouseOver.entityHit == entity) {
+//		if (Minecraft.getInstance().objectMouseOver.entityHit == entity) { // TODO: render ballistic path
 //			this.computeAndRenderTrajectory(entity, entity.getElevation(), entity.getBaseYaw() + entity.getFineYaw());
 //		}
 		

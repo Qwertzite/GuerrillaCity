@@ -12,12 +12,15 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
+import qwertzite.guerrillacity.combat.entity.Mortar120mmShellEntity;
 import qwertzite.guerrillacity.combat.event.MortarInputEventHandler;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
 import qwertzite.guerrillacity.combat.item.Mortar120mmItem;
 import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
+import qwertzite.guerrillacity.combat.model.Mortar120mmShellModel;
 import qwertzite.guerrillacity.combat.network.Mortar120mmCtrlPacket;
 import qwertzite.guerrillacity.combat.renderer.Mortar120mmRenderer;
+import qwertzite.guerrillacity.combat.renderer.Mortar120mmShellRenderer;
 import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.init.EntityRegister;
@@ -38,6 +41,7 @@ public class GcCombatModule extends GcModuleBase {
 	public static final ResourceKey<Item> KEY_MORTAR_120MM = ItemRegister.registryKey("mortar_120mm"); // M120
 	public static final ResourceKey<Item> KEY_MORTAR_SHELL_120MM_HE = ItemRegister.registryKey("mortar_shell_120mm_he"); // M933
 	public static final ResourceKey<EntityType<?>> KEY_MORTAR_120MM_ENTITY = EntityRegister.registryKey("mortar_120mm");
+	public static final ResourceKey<EntityType<?>> KEY_MORTAR_120MM_SHELL_ENTITY = EntityRegister.registryKey("mortar_120mm_shell");
 	
 	public static final RegistryObject<Item> COMBAT_SHOVEL_WOOD = ItemRegister.$(KEY_COMBAT_SHOVEL_WOOD,
 			() -> new CombatShovelItem(Tiers.WOOD, 2.0f, -2.5f, new Item.Properties().tab(GcCommon.GC_CREATIVE_TAB)))
@@ -69,6 +73,12 @@ public class GcCombatModule extends GcModuleBase {
 			() -> EntityType.Builder.<Mortar120mmEntity>of(Mortar120mmEntity::new, MobCategory.MISC).sized(1.0f, 1.4f).clientTrackingRange(8).build(KEY_MORTAR_120MM_ENTITY.toString()),
 			m -> new Mortar120mmRenderer(m))
 			.addModelLayer(Mortar120mmModel.MORTAR_MODEL, Mortar120mmModel::create)
+			.build();
+	
+	public static final RegistryObject<EntityType<Mortar120mmShellEntity>> MORTAR_120MM_SHELL_ENTITY = EntityRegister.$(KEY_MORTAR_120MM_SHELL_ENTITY,
+			() -> EntityType.Builder.<Mortar120mmShellEntity>of(Mortar120mmShellEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).build(KEY_MORTAR_120MM_SHELL_ENTITY.toString()),
+			m -> new Mortar120mmShellRenderer(m))
+			.addModelLayer(Mortar120mmShellModel.SHELL_MODEL, Mortar120mmShellModel::create)
 			.build();
 	
 	static {

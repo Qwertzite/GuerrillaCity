@@ -13,7 +13,7 @@ import qwertzite.guerrillacity.combat.GcCombatModule;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
 import qwertzite.guerrillacity.core.util.math.GcMath;
 
-public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity>{
+public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity> {
 	public static final ModelLayerLocation MORTAR_MODEL = new ModelLayerLocation(GcCombatModule.KEY_MORTAR_120MM_ENTITY.location(), "main");
 
 	private static final int TEXTURE_WIDTH = 256;
@@ -68,10 +68,10 @@ public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity>{
 	}
 	
 	private ModelPart root;
-	public ModelPart basePlate;
-	public ModelPart breechCap;
-	public ModelPart traverseGear;
-	public ModelPart bipodJoint;
+	private ModelPart basePlate;
+	private ModelPart breechCap;
+	private ModelPart traverseGear;
+	private ModelPart bipodJoint;
 	private ModelPart bipodStem;
 	
 	public Mortar120mmModel(ModelPart root) {
@@ -83,15 +83,13 @@ public class Mortar120mmModel extends HierarchicalModel<Mortar120mmEntity>{
 		this.traverseGear = root.getChild("traverse_gear");
 		// bipod assembly
 		this.bipodJoint = root.getChild("bipod_joint");
-//		this.bipodLegLeft = root.getChild("bipod_leg_left");
-//		this.bipodLegRight = root.getChild("bipod_leg_right");
 		this.bipodStem = root.getChild("bipod_stem");
 	}
 
 	@Override
 	public void setupAnim(Mortar120mmEntity mortar, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 		
-		float yaw = -mortar.getFineYaw() / 1000.0f;// 0 * AcMathHelper.DEG2RAD;
+		float yaw = - mortar.getFineYaw() / 1000.0f;// 0 * AcMathHelper.DEG2RAD;
 		float elevation = mortar.getElevation() / 1000.0f;// * GcMath.RAD2DEG;
 		float elev = GcMath.PI/2 - elevation;
 		
