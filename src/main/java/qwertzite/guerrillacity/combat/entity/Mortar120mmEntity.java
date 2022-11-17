@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import qwertzite.guerrillacity.combat.GcCombatModule;
+import qwertzite.guerrillacity.core.common.explosion.GcExplosions;
 import qwertzite.guerrillacity.core.util.math.GcMath;
 
 public class Mortar120mmEntity extends Entity {
@@ -188,7 +189,7 @@ public class Mortar120mmEntity extends Entity {
 					Mortar120mmShellEntity entity = new Mortar120mmShellEntity(GcCombatModule.MORTAR_120MM_SHELL_ENTITY.get(), fpx, fpy, fpz, this.getLevel());
 					entity.shoot(this, this.getElevation(), yawMil, 0);
 					this.level.addFreshEntity(entity);
-//					AcExplosions.dummyExplosion(this.getEntityWorld(), this, fpx, fpy, fpz, 1.0f, true); TODO: fire sequence
+					GcExplosions.dummyExplosion(this.getLevel(), this, (float) fpx, (float) fpy, (float) fpz, 1.0f);
 				}
 //				this.nextShell = ItemStack.EMPTY;
 			}

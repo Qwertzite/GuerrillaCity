@@ -122,7 +122,7 @@ public class GcCombatModule extends GcModuleBase {
 	
 	public GcCombatModule() {
 		MinecraftForge.EVENT_BUS.register(new MortarInputEventHandler());
-		GcNetwork.registerpacket(Mortar120mmCtrlPacket.class);
+		GcNetwork.registerPacket(Mortar120mmCtrlPacket.class);
 	}
 	
 	public void init(IEventBus bus) {}

@@ -41,7 +41,7 @@ public class GcNetwork {
 		GcNetwork.getNetworkHandler().send(PacketDistributor.PLAYER.with(() -> player), message);
 	}
 	
-	public static <T extends AbstractPacket> void registerpacket(Class<T> packetClass) {
+	public static <T extends AbstractPacket> void registerPacket(Class<T> packetClass) {
 		if (PacketToServer.class.isAssignableFrom(packetClass)) {
 			networkHandler.registerMessage(id, packetClass,
 					(msg, buf) -> ((AbstractPacket) msg).encode(buf),

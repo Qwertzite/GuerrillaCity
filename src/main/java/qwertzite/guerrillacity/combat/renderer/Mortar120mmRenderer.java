@@ -48,7 +48,7 @@ public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 		VertexConsumer vertexconsumer = buffers.getBuffer(this.model.renderType(this.getTextureLocation(entity)));
 		this.model.renderToBuffer(stack, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		
-		float status = entity.getFiringStatus(); // TODO render shell
+		float status = entity.getFiringStatus();
 		if (status != 0) {
 			status = Mortar120mmEntity.FIRING_INTERVAL - status + partialTicks;
 			status = status * (status + 1) / 2;

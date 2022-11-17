@@ -26,6 +26,7 @@ import qwertzite.guerrillacity.core.BootstrapCommon;
 import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.common.GcKeyBindings;
+import qwertzite.guerrillacity.core.common.explosion.GcExplosions;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
 import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
@@ -78,6 +79,7 @@ public class GuerrillaCityCore {
 		GcNetwork.init();
 		new GcCommon();
 		new GcKeyBindings();
+		GcExplosions.init();
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		bus.addListener(this::onFmlCommonRegistryEvent);

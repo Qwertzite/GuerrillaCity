@@ -1,18 +1,16 @@
-package qwertzite.aviation.core.explosion.network;
+package qwertzite.guerrillacity.core.common.explosion;
 
 import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import qwertzite.aviation.core.explosion.DummyExplosion;
-import qwertzite.aviation.core.network.AbstractPacket;
-import qwertzite.aviation.core.network.PacketToClient;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import qwertzite.guerrillacity.core.network.AbstractPacket;
+import qwertzite.guerrillacity.core.network.PacketToClient;
 
 public class PacketDummyExplosion extends AbstractPacket implements PacketToClient {
 
@@ -28,7 +26,7 @@ public class PacketDummyExplosion extends AbstractPacket implements PacketToClie
 	public PacketDummyExplosion() {}
 
 	public PacketDummyExplosion(double xIn, double yIn, double zIn, float strengthIn,
-			List<BlockPos> affectedBlockPositionsIn, Vec3d motion) {
+			List<BlockPos> affectedBlockPositionsIn, Vec3 motion) {
 		this.posX = xIn;
 		this.posY = yIn;
 		this.posZ = zIn;
@@ -41,33 +39,18 @@ public class PacketDummyExplosion extends AbstractPacket implements PacketToClie
 			this.motionZ = (float) motion.z;
 		}
 	}
-	
+
 	@Override
-	public void fromBytes(ByteBuf buf) {
-		this.posX = (double) buf.readFloat();
-		this.posY = (double) buf.readFloat();
-		this.posZ = (double) buf.readFloat();
-		this.strength = buf.readFloat();
-		int i = buf.readInt();
-		this.affectedBlockPositions = Lists.<BlockPos>newArrayListWithCapacity(i);
-		int j = (int) this.posX;
-		int k = (int) this.posY;
-		int l = (int) this.posZ;
-
-		for (int i1 = 0; i1 < i; ++i1) {
-			int j1 = buf.readByte() + j;
-			int k1 = buf.readByte() + k;
-			int l1 = buf.readByte() + l;
-			this.affectedBlockPositions.add(new BlockPos(j1, k1, l1));
-		}
-
-		this.motionX = buf.readFloat();
-		this.motionY = buf.readFloat();
-		this.motionZ = buf.readFloat();
+	public AbstractPacket handleClientSide(Player player) {
+		DummyExplosion explosion = new DummyExplosion(player.getLevel(), (Entity) null, this.posX, this.posY,
+				this.posZ, this.strength, this.affectedBlockPositions);
+		explosion.finalizeExplosion(true);
+		player.setDeltaMovement(motionX, motionY, motionZ);
+		return null;
 	}
 
 	@Override
-	public void toBytes(ByteBuf buf) {
+	public void encode(FriendlyByteBuf buf) {
 		buf.writeFloat((float) this.posX);
 		buf.writeFloat((float) this.posY);
 		buf.writeFloat((float) this.posZ);
@@ -92,15 +75,27 @@ public class PacketDummyExplosion extends AbstractPacket implements PacketToClie
 	}
 
 	@Override
-	public IMessage handleClientSide(EntityPlayer player) {
-//		PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
-		DummyExplosion explosion = new DummyExplosion(player.getEntityWorld(), (Entity) null, this.posX, this.posY,
-				this.posZ, this.strength, this.affectedBlockPositions);
-		explosion.doExplosionB(true);
-		player.motionX += (double) this.motionX;
-		player.motionY += (double) this.motionY;
-		player.motionZ += (double) this.motionZ;
-		return null;
+	public void decode(FriendlyByteBuf buf) {
+		this.posX = (double) buf.readFloat();
+		this.posY = (double) buf.readFloat();
+		this.posZ = (double) buf.readFloat();
+		this.strength = buf.readFloat();
+		int i = buf.readInt();
+		this.affectedBlockPositions = Lists.<BlockPos>newArrayListWithCapacity(i);
+		int j = (int) this.posX;
+		int k = (int) this.posY;
+		int l = (int) this.posZ;
+
+		for (int i1 = 0; i1 < i; ++i1) {
+			int j1 = buf.readByte() + j;
+			int k1 = buf.readByte() + k;
+			int l1 = buf.readByte() + l;
+			this.affectedBlockPositions.add(new BlockPos(j1, k1, l1));
+		}
+
+		this.motionX = buf.readFloat();
+		this.motionY = buf.readFloat();
+		this.motionZ = buf.readFloat();
 	}
 
 }
