@@ -43,12 +43,10 @@ public class PacketDummyExplosion extends AbstractPacket implements PacketToClie
 
 	@Override
 	public AbstractPacket handleClientSide(Player player, Context ctx) {
-		ctx.enqueueWork(() -> {
-			DummyExplosion explosion = new DummyExplosion(player.getLevel(), (Entity) null, this.posX, this.posY,
-					this.posZ, this.strength, this.affectedBlockPositions);
-			explosion.finalizeExplosion(true);
-			player.setDeltaMovement(motionX, motionY, motionZ);
-		});
+		DummyExplosion explosion = new DummyExplosion(player.getLevel(), (Entity) null, this.posX, this.posY,
+				this.posZ, this.strength, this.affectedBlockPositions);
+		explosion.finalizeExplosion(true);
+		player.setDeltaMovement(motionX, motionY, motionZ);
 		return null;
 	}
 
