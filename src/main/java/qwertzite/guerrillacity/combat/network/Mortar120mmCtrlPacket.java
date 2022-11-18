@@ -3,6 +3,7 @@ package qwertzite.guerrillacity.combat.network;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.network.NetworkEvent.Context;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
 import qwertzite.guerrillacity.core.network.AbstractPacket;
 import qwertzite.guerrillacity.core.network.PacketToServer;
@@ -40,7 +41,7 @@ public class Mortar120mmCtrlPacket extends AbstractPacket implements PacketToSer
 	}
 
 	@Override
-	public AbstractPacket handleServerSide(Player player) {
+	public AbstractPacket handleServerSide(Player player, Context ctx) {
 		Entity e = player.getLevel().getEntity(this.entityId);
 		if (e instanceof Mortar120mmEntity mortar) {
 			mortar.processInput(this.elev, this.yaw, this.yawCoarse);

@@ -16,12 +16,13 @@ public abstract class AbstractPacket {
 	public AbstractPacket onMessage(AbstractPacket message, Context ctx) {
 		AbstractPacket reply = null;
 		switch (ctx.getDirection()) {
-		case LOGIN_TO_CLIENT:
+		case LOGIN_TO_CLIENT:System.out.println("LOGIN TO CLIENT"); //DEBUG
 		case PLAY_TO_CLIENT:
 			if (message instanceof PacketToClient) {
 				Player player = this.getPlayer();
 				if (player == null) break;
-				reply = ((PacketToClient) message).handleClientSide(player);
+				reply = ((PacketToClient) message).handleClientSide(player, ctx);
+				ctx.setPacketHandled(true);
 				if (reply != null) GcNetwork.sendToServer(reply);
 			}
 			break;
@@ -29,7 +30,8 @@ public abstract class AbstractPacket {
 		case PLAY_TO_SERVER:
 			if (message instanceof PacketToServer) {
 				ServerPlayer player = ctx.getSender();
-				reply = ((PacketToServer) message).handleServerSide(player);
+				reply = ((PacketToServer) message).handleServerSide(player, ctx);
+				ctx.setPacketHandled(true);
 				if (reply != null) GcNetwork.sendTo(player, message);
 			}
 			break;

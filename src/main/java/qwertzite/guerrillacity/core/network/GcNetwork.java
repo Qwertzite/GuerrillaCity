@@ -47,7 +47,7 @@ public class GcNetwork {
 					(msg, buf) -> ((AbstractPacket) msg).encode(buf),
 					buf -> decoder(packetClass, buf),
 					(msg, buf) -> handlePacket(msg, buf.get()), Optional.of(NetworkDirection.PLAY_TO_SERVER));
-			ModLog.debug("Registered Packet {} with ID {}", packetClass.getName(), id);
+			ModLog.info("Registered Packet to server, %s with ID %s", packetClass.getName(), id);
 			id++;
 		}
 		if (PacketToClient.class.isAssignableFrom(packetClass)) {
@@ -55,7 +55,7 @@ public class GcNetwork {
 					(msg, buf) -> ((AbstractPacket) msg).encode(buf),
 					buf -> decoder(packetClass, buf),
 					(msg, buf) -> handlePacket(msg, buf.get()), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-			ModLog.debug("Registered Packet %s with ID %s", packetClass.getName(), id);
+			ModLog.info("Registered Packet to client, %s with ID %s", packetClass.getName(), id);
 			id++;
 		}
 	}

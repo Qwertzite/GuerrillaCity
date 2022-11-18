@@ -13,7 +13,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmShellEntity;
-import qwertzite.guerrillacity.combat.event.MortarInputEventHandler;
+import qwertzite.guerrillacity.combat.event.MortarEventHandler;
 import qwertzite.guerrillacity.combat.item.CombatShovelItem;
 import qwertzite.guerrillacity.combat.item.Mortar120mmItem;
 import qwertzite.guerrillacity.combat.model.Mortar120mmModel;
@@ -121,7 +121,7 @@ public class GcCombatModule extends GcModuleBase {
 	}
 	
 	public GcCombatModule() {
-		MinecraftForge.EVENT_BUS.register(new MortarInputEventHandler());
+		MinecraftForge.EVENT_BUS.register(new MortarEventHandler());
 		GcNetwork.registerPacket(Mortar120mmCtrlPacket.class);
 	}
 	

@@ -9,6 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkEvent.Context;
 import qwertzite.guerrillacity.core.network.AbstractPacket;
 import qwertzite.guerrillacity.core.network.PacketToClient;
 
@@ -41,11 +42,13 @@ public class PacketDummyExplosion extends AbstractPacket implements PacketToClie
 	}
 
 	@Override
-	public AbstractPacket handleClientSide(Player player) {
-		DummyExplosion explosion = new DummyExplosion(player.getLevel(), (Entity) null, this.posX, this.posY,
-				this.posZ, this.strength, this.affectedBlockPositions);
-		explosion.finalizeExplosion(true);
-		player.setDeltaMovement(motionX, motionY, motionZ);
+	public AbstractPacket handleClientSide(Player player, Context ctx) {
+		ctx.enqueueWork(() -> {
+			DummyExplosion explosion = new DummyExplosion(player.getLevel(), (Entity) null, this.posX, this.posY,
+					this.posZ, this.strength, this.affectedBlockPositions);
+			explosion.finalizeExplosion(true);
+			player.setDeltaMovement(motionX, motionY, motionZ);
+		});
 		return null;
 	}
 
