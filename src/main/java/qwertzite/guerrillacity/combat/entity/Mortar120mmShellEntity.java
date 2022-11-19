@@ -148,6 +148,9 @@ public class Mortar120mmShellEntity extends Projectile {
 		this.setDeltaMovement(nextVelocity);
 
 		this.setPos(nextPosition);
+		if (!this.level.isClientSide && this.getY() <= this.level.getMinBuildHeight() - 100) {
+			this.discard();
+		}
 		this.checkInsideBlocks();
 	}
 

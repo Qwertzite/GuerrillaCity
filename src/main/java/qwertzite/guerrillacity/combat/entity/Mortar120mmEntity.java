@@ -1,5 +1,6 @@
 package qwertzite.guerrillacity.combat.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -7,6 +8,8 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -18,6 +21,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,7 +35,7 @@ public class Mortar120mmEntity extends Entity {
 	public static final float GRAVITY = 9.8f *0.1f / (5*5);
 
 	public static final int ELEVATION_MIN = 710;
-	public static final int ELEVATION_MAX = 1450;
+	public static final int ELEVATION_MAX = 1500;
 	public static final int ELEVATION_STP = 5;
 	public static final int AZIMUTH_RANGE = 145;
 	public static final int AZIMUTH_COARSE = 50;
@@ -129,6 +133,11 @@ public class Mortar120mmEntity extends Entity {
 					this.dropDestroyedRemaining();
 				}
 				this.discard();
+				level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.METAL_BREAK, SoundSource.BLOCKS, 1.5F, 0.8F);
+				level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 0.5F, 0.4F);
+			} else {
+				level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.METAL_HIT, SoundSource.BLOCKS, 1.5F, 0.8F);
+				level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.5F, 0.4F);
 			}
 			return true;
 		} else {
@@ -137,8 +146,7 @@ public class Mortar120mmEntity extends Entity {
 	}
 	
 	protected void dropDestroyedRemaining() {
-//		this.spawnAtLocation(this.getDropItem());
-		// TODO: drop item
+		this.spawnAtLocation(new ItemStack(Items.IRON_INGOT, this.random.nextInt(4, 8)));
 	}
 	
 	@Override
@@ -153,11 +161,13 @@ public class Mortar120mmEntity extends Entity {
 
 		this.causeFallDamage(this.fallDistance, 1.0F, DamageSource.FALL);
 		if (!this.level.isClientSide && !this.isRemoved()) {
-			this.kill();
+			this.discard();
 			if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 				this.dropDestroyedRemaining();
 			}
 		}
+		level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.METAL_BREAK, SoundSource.BLOCKS, 1.5F, 0.8F);
+		level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 0.5F, 0.4F);
 	}
 
 	/**
@@ -171,6 +181,9 @@ public class Mortar120mmEntity extends Entity {
 		super.tick();
 		this.updateMotion();
 		this.move(MoverType.SELF, this.getDeltaMovement());
+		if (!this.level.isClientSide && this.getY() <= this.level.getMinBuildHeight() - 100) {
+			this.discard();
+		}
 		
 		int step = this.getFiringStatus();
 		if (step > 0) {
@@ -241,7 +254,7 @@ public class Mortar120mmEntity extends Entity {
 
 	private void updateMotion() {
 		Vec3 movement = this.getDeltaMovement();
-		if (!this.isNoGravity()) movement.subtract(0.0d, GRAVITY, 0.0d);
+		if (!this.isNoGravity()) movement = movement.subtract(0.0d, GRAVITY, 0.0d);
 		if (this.onGround) {
 			movement = movement.multiply(0.1d, 1.0d, 0.1d);
 		}
@@ -257,11 +270,13 @@ public class Mortar120mmEntity extends Entity {
 	/**
 	 * Applies the given player interaction to this Entity.
 	 */
+	@SuppressWarnings("resource")
 	@Override
 	public InteractionResult interactAt(Player player, Vec3 pVec, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		Item item = stack.getItem();
-		if (this.getFiringStatus() == 0 && item == GcCombatModule.MORTAR_SHELL_120MM_HE.get()) {
+		if (this.getFiringStatus() != 0) return InteractionResult.FAIL;
+		if (item == GcCombatModule.MORTAR_SHELL_120MM_HE.get()) {
 			if (!player.getAbilities().instabuild) { stack.shrink(1); }
 			if (!this.level.isClientSide) {
 				this.setFiringStatus(FIRING_INTERVAL);
@@ -269,6 +284,12 @@ public class Mortar120mmEntity extends Entity {
 //			this.nextShell = stack.copy();
 			player.awardStat(Stats.ITEM_USED.get(item));
 			return InteractionResult.CONSUME;
+		} if (Minecraft.getInstance().options.keySprint.isDown()) {
+			level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.METAL_HIT, SoundSource.BLOCKS, 1.5F, 0.8F);
+			level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.CHAIN_HIT, SoundSource.BLOCKS, 0.5F, 0.4F);
+			this.discard();
+			this.spawnAtLocation(new ItemStack(GcCombatModule.MORTAR_120MM.get()));
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.FAIL;
 	}
