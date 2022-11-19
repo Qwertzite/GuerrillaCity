@@ -78,7 +78,7 @@ public class GuerrillaCityCore {
 		ModLoadingContext.get().registerConfig(Type.COMMON, ConfigRegister.getConfig());
 		GcNetwork.init();
 		new GcCommon();
-		new GcKeyBindings();
+		GcKeyBindings.init();
 		GcExplosions.init();
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

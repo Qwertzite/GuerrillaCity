@@ -128,7 +128,11 @@ public class GcConstructionModule extends GcModuleBase {
 		.addIngredient(Items.GRAVEL, 4)
 		.addIngredient(Items.CLAY_BALL)
 		.addIngredient(Items.WATER_BUCKET);
-		// TODO concrete recipe
+		RecipeRegister.shapeless(REINFORCED_CONCRETE, 4)
+		.addIngredient(Blocks.SAND, 2)
+		.addIngredient(Blocks.GRAVEL, 2)
+		.addIngredient(Blocks.IRON_BARS)
+		.addIngredient(Items.WATER_BUCKET);
 	}
 
 	private static void emptyGabionRecipe(String name, RegistryObject<Item> gabion, Item item, Item dye) {

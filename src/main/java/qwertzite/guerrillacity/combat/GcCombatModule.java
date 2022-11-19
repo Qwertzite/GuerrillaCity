@@ -8,6 +8,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
@@ -22,6 +23,7 @@ import qwertzite.guerrillacity.combat.network.Mortar120mmCtrlPacket;
 import qwertzite.guerrillacity.combat.renderer.Mortar120mmRenderer;
 import qwertzite.guerrillacity.combat.renderer.Mortar120mmShellRenderer;
 import qwertzite.guerrillacity.core.common.GcCommon;
+import qwertzite.guerrillacity.core.common.GcKeyBindings;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.init.EntityRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
@@ -93,7 +95,26 @@ public class GcCombatModule extends GcModuleBase {
 		.setBaseItem(COMBAT_SHOVEL_DIAMOND)
 		.setMaterial(Items.NETHERITE_INGOT);
 		
-		// TODO: shell recipe, mortar recipe
+		// mortar
+		RecipeRegister.shaped(MORTAR_120MM, 1)
+		.setRecipeName("mortar_120mm")
+		.setGroup("mortar")
+		.setPattern(
+				"i  ",
+				" i ",
+				"i b")
+		.putItemDefinition('i', Items.IRON_INGOT)
+		.putItemDefinition('b', Blocks.IRON_BLOCK);
+		RecipeRegister.shaped(MORTAR_SHELL_120MM_HE, 4)
+		.setRecipeName("mortar_120mm_shell_he")
+		.setGroup("mortar_120mm_shell")
+		.setPattern(
+				"  t",
+				" i ",
+				"g  ")
+		.putItemDefinition('t', Blocks.TNT)
+		.putItemDefinition('i', Items.IRON_INGOT)
+		.putItemDefinition('g', Items.GUNPOWDER);
 	}
 	
 	private static void combatShovelRecipe(String name, RegistryObject<Item> shovel, Item item) {
@@ -121,8 +142,10 @@ public class GcCombatModule extends GcModuleBase {
 	}
 	
 	public GcCombatModule() {
-		MinecraftForge.EVENT_BUS.register(new MortarEventHandler());
+		var mortarEvent = new MortarEventHandler();
+		MinecraftForge.EVENT_BUS.register(mortarEvent);
 		GcNetwork.registerPacket(Mortar120mmCtrlPacket.class);
+		GcKeyBindings.addListener(GcKeyBindings.BTN_VIEW, mortarEvent::onKeyClick);
 	}
 	
 	public void init(IEventBus bus) {}

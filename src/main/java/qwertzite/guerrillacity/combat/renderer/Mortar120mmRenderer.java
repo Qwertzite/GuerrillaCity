@@ -1,8 +1,5 @@
 package qwertzite.guerrillacity.combat.renderer;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -13,7 +10,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmEntity;
 import qwertzite.guerrillacity.combat.entity.Mortar120mmShellEntity;
@@ -69,83 +65,8 @@ public class Mortar120mmRenderer extends EntityRenderer<Mortar120mmEntity> {
 		
 		stack.popPose();
 		
-//		if (Minecraft.getInstance().objectMouseOver.entityHit == entity) { // TODO: render ballistic path
-//			this.computeAndRenderTrajectory(entity, entity.getElevation(), entity.getBaseYaw() + entity.getFineYaw());
-//		}
-		
 		super.render(entity, entityYaw, partialTicks, stack, buffers, light);
 	}
-	
-	private List<Vec3> vertexes = new LinkedList<>();
-	private int lastElevation = 0;
-	private int lastTraverse = 0;
-//	public void computeAndRenderTrajectory(Mortar120mmEntity mortar, int elevation, int traverse) {
-//		if (elevation != this.lastElevation || lastTraverse != traverse) {
-//			this.vertexes.clear();
-//			float elev = elevation / 1000.0f;
-//			float trav = traverse / 1000.0f;
-//			float fpx = 53.0f/32.0f * Mth.cos(elev);
-//			float fpy = 4.0f/32.0f + 53.0f/32.0f * Mth.sin(elev);
-//			float fpz = fpx * Mth.cos(trav);
-//			fpx =  -fpx * Mth.sin(trav);
-//			Vec3 pos = new Vec3(mortar.posX + fpx, mortar.posY + fpy, mortar.posZ + fpz);
-//
-//			float ex = -Mth.sin(trav) * Mth.cos(elev);
-//			float ey = Mth.sin(elev);
-//			float ez = Mth.cos(trav) * Mth.cos(elev);
-//			ex *= Entity120mmMortarShellM933HE.INITIAL_VEL[0];
-//			ey *= Entity120mmMortarShellM933HE.INITIAL_VEL[0];
-//			ez *= Entity120mmMortarShellM933HE.INITIAL_VEL[0];
-//			
-//			float drag = 1.0f - Entity120mmMortarShellM933HE.AIR_DRAG;
-//			float grav = Entity120mmMortarShellM933HE.GRAVITY;
-//			
-//			World world = mortar.getEntityWorld();
-//			RayTraceResult trace;
-//			do {
-//				this.vertexes.add(pos.subtract(mortar.posX, mortar.posY, mortar.posZ));
-//				Vec3 end = pos.addVector(ex, ey, ez);
-//				ex *= drag;
-//				ey *= drag;
-//				ez *= drag;
-//				ey -= grav;
-//				trace = world.rayTraceBlocks(pos, end, true);
-//				pos = end;
-//			} while(pos.y >= 0.0f && (trace == null || trace.entityHit == mortar));
-//			this.vertexes.add((trace != null ? trace.hitVec : pos).subtract(mortar.posX, mortar.posY, mortar.posZ));
-//			
-//			this.lastElevation = elevation;
-//			this.lastTraverse = traverse;
-//		}
-//		GlStateManager.disableTexture2D();
-//		GlStateManager.color(0.0f, 1.0f, 0.0f, 1.0f);
-//		Tessellator tessellator = Tessellator.getInstance();
-//		BufferBuilder bb = tessellator.getBuffer();
-//		bb.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION);
-//		for (Vec3d v : this.vertexes) {
-//			bb.pos(v.x, v.y, v.z).endVertex();
-//		}
-//		tessellator.draw();
-//		Vec3d last = this.vertexes.get(this.vertexes.size()-1);
-////		GlStateManager.color(1.0f, 0.0f, 0.0f, 1.0f);
-//		GlStateManager.translate(last.x, last.y, last.z);
-//		bb.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION);
-//		bb.pos(0, 0, 0).endVertex();
-//		bb.pos(0.5f, 1.0f, 0.0f).endVertex();
-//		bb.pos(0.0f, 1.0f, 0.5f).endVertex();
-//		bb.pos(-0.5f, 1.0f, 0.0f).endVertex();
-//		bb.pos(0.0f, 1.0f, -0.5f).endVertex();
-//		bb.pos(0.5f, 1.0f, 0.0f).endVertex();
-//		tessellator.draw();
-//		bb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-//		bb.pos(-0.5f, 1.0f, 0.0f).endVertex();
-//		bb.pos(0.0f, 1.0f, 0.5f).endVertex();
-//		bb.pos(0.5f, 1.0f, 0.0f).endVertex();
-//		bb.pos(0.0f, 1.0f, -0.5f).endVertex();
-//		tessellator.draw();
-//		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-//		GlStateManager.enableTexture2D();
-//	}
 	
 	@Override
 	public ResourceLocation getTextureLocation(Mortar120mmEntity entity) {
