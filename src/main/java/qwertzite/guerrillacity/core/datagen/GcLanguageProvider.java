@@ -1,8 +1,11 @@
 package qwertzite.guerrillacity.core.datagen;
 
+import net.minecraft.Util;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.LanguageProvider;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.common.GcCommon;
+import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.BlockRegister;
 import qwertzite.guerrillacity.core.init.ItemRegister;
 import qwertzite.guerrillacity.core.init.KeyBindingRegister;
@@ -31,6 +34,14 @@ public class GcLanguageProvider extends LanguageProvider {
 		}
 		for (var register : KeyBindingRegister.ENTRY) {
 			if (register.getLocalName(this.locale) != null) this.add(register.getRegistrykey(), register.getLocalName(this.locale));
+		}
+		
+		for (var register : BiomeRegister.getEntries()) {
+			if (register.getLocalName(this.locale) != null) this.add(Util.makeDescriptionId("biome", register.getRegistrykey().location()), register.getLocalName(this.locale));
+		}
+		
+		{
+			this.add("itemGroup.%s".formatted(GuerrillaCityCore.MODID), GcCommon.GC_CREATIVE_TAB_NAME);
 		}
 	}
 

@@ -27,6 +27,7 @@ import qwertzite.guerrillacity.core.BootstrapServerSide;
 import qwertzite.guerrillacity.core.common.GcCommon;
 import qwertzite.guerrillacity.core.common.GcKeyBindings;
 import qwertzite.guerrillacity.core.common.explosion.GcExplosions;
+import qwertzite.guerrillacity.core.datagen.GcBiomeTagsProvider;
 import qwertzite.guerrillacity.core.datagen.GcBlockStateProvider;
 import qwertzite.guerrillacity.core.datagen.GcBlockTagsProvider;
 import qwertzite.guerrillacity.core.datagen.GcLangLocale;
@@ -44,7 +45,6 @@ import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
 import qwertzite.guerrillacity.core.network.GcNetwork;
-import qwertzite.guerrillacity.worldgen.GcBiomeTagsProvider;
 import qwertzite.guerrillacity.worldgen.GcWorldGenModule;
 import qwertzite.guerrillacity.worldgen.city.BuildingLoader;
 

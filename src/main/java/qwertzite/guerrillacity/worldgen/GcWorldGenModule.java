@@ -16,6 +16,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import qwertzite.guerrillacity.GuerrillaCityCore;
+import qwertzite.guerrillacity.core.datagen.GcLangLocale;
 import qwertzite.guerrillacity.core.init.BiomeRegister;
 import qwertzite.guerrillacity.core.init.ConfigRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
@@ -49,8 +50,14 @@ public class GcWorldGenModule extends GcModuleBase {
 	public GcWorldGenModule() {}
 	
 	public void init(IEventBus bus) {
-		CITY_BIOME = BiomeRegister.register(KEY_CITY_BIOME, () -> CityBiomes.plains(false));
-		SNOWY_CITY_BIOME = BiomeRegister.register(KEY_SNOWY_CITY_BIOME, () -> CityBiomes.plains(true));
+		CITY_BIOME = BiomeRegister.$(KEY_CITY_BIOME, () -> CityBiomes.plains(false))
+				.addToTag(TAG_IS_CITY)
+				.setLocalisedNameEn("City")
+				.setLocalisedName(GcLangLocale.JP_JP, "都市").register();
+		SNOWY_CITY_BIOME = BiomeRegister.$(KEY_SNOWY_CITY_BIOME, () -> CityBiomes.plains(true))
+				.addToTag(TAG_IS_CITY)
+				.setLocalisedNameEn("Snowy City")
+				.setLocalisedName(GcLangLocale.JP_JP, "雪の都市").register();
 		
 		DeferredRegister<StructurePlacementType<?>> STRUCTURE_PLACEMENT_REGISTER = DeferredRegister.create(Registry.STRUCTURE_PLACEMENT_TYPE_REGISTRY, GuerrillaCityCore.MODID);
 		EveryChunkStructurePlacement.TYPE = STRUCTURE_PLACEMENT_REGISTER

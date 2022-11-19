@@ -16,6 +16,6 @@ public class GcCommon {
 			return new ItemStack(GcConstructionModule.GREEN_GABION.get());
 		}
 	};
+	public static final String GC_CREATIVE_TAB_NAME = "Guerrilla City";
 	
-
 }
