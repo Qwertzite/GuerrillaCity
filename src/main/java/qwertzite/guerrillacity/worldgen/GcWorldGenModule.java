@@ -12,6 +12,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -22,6 +23,7 @@ import qwertzite.guerrillacity.core.init.ConfigRegister;
 import qwertzite.guerrillacity.core.init.RegionRegister;
 import qwertzite.guerrillacity.core.init.SurfaceRuleRegister;
 import qwertzite.guerrillacity.core.module.GcModuleBase;
+import qwertzite.guerrillacity.worldgen.event.BldgScriptEventHandler;
 import terrablender.api.SurfaceRuleManager.RuleCategory;
 
 /**
@@ -93,7 +95,10 @@ public class GcWorldGenModule extends GcModuleBase {
 		STRUCTURE_PIECE_REGISTER.register(bus);
 		STRUCTURE_PLACEMENT_REGISTER.register(bus);
 		
-		GcGenCommand.registerCommand();
+		GcGenCommand.registerCommands();
+		GcBldgScriptCommand.registerCommands();
+		
+		MinecraftForge.EVENT_BUS.register(new BldgScriptEventHandler());
 	}
 	
 	@Override

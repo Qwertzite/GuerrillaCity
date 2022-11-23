@@ -15,20 +15,21 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import qwertzite.guerrillacity.core.ModLog;
-import qwertzite.guerrillacity.core.command.CommandOption;
+import qwertzite.guerrillacity.core.command.CommandArgument;
 
 public class CommandRegister {
 	
 	private static final Set<CommandRegister> ENTRIES = new HashSet<>();
 	private static final Map<String, Map<String, CommandRegister>> GC_COMMANDS = new HashMap<>();
 	
-	private static void registerHelpCommand(LiteralArgumentBuilder<CommandSourceStack> root) {
+	private static void registerHelpCommand(LiteralArgumentBuilder<CommandSourceStack> root, CommandBuildContext buildContext) {
 		var cache = new ModuleCache();
 		
 		for (var moduleIter = GC_COMMANDS.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey())).iterator(); moduleIter.hasNext();) {
@@ -43,7 +44,7 @@ public class CommandRegister {
 				new CommandRegister(moduleName, cmdName, ctx -> {
 					printCommandUsage(ctx, command);
 					return Command.SINGLE_SUCCESS;
-				}).build(cache);
+				}).build(cache, buildContext);
 			}
 		}
 		
@@ -55,32 +56,42 @@ public class CommandRegister {
 	private static void printCommandUsage(CommandContext<CommandSourceStack> ctx, CommandRegister entry) {
 		String space = "    "; //" \u200B \u200B \u200B ";
 		StringBuilder s = new StringBuilder();
-		s.append("/gc %s %s\n".formatted(entry.moduleName, entry.name));
+		s.append("/gc %s %s".formatted(entry.moduleName, entry.name));
+		for (var arg : entry.positionalArgs) { s.append(" <%s>".formatted(arg.getName())); }
+		s.append("\n");
 		s.append(space + entry.usage);
 		s.append("\n");
-		if (!entry.options.isEmpty()) {
+		if (!entry.positionalArgs.isEmpty()) {
+			s.append("\n");
+			s.append(space + "Arguments:");
+			for (var arg : entry.positionalArgs) {
+				s.append("\n%s< %s > (%s) : %s".formatted(space, arg.getName(), arg.getTypeName(), arg.getDescription()));
+			}
+		}
+		
+		if (!entry.optionalArgs.isEmpty()) {
 			s.append("\n");
 			s.append(space + "Options:");
-			int nameLength = 0;
-			for (var option : entry.options.values()) {
-				if (nameLength < option.getLongName().length()) nameLength = option.getLongName().length();
+			for (var option : entry.optionalArgs.values()) {
 				s.append(("\n%s[ %s ] (%s) : %s").formatted(space, option.getLongName(), option.getTypeName(), option.getDescription()));
 			}
 		} else s.append("\n    This command has no options.");
+		s.append("\n");
 		
 		ctx.getSource().sendSuccess(Component.literal(s.toString()), true);
 	}
 	
-	public static void onServerStarting(ServerStartingEvent evt) {
+	public static void onRegisterCommand(RegisterCommandsEvent evt) {
+		CommandBuildContext cbc = evt.getBuildContext();
 		
 		LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("gc");
-		registerHelpCommand(root);
+		registerHelpCommand(root, cbc);
 		
 		var cache = new ModuleCache();
-		ENTRIES.forEach(e -> e.build(cache));
+		ENTRIES.forEach(e -> e.build(cache, cbc));
 		cache.validate(root);
 		
-		CommandDispatcher<CommandSourceStack> dispatcher = evt.getServer().getCommands().getDispatcher();
+		CommandDispatcher<CommandSourceStack> dispatcher = evt.getDispatcher();
 		dispatcher.register(root);
 	}
 	
@@ -95,14 +106,15 @@ public class CommandRegister {
 	private final String name;
 	private final ToIntFunction<CommandContext<CommandSourceStack>> commandBody;
 	private int permission = -1;
-	private final Map<String, CommandOption<?>> options;
+	private final Map<String, CommandArgument<?>> arguments = new HashMap<>();
+	private final List<CommandArgument<?>> positionalArgs = new LinkedList<>();
+	private final Map<String, CommandArgument<?>> optionalArgs = new HashMap<>();
 	private String usage = "";
 	
 	private CommandRegister(String moduleName, String name, ToIntFunction<CommandContext<CommandSourceStack>> command) {
 		this.moduleName = moduleName;
 		this.name = name;
 		this.commandBody = command;
-		this.options = new HashMap<>();
 	}
 	
 	public CommandRegister setPermissionLevel(int level) {
@@ -110,10 +122,21 @@ public class CommandRegister {
 		return this;
 	}
 	
-	public CommandRegister addOption(CommandOption<?> option) {
+	public CommandRegister addPositionalArguments(CommandArgument<?>...options) {
+		for (var option : options) {
+			String optionName = option.getName();
+			this.positionalArgs.add(option);
+			if (arguments.containsKey(optionName)) ModLog.warn("Found duplicate argument name %s for command gc/%s/%s. Ignoring old option.", optionName, name, moduleName);
+			this.arguments.put(optionName, option);
+		}
+		return this;
+	}
+	
+	public CommandRegister addOption(CommandArgument<?> option) {
 		String optionName = option.getName();
-		if (options.containsKey(optionName)) ModLog.warn("Found duplicate option {} for command gc/{}/{}", optionName, name, moduleName);
-		this.options.put(optionName, option);
+		this.optionalArgs.put(optionName, option);
+		if (arguments.containsKey(optionName)) ModLog.warn("Found duplicate option %s for command gc/%s/%s. Old option replaced.", optionName, name, moduleName);
+		this.arguments.put(optionName, option);
 		return this;
 	}
 	
@@ -122,17 +145,17 @@ public class CommandRegister {
 		return this;
 	}
 	
-	private void build(ModuleCache cache) {
+	private void build(ModuleCache cache, CommandBuildContext buildContext) {
 		ModLog.info("Added command %s.%s.%s", "gc", this.moduleName, this.name);
 		
 		Command<CommandSourceStack> command = this::executeCommand;
 		
 		List<Tuple<LiteralArgumentBuilder<CommandSourceStack>, RequiredArgumentBuilder<CommandSourceStack, ?>>> optionNodes = new LinkedList<>();
-		List<CommandOption<?>> optionList = this.options.values().stream().sorted((e1, e2) -> -e1.getName().compareToIgnoreCase(e2.getName())).toList();
+		List<CommandArgument<?>> optionList = this.optionalArgs.values().stream().sorted((e1, e2) -> -e1.getName().compareToIgnoreCase(e2.getName())).toList();
 		for (int i = 0; i < optionList.size(); i++) {
-			CommandOption<?> option = optionList.get(i);
+			CommandArgument<?> option = optionList.get(i);
 			
-			RequiredArgumentBuilder<CommandSourceStack, ?> value = Commands.argument(option.getName(), option.getType());
+			RequiredArgumentBuilder<CommandSourceStack, ?> value = Commands.argument(option.getName(), option.getType(buildContext));
 			value.executes(command);
 			for (var nextNode : optionNodes) {
 				value.then(nextNode.getA());
@@ -144,22 +167,42 @@ public class CommandRegister {
 			optionNodes.add(new Tuple<>(flag, value));
 		}
 		
-		LiteralArgumentBuilder<CommandSourceStack> cmdBase = Commands.literal(this.name); // ここで，get usage を overrideすることで何とかなるかもしれない
-		if (this.permission >= 0) cmdBase.requires(ctx -> ctx.hasPermission(permission));
-		cmdBase.executes(command);
-		for (var nextNode : optionNodes) {
-			cmdBase.then(nextNode.getA());
+		LiteralArgumentBuilder<CommandSourceStack> cmdBase;
+		if (this.positionalArgs.isEmpty()) {
+			cmdBase = Commands.literal(this.name); // ここで，get usage を overrideすることで何とかなるかもしれない
+			cmdBase.executes(command);
+			for (var nextNode : optionNodes) {
+				cmdBase.then(nextNode.getA());
+			}
+		} else {
+			CommandArgument<?> lastArg = this.positionalArgs.get(this.positionalArgs.size()-1);
+			RequiredArgumentBuilder<CommandSourceStack, ?> lastValue = Commands.argument(lastArg.getName(), lastArg.getType(buildContext));
+			lastValue.executes(command);
+			for (var nextNode : optionNodes) {
+				lastValue.then(nextNode.getA());
+			}
+			
+			for (int i = this.positionalArgs.size() - 2; i >= 0; i--) {
+				lastArg = this.positionalArgs.get(i);
+				var value = Commands.argument(lastArg.getName(), lastArg.getType(buildContext));
+				value.then(lastValue);
+				lastValue = value;
+			}
+			
+			cmdBase = Commands.literal(this.name); // ここで，get usage を overrideすることで何とかなるかもしれない
+			cmdBase.then(lastValue);
 		}
+		if (this.permission >= 0) cmdBase.requires(ctx -> ctx.hasPermission(permission));
 		
 		cache.getModuleCommand(moduleName).then(cmdBase);
 	}
 	
 	private int executeCommand(CommandContext<CommandSourceStack> ctx) {
-		Collection<CommandOption<?>> undesignated = new HashSet<>(this.options.values());
+		Collection<CommandArgument<?>> undesignated = new HashSet<>(this.arguments.values());
 		for (var node : ctx.getNodes()) {
 			String nodeName = node.getNode().getName();
-			if (this.options.containsKey(nodeName)) {
-				CommandOption<?> option = this.options.get(nodeName);
+			if (this.arguments.containsKey(nodeName)) {
+				CommandArgument<?> option = this.arguments.get(nodeName);
 				option.acceptValue(ctx);
 				undesignated.remove(option);
 			}

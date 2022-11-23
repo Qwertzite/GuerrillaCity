@@ -9,7 +9,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -132,8 +132,8 @@ public class GuerrillaCityCore {
 		});
 	}
 	
-	public void onServerStarting(ServerStartingEvent event) {
-		CommandRegister.onServerStarting(event);
+	public void onServerStarting(RegisterCommandsEvent event) {
+		CommandRegister.onRegisterCommand(event);
 	}
 	
 	@SubscribeEvent

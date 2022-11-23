@@ -179,6 +179,7 @@ public class MortarEventHandler {
 					pose.translate(mortar.getX(), mortar.getY(), mortar.getZ());
 					
 					if (!mortar.isAlive()) iter.remove();
+					if (mortar.touchingUnloadedChunk()) iter.remove();
 					this.computeAndRenderTrajectory(pose, mortar, MORTAR.get(mortar));
 					
 					pose.popPose();

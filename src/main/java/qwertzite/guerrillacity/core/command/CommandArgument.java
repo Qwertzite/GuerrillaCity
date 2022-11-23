@@ -9,27 +9,30 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 
-public class CommandOption<T> {
+public class CommandArgument<T> {
 	
 	protected final String name;
 	protected final String shortName;
 	protected final String typeName;
 	protected String description = "Not available";
 	
-	protected final ArgumentType<?> type;
+	protected final Function<CommandBuildContext, ArgumentType<?>> type;
 	
 	protected final BiFunction<CommandContext<CommandSourceStack>, String, T> argParser;
 	protected Function<CommandContext<CommandSourceStack>, T> defaultValueProvider;
 	
 	protected T value;
 	
-	public static CommandOption<BlockPos> blockPos(String name) {
-		return new CommandOption<>(name, "block pos",
-				BlockPosArgument.blockPos(),
+	public static CommandArgument<BlockPos> blockPos(String name) {
+		return new CommandArgument<>(name, "block pos",
+				(cbc) -> BlockPosArgument.blockPos(),
 				(t, u) -> {
 					try {
 						return BlockPosArgument.getLoadedBlockPos(t, u);
@@ -39,21 +42,26 @@ public class CommandOption<T> {
 				});
 	}
 	
-	public static CommandOption<Long> longArg(String name) {
-		return new CommandOption<>(name, "long", LongArgumentType.longArg(),
+	public static CommandArgument<Long> longArg(String name) {
+		return new CommandArgument<>(name, "long", (cbc) -> LongArgumentType.longArg(),
 				LongArgumentType::getLong);
 	}
 	
-	public static CommandOption<String> string(String name) {
-		return new CommandOption<>(name, "string", StringArgumentType.string(),
+	public static CommandArgument<BlockInput> blockType(String name) {
+		return new CommandArgument<>(name, "block state", (cbc) -> BlockStateArgument.block(cbc),
+				BlockStateArgument::getBlock);
+	}
+	
+	public static CommandArgument<String> string(String name) {
+		return new CommandArgument<>(name, "string", (cbc) -> StringArgumentType.string(),
 				StringArgumentType::getString);
 	}
 	
-	public CommandOption(String name, String typeName, ArgumentType<?> type, BiFunction<CommandContext<CommandSourceStack>, String, T> argParser) {
+	public CommandArgument(String name, String typeName, Function<CommandBuildContext, ArgumentType<?>> type, BiFunction<CommandContext<CommandSourceStack>, String, T> argParser) {
 		this(null, name, typeName, type, argParser);
 	}
 	
-	public CommandOption(String shortName, String name, String typeName, ArgumentType<?> type, BiFunction<CommandContext<CommandSourceStack>, String, T> argParser) {
+	public CommandArgument(String shortName, String name, String typeName, Function<CommandBuildContext, ArgumentType<?>> type, BiFunction<CommandContext<CommandSourceStack>, String, T> argParser) {
 		this.name = name;
 		this.shortName = shortName;
 		this.typeName = typeName;
@@ -61,12 +69,12 @@ public class CommandOption<T> {
 		this.argParser = argParser;
 	}
 	
-	public CommandOption<T> setDefaultValue(Function<CommandContext<CommandSourceStack>, T> defaultValueProvider) {
+	public CommandArgument<T> setDefaultValue(Function<CommandContext<CommandSourceStack>, T> defaultValueProvider) {
 		this.defaultValueProvider = defaultValueProvider;
 		return this;
 	}
 	
-	public CommandOption<T> setDescription(String description) {
+	public CommandArgument<T> setDescription(String description) {
 		this.description = description;
 		return this;
 	}
@@ -86,7 +94,7 @@ public class CommandOption<T> {
 	public boolean hasShortName() { return this.shortName != null; }
 	public String getShortName() { assert(shortName != null); return "-" + shortName; }
 	public String getName() { return name; }
-	public ArgumentType<?> getType() { return type; }
+	public ArgumentType<?> getType(CommandBuildContext cbc) { return type.apply(cbc); }
 	public boolean hasDefaultValue() { return this.defaultValueProvider != null; }
 	
 	public String getTypeName() { return this.typeName; }

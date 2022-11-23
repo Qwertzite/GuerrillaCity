@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import qwertzite.guerrillacity.core.ModLog;
-import qwertzite.guerrillacity.core.command.CommandOption;
+import qwertzite.guerrillacity.core.command.CommandArgument;
 import qwertzite.guerrillacity.core.init.CommandRegister;
 import qwertzite.guerrillacity.core.util.math.Rectangle;
 import qwertzite.guerrillacity.worldgen.city.CityStructureProvider;
@@ -22,12 +22,12 @@ import qwertzite.guerrillacity.worldgen.city.WardPos;
 
 public class GcGenCommand {
 	
-	public static void registerCommand() {
+	public static void registerCommands() {
 		{
-			CommandOption<Long> seed = CommandOption.longArg("seed")
+			CommandArgument<Long> seed = CommandArgument.longArg("seed")
 					.setDefaultValue(ctx -> 0L)
 					.setDescription("Seed to be used to generate a city.");
-			CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
+			CommandArgument<BlockPos> pos = CommandArgument.blockPos("pos")
 					.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
 					.setDescription("Position of city to be generated.");
 			
@@ -46,7 +46,7 @@ public class GcGenCommand {
 			.setUsageString("Clears city generation related caches.");
 		}
 		{
-			CommandOption<BlockPos> pos = CommandOption.blockPos("pos")
+			CommandArgument<BlockPos> pos = CommandArgument.blockPos("pos")
 								.setDefaultValue(ctx -> new BlockPos(WorldCoordinates.current().getPosition(ctx.getSource())))
 								.setDescription("Position to check.");
 			CommandRegister.$("gen", "check_biome", ctx -> {
