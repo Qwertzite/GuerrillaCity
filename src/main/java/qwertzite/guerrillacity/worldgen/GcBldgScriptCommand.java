@@ -18,27 +18,14 @@ public class GcBldgScriptCommand {
 	
 	public static void registerCommands() {
 		
-		// ==== building exports ====
-		
+		// ==== building exportation ====
 		setTargetArea(); // set target area <pos1> <pos2>
 		resetTargetArea(); // clear target area
 		exclueBlock(); // exclude block <block>
-		
-		{ // include block <block>
-			
-		}
-		{ // set keep setting [flag]
-			
-		}
-		{ // show export settings
-			
-		}
-		{ // clear settings
-			
-		}
-		{ // export building <name> [keep?]
-			
-		}
+		includeBlock(); // include block <block>
+		chatExportSettings();
+		initExportSettings();
+		exportBuilding(); // export building <name>
 		
 		// ==== building generation ====
 		
@@ -77,33 +64,98 @@ public class GcBldgScriptCommand {
 	}
 	
 	private static void exclueBlock() {
-		CommandArgument<BlockInput> block = CommandArgument.blockType("pos1")
+		CommandArgument<BlockInput> block = CommandArgument.blockType("block")
 				.setDefaultValue(ctx -> null)
 				.setDescription("Block type to be ignored, state will not be considered.");
 		
 		CommandRegister.$(GROUP_NAME, "exclude_block", ctx -> {
 			BlockInput input = block.getValue();
 			Block blk = input == null ? null : input.getState().getBlock();
-			if (ScriptWriter.$().excluedeBlock(blk)) {
+			if (ScriptWriter.$().excludeBlock(blk)) {
 				ctx.getSource().sendSuccess(Component.literal("Set %s to ignore".formatted(blk)), true);
 			} else {
 				ctx.getSource().sendFailure(Component.literal("Specified %s was already ignored.".formatted(blk)));
 			}
-			if (ScriptWriter.$().getExcludedBlocks().isEmpty()) {
-				ctx.getSource().sendSuccess(Component.literal("Currently there are no block to ignore on export."), true);
-			} else {
-				StringBuilder sb = new StringBuilder();
-				sb.append("Currently following blocks are to be ignored on export.\n");
-				for (var b : ScriptWriter.$().getExcludedBlocks()) {
-					sb.append("%s\n".formatted(b));
-				}
-				ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
-			}
+			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
 			return Command.SINGLE_SUCCESS;
 		}).setPermissionLevel(2)
 		.addPositionalArguments(block)
-		.setUsageString("Clear region to export.");
+		.setUsageString("Add block to ignore on exportation.");
 	}
 	
+	private static void includeBlock() {
+		CommandArgument<BlockInput> block = CommandArgument.blockType("block")
+				.setDefaultValue(ctx -> null)
+				.setDescription("Block type to be included in exported building, state will not be considered.");
+		
+		CommandRegister.$(GROUP_NAME, "include_block", ctx -> {
+			BlockInput input = block.getValue();
+			Block blk = input == null ? null : input.getState().getBlock();
+			if (ScriptWriter.$().includeBlock(blk)) {
+				ctx.getSource().sendSuccess(Component.literal("Set %s to include".formatted(blk)), true);
+			} else {
+				ctx.getSource().sendFailure(Component.literal("Specified %s was already included.".formatted(blk)));
+			}
+			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
+			return Command.SINGLE_SUCCESS;
+		}).setPermissionLevel(2)
+		.addPositionalArguments(block)
+		.setUsageString("Set block to be included in exported building file.");
+	}
+	
+	private static String chatIgnoreStat() {
+		if (ScriptWriter.$().getExcludedBlocks().isEmpty()) {
+			return "Currently there are no block to ignore on export.";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Following blocks will be ignored when exporting building.\n");
+			for (var b : ScriptWriter.$().getExcludedBlocks()) {
+				sb.append("    - %s\n".formatted(b));
+			}
+			return sb.toString();
+		}
+	}
+	
+	private static void chatExportSettings() {
+		CommandRegister.$(GROUP_NAME, "show_export_settings", ctx -> {
+			StringBuilder sb = new StringBuilder();
+			sb.append(" ==== Current Export Settings ====\n");
+			sb.append((ScriptWriter.$().getTargetArea() == null ?  "Export area not set" : "Target Area: " + ScriptWriter.$().getTargetArea()) + "\n");
+			sb.append(chatIgnoreStat());
+			ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
+			return Command.SINGLE_SUCCESS;
+		}).setPermissionLevel(2)
+		.setUsageString("Show building export settings.");
+	}
+	
+	private static void initExportSettings() {
+		CommandRegister.$(GROUP_NAME, "init_export_settings", ctx -> {
+			StringBuilder sb = new StringBuilder();
+			ScriptWriter.$().initialiseSettings();
+			sb.append("Reset export settings. Current settings are as follows.\n");
+			sb.append((ScriptWriter.$().getTargetArea() == null ?  "Export area not set" : "Target Area: " + ScriptWriter.$().getTargetArea()) + "\n");
+			sb.append(chatIgnoreStat());
+			ctx.getSource().sendSuccess(Component.literal(""), true);
+			return Command.SINGLE_SUCCESS;
+		}).setPermissionLevel(2)
+		.setUsageString("Initialise export settings.");
+	}
+	
+	public static void exportBuilding() {
+//		CommandArgument<BlockInput> fileNameArg = CommandArgument.blockType("building_name")
+//				.setDefaultValue(ctx -> null)
+//				.setDescription("Block type to be included in exported building, state will not be considered.");
+//		
+//		CommandRegister.$(GROUP_NAME, "init_export_settings", ctx -> {
+//			StringBuilder sb = new StringBuilder();
+//			ScriptWriter.$().initialiseSettings();
+//			sb.append("Reset export settings. Current settings are as follows.\n");
+//			sb.append((ScriptWriter.$().getTargetArea() == null ?  "Export area not set" : "Target Area: " + ScriptWriter.$().getTargetArea()) + "\n");
+//			sb.append(chatIgnoreStat());
+//			ctx.getSource().sendSuccess(Component.literal(""), true);
+//			return Command.SINGLE_SUCCESS;
+//		}).setPermissionLevel(2)
+//		.setUsageString("Initialise export settings.");
+	}
 	// TODO: check usage
 }

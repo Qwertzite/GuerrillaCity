@@ -18,6 +18,11 @@ public class ScriptWriter {
 	private Set<Block> exclude =  new HashSet<>();
 	
 	private ScriptWriter() {
+		this.initialiseSettings();
+	}
+	
+	public void initialiseSettings() {
+		this.area = null;
 		this.resetExcluededBlocks();
 	}
 	
@@ -33,8 +38,12 @@ public class ScriptWriter {
 	 * @param block block type to ignore on export.
 	 * @return true if the specified block was not already ignored.
 	 */
-	public boolean excluedeBlock(Block block) {
+	public boolean excludeBlock(Block block) {
 		return this.exclude.add(block);
+	}
+	
+	public boolean includeBlock(Block block) {
+		return this.exclude.remove(block);
 	}
 	
 	public Set<Block> getExcludedBlocks() {
@@ -46,5 +55,9 @@ public class ScriptWriter {
 		this.exclude.add(Blocks.AIR);
 	}
 	
+	// ==== actual exportation process ====
 	
+	public void exportBuilding(String name) {
+		
+	}
 }

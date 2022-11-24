@@ -173,17 +173,18 @@ public class MortarEventHandler {
 			pose.translate(-cameraPos.x(), -cameraPos.y(), -cameraPos.z());
 			
 			synchronized(MORTAR) {
+				Map<Mortar120mmEntity, TrajectoryData> newData = new HashMap<>();
 				for (var iter = MORTAR.keySet().iterator(); iter.hasNext();) {
 					var mortar = iter.next();
 					pose.pushPose();
 					pose.translate(mortar.getX(), mortar.getY(), mortar.getZ());
 					
-					if (!mortar.isAlive()) iter.remove();
-					if (mortar.touchingUnloadedChunk()) iter.remove();
-					this.computeAndRenderTrajectory(pose, mortar, MORTAR.get(mortar));
+					if (!mortar.isAlive() || mortar.touchingUnloadedChunk()) iter.remove();
+					this.computeAndRenderTrajectory(pose, mortar, MORTAR.get(mortar), newData);
 					
 					pose.popPose();
 				}
+				MORTAR.putAll(newData);
 			}
 			pose.popPose();
 			
@@ -193,7 +194,7 @@ public class MortarEventHandler {
 		}
 	}
 	
-	public void computeAndRenderTrajectory(PoseStack pose, Mortar120mmEntity mortar, TrajectoryData trajectory) {
+	public void computeAndRenderTrajectory(PoseStack pose, Mortar120mmEntity mortar, TrajectoryData trajectory, Map<Mortar120mmEntity, TrajectoryData> newData) {
 		int traverse = mortar.getBaseYaw() + mortar.getFineYaw();
 		int elevation = mortar.getElevation();
 		if (trajectory == null || elevation != trajectory.lastElevation || traverse != trajectory.lastTraverse) {
@@ -230,7 +231,7 @@ public class MortarEventHandler {
 			} while(pos.y >= 0.0f && (trace == null || trace.getType() != Type.BLOCK));
 			
 			trajectory.vertexes.add((trace != null ? trace.getLocation() : pos).subtract(mortar.getX(), mortar.getY(), mortar.getZ()));
-			MORTAR.put(mortar, trajectory);
+			newData.put(mortar, trajectory);
 		}
 		
 		
