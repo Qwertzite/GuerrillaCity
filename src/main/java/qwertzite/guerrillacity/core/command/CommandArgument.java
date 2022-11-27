@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -21,7 +20,7 @@ public class CommandArgument<T> {
 	protected final String name;
 	protected final String shortName;
 	protected final String typeName;
-	protected String description = "Not available";
+	protected String description = "Documentation not available";
 	
 	protected final Function<CommandBuildContext, ArgumentType<?>> type;
 	
@@ -42,6 +41,11 @@ public class CommandArgument<T> {
 				});
 	}
 	
+	public static CommandArgument<Boolean> flag(String name) {
+		return new CommandArgument<>(name, "flag", null, (ctx, n) -> true)
+				.setDefaultValue(ctx -> false);
+	}
+	
 	public static CommandArgument<Long> longArg(String name) {
 		return new CommandArgument<>(name, "long", (cbc) -> LongArgumentType.longArg(),
 				LongArgumentType::getLong);
@@ -53,8 +57,8 @@ public class CommandArgument<T> {
 	}
 	
 	public static CommandArgument<String> string(String name) {
-		return new CommandArgument<>(name, "string", (cbc) -> StringArgumentType.string(),
-				StringArgumentType::getString);
+		return new CommandArgument<>(name, "string", (cbc) -> GcStringArgument.string(),
+				GcStringArgument::getString);
 	}
 	
 	public CommandArgument(String name, String typeName, Function<CommandBuildContext, ArgumentType<?>> type, BiFunction<CommandContext<CommandSourceStack>, String, T> argParser) {
@@ -94,6 +98,7 @@ public class CommandArgument<T> {
 	public boolean hasShortName() { return this.shortName != null; }
 	public String getShortName() { assert(shortName != null); return "-" + shortName; }
 	public String getName() { return name; }
+	public boolean hasVariable() { return this.type != null; }
 	public ArgumentType<?> getType(CommandBuildContext cbc) { return type.apply(cbc); }
 	public boolean hasDefaultValue() { return this.defaultValueProvider != null; }
 	

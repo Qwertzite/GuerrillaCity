@@ -97,6 +97,7 @@ public class GuerrillaCityCore {
 		ItemRegister.initialise(bus);
 		BlockRegister.initialise(bus);
 		EntityRegister.initialise(bus);
+		CommandRegister.initialise(bus);
 		
 		for (var module : this.modules) module.init(bus);
 		

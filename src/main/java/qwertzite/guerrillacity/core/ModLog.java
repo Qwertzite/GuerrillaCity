@@ -43,6 +43,10 @@ public class ModLog {
 		logger.log(level, message);
 	}
 	
+	public static void error(String message, Throwable throwable) {
+		ModLog.log(Level.ERROR, message, throwable);
+	}
+	
 	public static void warn(String message, Object...params) {
 		ModLog.log(Level.WARN, message, params);
 	}

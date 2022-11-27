@@ -11,6 +11,7 @@ import java.util.function.ToIntFunction;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,13 +19,30 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import qwertzite.guerrillacity.GuerrillaCityCore;
 import qwertzite.guerrillacity.core.ModLog;
 import qwertzite.guerrillacity.core.command.CommandArgument;
+import qwertzite.guerrillacity.core.command.GcStringArgument;
+import qwertzite.guerrillacity.core.command.GcStringArgumentTypeInfo;
 
 public class CommandRegister {
+	
+	public static void initialise(IEventBus bus) {
+		final var REGISTRY = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, GuerrillaCityCore.MODID);
+		REGISTRY.register(bus);
+		
+		// custom argument type
+		REGISTRY.register("gc_string", () -> new GcStringArgumentTypeInfo());
+		ArgumentTypeInfos.registerByClass(GcStringArgument.class, new GcStringArgumentTypeInfo());
+		
+	}
 	
 	private static final Set<CommandRegister> ENTRIES = new HashSet<>();
 	private static final Map<String, Map<String, CommandRegister>> GC_COMMANDS = new HashMap<>();
@@ -65,7 +83,7 @@ public class CommandRegister {
 			s.append("\n");
 			s.append(space + "Arguments:");
 			for (var arg : entry.positionalArgs) {
-				s.append("\n%s< %s > (%s) : %s".formatted(space, arg.getName(), arg.getTypeName(), arg.getDescription()));
+				s.append("\n%s< %s : %s > : %s".formatted(space, arg.getName(), arg.getTypeName(), arg.getDescription()));
 			}
 		}
 		
@@ -73,7 +91,11 @@ public class CommandRegister {
 			s.append("\n");
 			s.append(space + "Options:");
 			for (var option : entry.optionalArgs.values()) {
-				s.append(("\n%s[ %s ] (%s) : %s").formatted(space, option.getLongName(), option.getTypeName(), option.getDescription()));
+				if (option.hasVariable()) {
+					s.append(("\n%s[ %s : %s ] : %s").formatted(space, option.getLongName(), option.getTypeName(), option.getDescription()));
+				} else {
+					s.append(("\n%s[ %s ] : %s").formatted(space, option.getLongName(), option.getDescription()));
+				}
 			}
 		} else s.append("\n    This command has no options.");
 		s.append("\n");
@@ -136,7 +158,8 @@ public class CommandRegister {
 		String optionName = option.getName();
 		this.optionalArgs.put(optionName, option);
 		if (arguments.containsKey(optionName)) ModLog.warn("Found duplicate option %s for command gc/%s/%s. Old option replaced.", optionName, name, moduleName);
-		this.arguments.put(optionName, option);
+		if (option.hasVariable()) this.arguments.put(optionName, option);
+		else this.arguments.put(option.getLongName(), option);
 		return this;
 	}
 	
@@ -146,30 +169,39 @@ public class CommandRegister {
 	}
 	
 	private void build(ModuleCache cache, CommandBuildContext buildContext) {
-		ModLog.info("Added command %s.%s.%s", "gc", this.moduleName, this.name);
+		ModLog.debug("Added command %s.%s.%s", "gc", this.moduleName, this.name);
 		
 		Command<CommandSourceStack> command = this::executeCommand;
 		
-		List<Tuple<LiteralArgumentBuilder<CommandSourceStack>, RequiredArgumentBuilder<CommandSourceStack, ?>>> optionNodes = new LinkedList<>();
+		List<Tuple<ArgumentBuilder<CommandSourceStack, ?>, ArgumentBuilder<CommandSourceStack, ?>>> optionNodes = new LinkedList<>();
 		List<CommandArgument<?>> optionList = this.optionalArgs.values().stream().sorted((e1, e2) -> -e1.getName().compareToIgnoreCase(e2.getName())).toList();
 		for (int i = 0; i < optionList.size(); i++) {
+			
 			CommandArgument<?> option = optionList.get(i);
 			
-			RequiredArgumentBuilder<CommandSourceStack, ?> value = Commands.argument(option.getName(), option.getType(buildContext));
-			value.executes(command);
-			for (var nextNode : optionNodes) {
-				value.then(nextNode.getA());
+			if (option.hasVariable()) {
+				RequiredArgumentBuilder<CommandSourceStack, ?> value = Commands.argument(option.getName(), option.getType(buildContext));
+				value.executes(command);
+				for (var nextNode : optionNodes) {
+					value.then(nextNode.getA());
+				}
+				LiteralArgumentBuilder<CommandSourceStack> flag = Commands.literal(option.getLongName());
+				flag.then(value);
+				optionNodes.add(new Tuple<>(flag, value));
+			} else {
+				LiteralArgumentBuilder<CommandSourceStack> flag = Commands.literal(option.getLongName());
+				flag.executes(command);
+				for (var nextNode : optionNodes) {
+					flag.then(nextNode.getA());
+				}
+				optionNodes.add(new Tuple<>(flag, flag));
 			}
 			
-			LiteralArgumentBuilder<CommandSourceStack> flag = Commands.literal(option.getLongName());
-			flag.then(value);
-			
-			optionNodes.add(new Tuple<>(flag, value));
 		}
 		
 		LiteralArgumentBuilder<CommandSourceStack> cmdBase;
 		if (this.positionalArgs.isEmpty()) {
-			cmdBase = Commands.literal(this.name); // ここで，get usage を overrideすることで何とかなるかもしれない
+			cmdBase = Commands.literal(this.name);
 			cmdBase.executes(command);
 			for (var nextNode : optionNodes) {
 				cmdBase.then(nextNode.getA());
@@ -200,11 +232,14 @@ public class CommandRegister {
 	private int executeCommand(CommandContext<CommandSourceStack> ctx) {
 		Collection<CommandArgument<?>> undesignated = new HashSet<>(this.arguments.values());
 		for (var node : ctx.getNodes()) {
+			for (var s : this.arguments.keySet()) System.out.println(s); // DEBUG
+			System.out.println(node + " -> " + node.getNode().getName()); // DEBUG
 			String nodeName = node.getNode().getName();
 			if (this.arguments.containsKey(nodeName)) {
 				CommandArgument<?> option = this.arguments.get(nodeName);
 				option.acceptValue(ctx);
 				undesignated.remove(option);
+				System.out.println("option node = " + nodeName); // DEBUG
 			}
 		}
 		for (var option : undesignated) {
