@@ -39,9 +39,7 @@ public class CommandRegister {
 		REGISTRY.register(bus);
 		
 		// custom argument type
-		REGISTRY.register("gc_string", () -> new GcStringArgumentTypeInfo());
-		ArgumentTypeInfos.registerByClass(GcStringArgument.class, new GcStringArgumentTypeInfo());
-		
+		REGISTRY.register("gc_string", () -> ArgumentTypeInfos.registerByClass(GcStringArgument.class, new GcStringArgumentTypeInfo()));
 	}
 	
 	private static final Set<CommandRegister> ENTRIES = new HashSet<>();

@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.hash.Hashing;
@@ -16,8 +18,12 @@ import com.google.common.hash.HashingOutputStream;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,17 +41,27 @@ public class ScriptWriter {
 	private Set<Block> exclude =  new HashSet<>();
 	
 	private ScriptWriter() {
-		this.initialiseSettings();
+		this.initialiseSettings(null);
 	}
 	
-	public void initialiseSettings() {
+	public void initialiseSettings(CommandContext<CommandSourceStack> ctx) {
 		this.area = null;
 		this.resetExcluededBlocks();
+		StringBuilder sb = new StringBuilder();
+		sb.append("Reset export settings. Current settings are as follows.\n");
+		sb.append(chatExportSetting());
+		if (ctx != null) ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
 	}
 	
-	public void setTargetArea(BoundingBox bb) {
+	public void setTargetArea(CommandContext<CommandSourceStack> ctx, BoundingBox bb) {
 		this.area = bb;
+		ctx.getSource().sendSuccess(Component.literal("Set export area to %s".formatted(bb)), true);
 	}
+	
+	public void resetTargetArea(CommandContext<CommandSourceStack> ctx) {
+		ctx.getSource().sendSuccess(Component.literal("Reset export area".formatted()), true);
+	}
+	
 	public BoundingBox getTargetArea() {
 		return this.area;
 	}
@@ -55,12 +71,29 @@ public class ScriptWriter {
 	 * @param block block type to ignore on export.
 	 * @return true if the specified block was not already ignored.
 	 */
-	public boolean excludeBlock(Block block) {
-		return this.exclude.add(block);
+	public int excludeBlock(CommandContext<CommandSourceStack> ctx, Block block) {
+		var flag = this.exclude.add(block);
+		if (flag) {
+			ctx.getSource().sendSuccess(Component.literal("Set %s to ignore".formatted(block)), true);
+			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
+			return Command.SINGLE_SUCCESS;
+		} else {
+			ctx.getSource().sendFailure(Component.literal("Specified %s was already ignored.".formatted(block)));
+			ctx.getSource().sendFailure(Component.literal(chatIgnoreStat()));
+			return 0;
+		}
 	}
 	
-	public boolean includeBlock(Block block) {
-		return this.exclude.remove(block);
+	public int includeBlock(CommandContext<CommandSourceStack> ctx, Block block) {
+		if (this.exclude.remove(block)) {
+			ctx.getSource().sendSuccess(Component.literal("Set %s to include".formatted(block)), true);
+			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
+			return Command.SINGLE_SUCCESS;
+		} else {
+			ctx.getSource().sendFailure(Component.literal("Specified %s was already included.".formatted(block)));
+			ctx.getSource().sendFailure(Component.literal(chatIgnoreStat()));
+			return 0;
+		}
 	}
 	
 	public Set<Block> getExcludedBlocks() {
@@ -72,20 +105,58 @@ public class ScriptWriter {
 		this.exclude.add(Blocks.AIR);
 	}
 	
+	public void chatCurrentSetting(CommandContext<CommandSourceStack> ctx) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(" ==== Current Export Settings ====\n");
+		sb.append(chatExportSetting());
+		ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
+	}
+	
+	// ==== util ====
+	
+	private static String chatExportSetting() {
+		StringBuilder sb = new StringBuilder();
+		sb.append((ScriptWriter.$().getTargetArea() == null ?  "Export area not set" : "Target Area: " + ScriptWriter.$().getTargetArea()) + "\n");
+		sb.append(chatIgnoreStat());
+		return sb.toString();
+	}
+	
+	private static String chatIgnoreStat() {
+		if (ScriptWriter.$().getExcludedBlocks().isEmpty()) {
+			return "Currently there are no block to ignore on export.";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Following blocks will be ignored when exporting building.\n");
+			for (var b : ScriptWriter.$().getExcludedBlocks()) {
+				sb.append("    - %s\n".formatted(b));
+			}
+			return sb.toString();
+		}
+	}
+	
 	// ==== actual exportation process ====
 	
-	public String exportStructure(String name) {
-		
-		if (this.area == null) { return "Export target area not set!"; }
+	public int exportStructure(CommandContext<CommandSourceStack> ctx, String name, boolean overwrite) {
+		List<String> errorMessage = new LinkedList<>();
+		if (this.area == null) { errorMessage.add("Export target area not set! Use command \"gc bldg set_export_area\" to set target area."); }
 		
 		int separator = name.lastIndexOf("#");
 		String fileName = separator < 0 ? name : name.substring(0, separator);
 		String scriptName = separator < 0 ? "main" : fileName.substring(separator);
-		
 		@SuppressWarnings("resource")
 		File outputFolder = new File(Minecraft.getInstance().gameDirectory, "buildings");
 		outputFolder.mkdir();
 		Path buildingFilePath = outputFolder.toPath().resolve(name + ".json");
+		
+		// TODO: check overwrite
+		
+		if (errorMessage.size() > 0) {
+			for (var msg : errorMessage) {
+				ctx.getSource().sendFailure(Component.literal(msg));
+			}
+			return 0;
+		}
+		
 		
 		// TODO: use actual data
 		JsonObject json = new JsonObject();
@@ -98,9 +169,19 @@ public class ScriptWriter {
 			sb.append("Caught an exception while exporting a building.\n");
 			sb.append("Details: %s".formatted(e.getMessage()));
 			sb.append("Read log for more details.");
-			return sb.toString();
+			ctx.getSource().sendFailure(Component.literal(sb.toString()));
+			return 0;
 		}
-		return null;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("Exported building script \"%s\" using following settings.\n".formatted(name));
+		sb.append("Target area: %s\n".formatted(ScriptWriter.$().getTargetArea()));
+		sb.append("Following blocks were ignored.\n");
+		for (var b : ScriptWriter.$().getExcludedBlocks()) {
+			sb.append("    - %s\n".formatted(b));
+		}
+		ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
+		return Command.SINGLE_SUCCESS;
 	}
 
 	private void writeJsonToFile(JsonElement json, Path path) throws IOException {
@@ -116,4 +197,5 @@ public class ScriptWriter {
 		Files.createDirectories(path.getParent());
 		Files.write(path, bytearrayoutputstream.toByteArray());
 	}
+
 }

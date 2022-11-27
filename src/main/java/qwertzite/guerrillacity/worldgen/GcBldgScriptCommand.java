@@ -7,9 +7,9 @@ import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import qwertzite.guerrillacity.core.command.CommandArgument;
 import qwertzite.guerrillacity.core.init.CommandRegister;
-import qwertzite.guerrillacity.core.util.McUtil;
 import qwertzite.guerrillacity.worldgen.script.ScriptWriter;
 
 public class GcBldgScriptCommand {
@@ -45,9 +45,8 @@ public class GcBldgScriptCommand {
 		CommandRegister.$(GROUP_NAME, "set_export_area", ctx -> {
 			BlockPos bp1 = pos1.getValue();
 			BlockPos bp2 = pos2.getValue();
-			var bb = McUtil.boundingBox(bp1.getX(), bp1.getY(), bp1.getZ(), bp2.getX(), bp2.getY(), bp2.getZ());
-			ScriptWriter.$().setTargetArea(bb);
-			ctx.getSource().sendSuccess(Component.literal("Set export area to %s".formatted(bb)), true);
+			var bb = BoundingBox.fromCorners(bp1, bp2);;
+			ScriptWriter.$().setTargetArea(ctx, bb);
 			return Command.SINGLE_SUCCESS;
 		}).setPermissionLevel(2)
 		.addPositionalArguments(pos1, pos2)
@@ -56,8 +55,7 @@ public class GcBldgScriptCommand {
 	
 	private static void resetTargetArea() {
 		CommandRegister.$(GROUP_NAME, "clear_target_area", ctx -> {
-			ScriptWriter.$().setTargetArea(null);
-			ctx.getSource().sendSuccess(Component.literal("Reset export area".formatted()), true);
+			ScriptWriter.$().resetTargetArea(ctx);
 			return Command.SINGLE_SUCCESS;
 		}).setPermissionLevel(2)
 		.setUsageString("Clear region to export.");
@@ -71,13 +69,7 @@ public class GcBldgScriptCommand {
 		CommandRegister.$(GROUP_NAME, "exclude_block", ctx -> {
 			BlockInput input = block.getValue();
 			Block blk = input == null ? null : input.getState().getBlock();
-			if (ScriptWriter.$().excludeBlock(blk)) {
-				ctx.getSource().sendSuccess(Component.literal("Set %s to ignore".formatted(blk)), true);
-			} else {
-				ctx.getSource().sendFailure(Component.literal("Specified %s was already ignored.".formatted(blk)));
-			}
-			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
-			return Command.SINGLE_SUCCESS;
+			return ScriptWriter.$().excludeBlock(ctx, blk);
 		}).setPermissionLevel(2)
 		.addPositionalArguments(block)
 		.setUsageString("Specifies block to ignore on exportation.");
@@ -91,13 +83,7 @@ public class GcBldgScriptCommand {
 		CommandRegister.$(GROUP_NAME, "include_block", ctx -> {
 			BlockInput input = block.getValue();
 			Block blk = input == null ? null : input.getState().getBlock();
-			if (ScriptWriter.$().includeBlock(blk)) {
-				ctx.getSource().sendSuccess(Component.literal("Set %s to include".formatted(blk)), true);
-			} else {
-				ctx.getSource().sendFailure(Component.literal("Specified %s was already included.".formatted(blk)));
-			}
-			ctx.getSource().sendSuccess(Component.literal(chatIgnoreStat()), true);
-			return Command.SINGLE_SUCCESS;
+			return ScriptWriter.$().includeBlock(ctx, blk);
 		}).setPermissionLevel(2)
 		.addPositionalArguments(block)
 		.setUsageString("Set block to be included in exported building file.");
@@ -105,10 +91,7 @@ public class GcBldgScriptCommand {
 	
 	private static void showExportSettings() {
 		CommandRegister.$(GROUP_NAME, "show_export_settings", ctx -> {
-			StringBuilder sb = new StringBuilder();
-			sb.append(" ==== Current Export Settings ====\n");
-			sb.append(chatExportSetting());
-			ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
+			ScriptWriter.$().chatCurrentSetting(ctx);
 			return Command.SINGLE_SUCCESS;
 		}).setPermissionLevel(2)
 		.setUsageString("Show building export settings.");
@@ -116,11 +99,7 @@ public class GcBldgScriptCommand {
 	
 	private static void initExportSettings() {
 		CommandRegister.$(GROUP_NAME, "init_export_settings", ctx -> {
-			ScriptWriter.$().initialiseSettings();
-			StringBuilder sb = new StringBuilder();
-			sb.append("Reset export settings. Current settings are as follows.\n");
-			sb.append(chatExportSetting());
-			ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
+			ScriptWriter.$().initialiseSettings(ctx);
 			return Command.SINGLE_SUCCESS;
 		}).setPermissionLevel(2)
 		.setUsageString("Initialise export settings.");
@@ -135,45 +114,12 @@ public class GcBldgScriptCommand {
 		
 		CommandRegister.$(GROUP_NAME, "export", ctx -> {
 			String buildingName = fileNameArg.getValue();
-			System.out.println("overwrite=" + flagOverwrite.getValue() + ",name=" + buildingName);
-			String errMsg = ScriptWriter.$().exportStructure(buildingName);
-			if (errMsg != null) {
-				ctx.getSource().sendFailure(Component.literal(errMsg));
-				return 0;
-			}
-			StringBuilder sb = new StringBuilder();
-			sb.append("Exported building script \"%s\" using following settings.\n".formatted(buildingName));
-			sb.append("Target area: %s\n".formatted(ScriptWriter.$().getTargetArea()));
-			sb.append("Following blocks were ignored.\n");
-			for (var b : ScriptWriter.$().getExcludedBlocks()) {
-				sb.append("    - %s\n".formatted(b));
-			}
-			ctx.getSource().sendSuccess(Component.literal(sb.toString()), true);
-			return Command.SINGLE_SUCCESS;
+			boolean overwrite = flagOverwrite.getValue();
+			return ScriptWriter.$().exportStructure(ctx, buildingName, overwrite);
 		}).setPermissionLevel(2)
 		.addPositionalArguments(fileNameArg)
 		.addOption(flagOverwrite)
 		.setUsageString("Export building script.");
-	}
-	
-	private static String chatExportSetting() {
-		StringBuilder sb = new StringBuilder();
-		sb.append((ScriptWriter.$().getTargetArea() == null ?  "Export area not set" : "Target Area: " + ScriptWriter.$().getTargetArea()) + "\n");
-		sb.append(chatIgnoreStat());
-		return sb.toString();
-	}
-	
-	private static String chatIgnoreStat() {
-		if (ScriptWriter.$().getExcludedBlocks().isEmpty()) {
-			return "Currently there are no block to ignore on export.";
-		} else {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Following blocks will be ignored when exporting building.\n");
-			for (var b : ScriptWriter.$().getExcludedBlocks()) {
-				sb.append("    - %s\n".formatted(b));
-			}
-			return sb.toString();
-		}
 	}
 	
 	private static void createBuildingPropertyStub() {
